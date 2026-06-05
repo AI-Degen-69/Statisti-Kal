@@ -4,10 +4,31 @@
  */
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'motion/react';
 import { InlineMath, BlockMath } from 'react-katex';
-import { Info, Calculator, RefreshCw, HelpCircle } from 'lucide-react';
+import { 
+  Info, 
+  Calculator, 
+  RefreshCw, 
+  HelpCircle, 
+  Sun, 
+  Moon, 
+  AlertCircle, 
+  BookOpen, 
+  Settings, 
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  ReferenceLine,
+  CartesianGrid
+} from 'recharts';
 
 // --- Math Utilities ---
 
@@ -16,15 +37,15 @@ import { Info, Calculator, RefreshCw, HelpCircle } from 'lucide-react';
  * Approximation using the error function (erf)
  */
 function normalCDF(x: number, mean: number, stdDev: number): number {
+  if (stdDev <= 0) return 0.5; // fallback
   const z = (x - mean) / stdDev;
   return 0.5 * (1 + erf(z / Math.sqrt(2)));
 }
 
 /**
- * Error function approximation
+ * Error function approximation (A&S formula 7.1.26)
  */
 function erf(x: number): number {
-  // constants
   const a1 = 0.254829592;
   const a2 = -0.284496736;
   const a3 = 1.421413741;
@@ -32,13 +53,11 @@ function erf(x: number): number {
   const a5 = 1.061405429;
   const p = 0.3275911;
 
-  // Save the sign of x
   const sign = x < 0 ? -1 : 1;
-  x = Math.abs(x);
+  const absX = Math.abs(x);
 
-  // A&S formula 7.1.26
-  const t = 1.0 / (1.0 + p * x);
-  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  const t = 1.0 / (1.0 + p * absX);
+  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
 
   return sign * y;
 }
@@ -47,6 +66,7 @@ function erf(x: number): number {
  * Normal Probability Density Function (PDF)
  */
 function normalPDF(x: number, mean: number, stdDev: number): number {
+  if (stdDev <= 0) return 0;
   const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
   return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
 }
@@ -59,7 +79,6 @@ function inverseNormalCDF(p: number): number {
   if (p <= 0) return -5;
   if (p >= 1) return 5;
 
-  // Rational approximation
   const c = [2.515517, 0.802853, 0.010328];
   const d = [1.432788, 0.189269, 0.001308];
 
@@ -85,7 +104,7 @@ interface CalculationResult {
 
 // --- Components ---
 
-const Tooltip: React.FC<{ content: string; children: React.ReactNode }> = ({ content, children }) => {
+const Tooltip: React.FC<{ content: string; children: React.ReactNode; theme: 'light' | 'dark' }> = ({ content, children, theme }) => {
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -109,10 +128,16 @@ const Tooltip: React.FC<{ content: string; children: React.ReactNode }> = ({ con
             initial={{ opacity: 0, y: 5, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.95 }}
-            className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl pointer-events-none text-center leading-normal font-medium"
+            className={`absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 text-xs rounded-xl shadow-xl pointer-events-none text-center leading-normal font-medium ${
+              theme === 'dark' 
+                ? 'bg-slate-800 text-slate-100 border border-slate-700' 
+                : 'bg-slate-900 text-white'
+            }`}
           >
             {content}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800" />
+            <div className={`absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent ${
+              theme === 'dark' ? 'border-t-slate-800' : 'border-t-slate-900'
+            }`} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -120,6 +145,7 @@ const Tooltip: React.FC<{ content: string; children: React.ReactNode }> = ({ con
   );
 };
 
+// --- Recharts-based Interactive Normal Chart ---
 const NormalChart: React.FC<{
   mean: number;
   stdDev: number;
@@ -132,282 +158,393 @@ const NormalChart: React.FC<{
   condX2?: number;
   probability: number;
   mode?: CalcMode;
-}> = ({ mean, stdDev, type, x1, x2, condType, condTypeA, condX1, condX2, probability, mode }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  useEffect(() => {
-    if (!svgRef.current) return;
-
-    const margin = { top: 40, right: 30, bottom: 80, left: 40 };
-    const width = svgRef.current.clientWidth - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
-
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
-
-    const g = svg.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    // Range for X axis (mean +/- 4 stdDev)
+  theme: 'light' | 'dark';
+}> = ({ mean, stdDev, type, x1, x2, condType, condTypeA, condX1, condX2, probability, mode, theme }) => {
+  
+  const chartData = useMemo(() => {
+    if (stdDev <= 0) return [];
+    
+    const pts = [];
+    const numPoints = 140;
     const xMin = mean - 4 * stdDev;
     const xMax = mean + 4 * stdDev;
+    const step = (xMax - xMin) / (numPoints - 1);
 
-    const xScale = d3.scaleLinear()
-      .domain([xMin, xMax])
-      .range([0, width]);
-
-    // Max height of the curve
-    const yMax = normalPDF(mean, mean, stdDev);
-    const yScale = d3.scaleLinear()
-      .domain([0, yMax * 1.1])
-      .range([height, 0]);
-
-    // Generate data points for the curve
-    const points: [number, number][] = [];
-    const stepSize = (xMax - xMin) / 200;
-    for (let x = xMin; x <= xMax; x += stepSize) {
-      points.push([x, normalPDF(x, mean, stdDev)]);
-    }
-
-    const line = d3.line<[number, number]>()
-      .x(d => xScale(d[0]))
-      .y(d => yScale(d[1]))
-      .curve(d3.curveBasis);
-
-    // Shading logic
-    const area = d3.area<[number, number]>()
-      .x(d => xScale(d[0]))
-      .y0(height)
-      .y1(d => yScale(d[1]))
-      .curve(d3.curveBasis);
-
-    if (type === 'conditional') {
-      const getRange = (t: string | undefined, v1: number | undefined, v2: number | undefined): [number, number] => {
-        const val1 = v1 ?? 0;
-        const val2 = v2 ?? 0;
-        if (t === 'below') return [-Infinity, val1];
-        if (t === 'above') return [val1, Infinity];
-        if (t === 'between') return [Math.min(val1, val2), Math.max(val1, val2)];
-        return [-Infinity, Infinity];
-      };
-
-      const rA = getRange(condTypeA || 'below', x1, x2); 
-      const rB = getRange(condType, condX1, condX2);
-
-      // Layer 1: The condition (Event B) - Background layer
-      const bStart = Math.max(xMin, rB[0]);
-      const bEnd = Math.min(xMax, rB[1]);
-      
-      if (bStart < bEnd) {
-        const pointsB = points.filter(p => p[0] >= bStart && p[0] <= bEnd);
-        g.append('path')
-          .datum(pointsB)
-          .attr('fill', 'rgba(16, 185, 129, 0.15)') // Light green for condition
-          .attr('d', area);
-      }
-
-      // Layer 2: The intersection (Event A ∩ B) - Foreground layer
-      const intersectStart = Math.max(rA[0], rB[0]);
-      const intersectEnd = Math.min(rA[1], rB[1]);
-      
-      const iStart = Math.max(xMin, intersectStart);
-      const iEnd = Math.min(xMax, intersectEnd);
-
-      if (iStart < iEnd) {
-        const pointsAandB = points.filter(p => p[0] >= iStart && p[0] <= iEnd);
-        g.append('path')
-          .datum(pointsAandB)
-          .attr('fill', 'rgba(37, 99, 235, 0.5)') // Blue for intersection
-          .attr('d', area);
-      }
-    } else {
-      const getShadedPoints = () => {
-        switch (type) {
-          case 'below':
-            return points.filter(p => p[0] <= x1);
-          case 'above':
-            return points.filter(p => p[0] >= x1);
-          case 'between':
-            const start = Math.min(x1, x2);
-            const end = Math.max(x1, x2);
-            return points.filter(p => p[0] >= start && p[0] <= end);
-          case 'outside':
-            const s = Math.min(x1, x2);
-            const e = Math.max(x1, x2);
-            return [points.filter(p => p[0] <= s), points.filter(p => p[0] >= e)];
-          default:
-            return [];
-        }
-      };
-
-      const shaded = getShadedPoints();
-
-      if (Array.isArray(shaded[0]) && Array.isArray(shaded[0][0])) {
-        // Outside case (two areas)
-        (shaded as [number, number][][]).forEach(pts => {
-          g.append('path')
-            .datum(pts)
-            .attr('fill', 'rgba(59, 130, 246, 0.3)')
-            .attr('d', area);
-        });
-      } else if (shaded.length > 0) {
-        g.append('path')
-          .datum(shaded as [number, number][])
-          .attr('fill', 'rgba(59, 130, 246, 0.3)')
-          .attr('d', area);
-      }
-    }
-
-    // Calculate and display percentage
-    g.append('text')
-      .attr('x', width / 2)
-      .attr('y', -10)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '16px')
-      .attr('font-family', 'Assistant, sans-serif')
-      .attr('font-weight', '800')
-      .attr('fill', '#2563eb')
-      .text(type === 'conditional' ? `P(A|B) = ${probability.toFixed(4)}` : `השטח הצבוע: ${(probability * 100).toFixed(2)}%`);
-
-    // Draw the curve
-    g.append('path')
-      .datum(points)
-      .attr('fill', 'none')
-      .attr('stroke', '#3b82f6')
-      .attr('stroke-width', 2)
-      .attr('d', line);
-
-    // Axes
-    const xAxis = g.append('g')
-      .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(xScale).ticks(7));
-    
-    xAxis.selectAll('text')
-      .attr('font-family', 'Assistant, sans-serif')
-      .attr('font-size', '12px')
-      .attr('fill', '#64748b');
-    
-    xAxis.selectAll('line')
-      .attr('stroke', '#e2e8f0');
-    
-    xAxis.select('.domain')
-      .attr('stroke', '#e2e8f0');
-
-    // Vertical lines for X values
-    const drawXLine = (val: number, color: string, label: string, yOffset: number = 25) => {
-      if (val < xMin || val > xMax) return;
-      g.append('line')
-        .attr('x1', xScale(val))
-        .attr('x2', xScale(val))
-        .attr('y1', yScale(0))
-        .attr('y2', yScale(normalPDF(val, mean, stdDev)))
-        .attr('stroke', color)
-        .attr('stroke-width', 1.5)
-        .attr('stroke-dasharray', '4,4');
-      
-      g.append('text')
-        .attr('x', xScale(val))
-        .attr('y', height + yOffset)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '14px')
-        .attr('font-family', 'Assistant, sans-serif')
-        .attr('font-weight', '700')
-        .attr('fill', color)
-        .text(label);
+    const getRangeRange = (t: string | undefined, v1: number | undefined, v2: number | undefined): [number, number] => {
+      const val1 = v1 ?? 0;
+      const val2 = v2 ?? 0;
+      if (t === 'below') return [-Infinity, val1];
+      if (t === 'above') return [val1, Infinity];
+      if (t === 'between') return [Math.min(val1, val2), Math.max(val1, val2)];
+      return [-Infinity, Infinity];
     };
 
-    // Always draw mean line
-    drawXLine(mean, '#64748b', `μ=${mean.toFixed(2)}`, 25);
+    const isXInside = (val: number, range: [number, number]) => val >= range[0] && val <= range[1];
 
-    if (type === 'conditional') {
-      const getLabel = (t: CondType | undefined, v1: number, v2: number | undefined) => {
-        if (t === 'below') return `X<${v1.toFixed(2)}`;
-        if (t === 'above') return `X>${v1.toFixed(2)}`;
-        return `${v1.toFixed(2)}<X<${v2?.toFixed(2)}`;
-      };
+    const minStandardX = Math.min(x1, x2);
+    const maxStandardX = Math.max(x1, x2);
 
-      drawXLine(x1, '#ef4444', `A: ${getLabel(condTypeA || 'below', x1, x2)}`, 45);
-      if (condTypeA === 'between') {
-        drawXLine(x2, '#ef4444', `A: ${getLabel(condTypeA, x1, x2)}`, 65);
-      }
+    for (let i = 0; i < numPoints; i++) {
+      const x = xMin + i * step;
+      const y = normalPDF(x, mean, stdDev);
 
-      drawXLine(condX1 || 0, '#10b981', `B: ${getLabel(condType, condX1 || 0, condX2)}`, 25);
-      if (condType === 'between' && condX2 !== undefined) {
-        drawXLine(condX2, '#10b981', `B: ${getLabel(condType, condX1 || 0, condX2)}`, 65);
-      }
-    } else if (mode === 'inverse') {
-      drawXLine(x1, '#2563eb', `X=${x1.toFixed(2)}`, 25);
-    } else {
-      // Draw input X values with potential offset to avoid overlap
-      const x1Offset = Math.abs(x1 - mean) < (xMax - xMin) * 0.1 ? 45 : 25;
-      drawXLine(x1, '#ef4444', `X=${x1.toFixed(2)}`, x1Offset);
+      let shadedY: number | null = null;
+      let shadedYBelow: number | null = null;
+      let shadedYAbove: number | null = null;
+      let condBShadedY: number | null = null;
+      let intersectShadedY: number | null = null;
 
-      if (type === 'between' || type === 'outside') {
-        let x2Offset = 25;
-        const distToMean = Math.abs(x2 - mean);
-        const distToX1 = Math.abs(x2 - x1);
-        const threshold = (xMax - xMin) * 0.1;
+      if (type === 'conditional') {
+        const rA = getRangeRange(condTypeA || 'below', x1, x2);
+        const rB = getRangeRange(condType, condX1, condX2);
 
-        if (distToMean < threshold) {
-          x2Offset = 45;
-        } else if (distToX1 < threshold) {
-          x2Offset = x1Offset === 25 ? 45 : 25;
+        if (isXInside(x, rB)) {
+          condBShadedY = y;
         }
-        
-        drawXLine(x2, '#10b981', `X=${x2.toFixed(2)}`, x2Offset);
+        if (isXInside(x, rA) && isXInside(x, rB)) {
+          intersectShadedY = y;
+        }
+      } else {
+        switch (type) {
+          case 'below':
+            if (x <= x1) shadedY = y;
+            break;
+          case 'above':
+            if (x >= x1) shadedY = y;
+            break;
+          case 'between':
+            if (x >= minStandardX && x <= maxStandardX) shadedY = y;
+            break;
+          case 'outside':
+            if (x <= minStandardX) shadedYBelow = y;
+            if (x >= maxStandardX) shadedYAbove = y;
+            break;
+        }
       }
-    }
 
-  }, [mean, stdDev, type, x1, x2, condType, condTypeA, condX1, condX2, probability, mode]);
+      pts.push({
+        x: Number(x.toFixed(4)),
+        pdf: y,
+        shadedY,
+        shadedYBelow,
+        shadedYAbove,
+        condBShadedY,
+        intersectShadedY,
+      });
+    }
+    return pts;
+  }, [mean, stdDev, type, x1, x2, condType, condTypeA, condX1, condX2]);
+
+  if (stdDev <= 0) {
+    return (
+      <div className="flex h-64 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/20 text-red-500 font-bold border border-red-100 dark:border-red-900/30">
+        נא להזין סטיית תקן גדולה מ-0 להצגת גרף.
+      </div>
+    );
+  }
+
+  // Define line colors based on the theme
+  const curveColor = theme === 'dark' ? '#60a5fa' : '#2563eb';
+  const mainGridColor = theme === 'dark' ? '#334155' : '#f1f5f9';
+  const axisLabelColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+  const shadedColor = theme === 'dark' ? 'rgba(96, 165, 250, 0.4)' : 'rgba(37, 99, 235, 0.25)';
+  const bShadedColor = theme === 'dark' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)';
+  const intersectShadedColor = theme === 'dark' ? 'rgba(59, 130, 246, 0.65)' : 'rgba(37, 99, 235, 0.55)';
+
+  const minStandardX = Math.min(x1, x2);
+  const maxStandardX = Math.max(x1, x2);
+
+  // Customized tooltip
+  const CustomTooltipInner = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const dataPt = payload[0].payload;
+      const zVal = (dataPt.x - mean) / stdDev;
+      return (
+        <div className={`p-3 border rounded-xl shadow-lg text-xs font-sans text-right space-y-1 backdrop-blur-md ${
+          theme === 'dark' 
+            ? 'bg-slate-900/90 border-slate-700 text-slate-100' 
+            : 'bg-white/90 border-slate-200 text-slate-900'
+        }`}>
+          <p className="font-bold text-sm text-blue-600 dark:text-blue-400">נקודה על העקומה</p>
+          <p className="flex justify-between gap-4"><span>ערך X:</span> <span className="font-mono font-bold">{dataPt.x.toFixed(2)}</span></p>
+          <p className="flex justify-between gap-4"><span>ציון תקן Z:</span> <span className="font-mono font-bold">{zVal.toFixed(2)}</span></p>
+          <p className="flex justify-between gap-4"><span>צפיפות PDF:</span> <span className="font-mono font-bold">{dataPt.pdf.toFixed(4)}</span></p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className="w-full bg-white rounded-xl p-4 shadow-sm border border-slate-100 overflow-hidden">
-      <svg ref={svgRef} className="w-full h-[400px]" />
+    <div className={`w-full rounded-2xl p-4 border transition-colors ${
+      theme === 'dark' ? 'bg-slate-905 border-slate-800' : 'bg-white border-slate-100'
+    }`}>
+      <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b pb-4 border-slate-100 dark:border-slate-800">
+        <h3 className={`text-base font-bold ${theme === 'dark' ? 'text-slate-200' : 'text-slate-700'}`}>
+          {type === 'conditional' ? 'גרף התפלגות מותנית P(A|B)' : 'עקומת פעמון ושטחים מחושבים'}
+        </h3>
+        <span className={`px-3 py-1 rounded-full text-xs font-black tracking-wide shrink-0 ${
+          theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-750'
+        }`}>
+          {type === 'conditional' ? `P(A|B) = ${probability.toFixed(4)}` : `שטח מחושב: ${(probability * 100).toFixed(2)}%`}
+        </span>
+      </div>
+
+      <div className="h-[350px] w-full" dir="ltr">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 5 }}>
+            <defs>
+              <linearGradient id="mainColor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={curveColor} stopOpacity={0.1}/>
+                <stop offset="95%" stopColor={curveColor} stopOpacity={0.01}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={mainGridColor} />
+
+            <XAxis 
+              dataKey="x" 
+              type="number" 
+              domain={[mean - 4.2 * stdDev, mean + 4.2 * stdDev]}
+              tick={{ fill: axisLabelColor, fontSize: 11 }}
+              axisLine={{ stroke: mainGridColor }}
+              tickLine={false}
+            />
+            <YAxis hide={true} />
+            <RechartsTooltip content={<CustomTooltipInner />} />
+
+            {/* Always render standard curve path */}
+            <Area 
+              type="monotone" 
+              dataKey="pdf" 
+              stroke={curveColor} 
+              strokeWidth={2.5} 
+              fill="url(#mainColor)" 
+              dot={false}
+              isAnimationActive={false}
+            />
+
+            {/* Shaded area layers depending on normal / conditional type */}
+            {type === 'conditional' ? (
+              <>
+                <Area 
+                  type="monotone" 
+                  dataKey="condBShadedY" 
+                  stroke="none" 
+                  fill={bShadedColor} 
+                  dot={false}
+                  isAnimationActive={false}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="intersectShadedY" 
+                  stroke="none" 
+                  fill={intersectShadedColor} 
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </>
+            ) : type === 'outside' ? (
+              <>
+                <Area 
+                  type="monotone" 
+                  dataKey="shadedYBelow" 
+                  stroke="none" 
+                  fill={shadedColor} 
+                  dot={false}
+                  isAnimationActive={false}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="shadedYAbove" 
+                  stroke="none" 
+                  fill={shadedColor} 
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </>
+            ) : (
+              <Area 
+                type="monotone" 
+                dataKey="shadedY" 
+                stroke="none" 
+                fill={shadedColor} 
+                dot={false}
+                isAnimationActive={false}
+              />
+            )}
+
+            {/* Reference Line for Mean */}
+            <ReferenceLine 
+              x={mean} 
+              stroke={theme === 'dark' ? '#94a3b8' : '#475569'} 
+              strokeWidth={1.5} 
+              strokeDasharray="4 4"
+              label={{
+                value: `μ=${mean}`,
+                position: 'top',
+                fill: theme === 'dark' ? '#cbd5e1' : '#334155',
+                fontSize: 11,
+                fontWeight: 'bold'
+              }}
+            />
+
+            {/* Reference Lines for Inputs */}
+            {type === 'conditional' ? (
+              <>
+                {condX1 !== undefined && (condType === 'below' || condType === 'above' || condType === 'between') && (
+                  <ReferenceLine 
+                    x={condX1} 
+                    stroke="#10b981" 
+                    strokeWidth={1.5} 
+                    strokeDasharray="3 3"
+                    label={{
+                      value: condType === 'between' ? 'B: x1' : 'B',
+                      position: 'top',
+                      fill: '#10b981',
+                      fontSize: 10,
+                      fontWeight: 'bold'
+                    }}
+                  />
+                )}
+                {condX2 !== undefined && condType === 'between' && (
+                  <ReferenceLine 
+                    x={condX2} 
+                    stroke="#10b981" 
+                    strokeWidth={1.5} 
+                    strokeDasharray="3 3"
+                    label={{
+                      value: 'B: x2',
+                      position: 'top',
+                      fill: '#10b981',
+                      fontSize: 10,
+                      fontWeight: 'bold'
+                    }}
+                  />
+                )}
+                {(condTypeA === 'below' || condTypeA === 'above' || condTypeA === 'between') && (
+                  <ReferenceLine 
+                    x={x1} 
+                    stroke="#ef4444" 
+                    strokeWidth={1.5} 
+                    label={{
+                      value: condTypeA === 'between' ? 'A: x1' : 'A',
+                      position: 'top',
+                      fill: '#ef4444',
+                      fontSize: 10,
+                      fontWeight: 'bold'
+                    }}
+                  />
+                )}
+                {condTypeA === 'between' && (
+                  <ReferenceLine 
+                    x={x2} 
+                    stroke="#ef4444" 
+                    strokeWidth={1.5} 
+                    label={{
+                      value: 'A: x2',
+                      position: 'top',
+                      fill: '#ef4444',
+                      fontSize: 10,
+                      fontWeight: 'bold'
+                    }}
+                  />
+                )}
+              </>
+            ) : mode === 'inverse' ? (
+              <ReferenceLine 
+                x={x1} 
+                stroke="#3b82f6" 
+                strokeWidth={1.5} 
+                label={{
+                  value: `X = ${x1.toFixed(2)}`,
+                  position: 'top',
+                  fill: '#3b82f6',
+                  fontSize: 11,
+                  fontWeight: 'bold'
+                }}
+              />
+            ) : (
+              <>
+                <ReferenceLine 
+                  x={x1} 
+                  stroke="#ef4444" 
+                  strokeWidth={1.5} 
+                  label={{
+                    value: type === 'between' || type === 'outside' ? 'X₁' : 'X',
+                    position: 'top',
+                    fill: '#ef4444',
+                    fontSize: 11,
+                    fontWeight: 'bold'
+                  }}
+                />
+                {(type === 'between' || type === 'outside') && (
+                  <ReferenceLine 
+                    x={x2} 
+                    stroke="#10b981" 
+                    strokeWidth={1.5} 
+                    label={{
+                      value: 'X₂',
+                      position: 'top',
+                      fill: '#10b981',
+                      fontSize: 11,
+                      fontWeight: 'bold'
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
 
-const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
+const FormattedStep: React.FC<{ text: string; theme: 'light' | 'dark' }> = ({ text, theme }) => {
   const isResult = text.startsWith('תוצאה סופית:');
-  
-  // Split by [MATH]...[/MATH]
   const parts = text.split(/\[MATH\](.*?)\[\/MATH\]/g);
 
   return (
-    <div className={`text-slate-900 leading-relaxed font-sans font-medium text-base md:text-lg w-full ${isResult ? 'font-bold text-blue-900 bg-blue-600/5 p-6 rounded-2xl border border-blue-200 shadow-md' : ''}`}>
+    <div className={`text-sm md:text-base leading-relaxed w-full transition-all ${
+      isResult 
+        ? theme === 'dark'
+          ? 'font-bold text-blue-200 bg-blue-950/40 p-5 rounded-2xl border border-blue-900 shadow-lg'
+          : 'font-bold text-blue-900 bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-md'
+        : theme === 'dark' ? 'text-slate-200' : 'text-slate-850'
+    }`}>
       {parts.map((part, i) => {
         if (i % 2 === 1) {
-          // Heuristic for block vs inline
           const isOnlyMath = parts.length === 3 && parts[0] === "" && parts[2] === "";
           const hasFraction = part.includes('\\frac');
           const hasPercentage = part.includes('%') || part.includes('\\%');
           const hasEquals = part.includes('=');
-          
-          // Block if:
-          // 1. It has a fraction (too tall for inline)
-          // 2. It is the ONLY thing in the step AND has an equals sign (a standalone calculation)
-          // BUT: Never block if it has a percentage (usually a result/probability)
-          const shouldBeBlock = (hasFraction || (isOnlyMath && hasEquals)) && !hasPercentage;
+          const shouldBeBlockPoint = (hasFraction || (isOnlyMath && hasEquals)) && !hasPercentage;
 
-          if (shouldBeBlock) {
+          if (shouldBeBlockPoint) {
             return (
-              <div key={i} className="my-4 text-center bg-slate-50/50 py-4 px-2 rounded-xl border border-slate-100 shadow-inner overflow-x-auto" dir="ltr">
+              <div 
+                key={i} 
+                className={`my-3 text-center py-3 px-2 rounded-xl border shadow-inner overflow-x-auto ${
+                  theme === 'dark' 
+                    ? 'bg-slate-800/60 border-slate-700/60' 
+                    : 'bg-slate-50 border-slate-100'
+                }`} 
+                dir="ltr"
+              >
                 <BlockMath math={part} />
               </div>
             );
           }
-          // Inline math
-          return <span key={i} dir="ltr" className="inline-block mx-1 font-bold"><InlineMath math={part} /></span>;
+          return <span key={i} dir="ltr" className="inline-block mx-1 font-bold whitespace-nowrap"><InlineMath math={part} /></span>;
         }
-        // Text part
         if (!part && parts.length > 1) return null;
-        return <span key={i}>{part}</span>;
+        return <span key={i} className="align-middle font-sans font-medium">{part}</span>;
       })}
     </div>
   );
 };
 
-const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ activeZ = null, showSearch = false }) => {
+const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: 'light' | 'dark' }> = ({ activeZ = null, showSearch = false, theme }) => {
   const [searchType, setSearchType] = useState<'z' | 'phi'>('z');
   const [searchVal, setSearchVal] = useState<string>(activeZ?.toFixed(2) || '');
   const [phiSearchVal, setPhiSearchVal] = useState<string>('');
@@ -419,12 +556,13 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
     }
   }, [activeZ]);
 
-  // Table range: 0.0 to 3.5 rows, 0.00 to 0.09 cols
   const rows = useMemo(() => Array.from({ length: 36 }, (_, i) => i / 10), []);
   const cols = useMemo(() => Array.from({ length: 10 }, (_, i) => i / 100), []);
+  
+  const leftRows = useMemo(() => rows.slice(0, 18), [rows]);
+  const rightRows = useMemo(() => rows.slice(18), [rows]);
 
-  // Find Z by closest PHI
-  const findZByPhi = (targetPhi: number) => {
+  const findZByPhiVal = (targetPhi: number) => {
     let closestZ = 0;
     let minDiff = Infinity;
     
@@ -444,78 +582,154 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
 
   if (activeZ === null && !showSearch) return null;
   
-  // The actual value being searched (could be negative)
   const actualZ = useMemo(() => {
     if (searchType === 'phi') {
       const parsedPhi = parseFloat(phiSearchVal);
       if (isNaN(parsedPhi) || parsedPhi < 0 || parsedPhi > 1) return null;
-      return findZByPhi(parsedPhi);
+      return findZByPhiVal(parsedPhi);
     }
     if (activeZ !== null) return activeZ;
     const parsed = parseFloat(searchVal);
     return isNaN(parsed) ? null : parsed;
   }, [activeZ, searchVal, phiSearchVal, searchType, rows, cols]);
 
-  const isNegative = actualZ !== null && actualZ < 0;
+  const isZNegative = actualZ !== null && actualZ < 0;
   const lookupZ = actualZ !== null ? Math.abs(actualZ) : null;
 
   const rowVal = lookupZ !== null ? Math.floor(lookupZ * 10) / 10 : null;
   const colVal = lookupZ !== null ? Math.round((lookupZ - rowVal!) * 100) / 100 : null;
 
+  const renderTableSection = (tableRows: number[]) => (
+    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-850">
+      <table className="w-full text-xs sm:text-sm border-collapse">
+        <thead>
+          <tr className="bg-slate-100 dark:bg-slate-800">
+            <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-400 font-black text-center text-sm w-14 bg-slate-100 dark:bg-slate-800">Z</th>
+            {cols.map(c => {
+              const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
+              return (
+                <th 
+                  key={c} 
+                  className={`p-2.5 border border-slate-200 dark:border-slate-700 transition-colors duration-300 font-extrabold text-center min-w-[58px] ${
+                    isColActive 
+                      ? 'bg-blue-600 text-white dark:bg-blue-500' 
+                      : 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800'
+                  }`}
+                >
+                  {c.toFixed(2).slice(2)}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {tableRows.map(r => {
+            const isRowActive = lookupZ !== null && Math.abs(r - rowVal!) < 0.01;
+            return (
+              <tr key={r} className={`transition-colors duration-200 ${
+                isRowActive 
+                  ? theme === 'dark' ? 'bg-blue-950/20' : 'bg-blue-50/50' 
+                  : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
+              }`}>
+                <td className={`p-2.5 border border-slate-200 dark:border-slate-700 font-black text-center text-sm transition-colors duration-300 ${
+                  isRowActive 
+                    ? 'bg-blue-600 text-white dark:bg-blue-500' 
+                    : 'text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-850'
+                }`}>
+                  {r.toFixed(1)}
+                </td>
+                {cols.map(c => {
+                  const z = r + c;
+                  const val = normalCDF(z, 0, 1);
+                  const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
+                  const isActive = isRowActive && isColActive;
+                  
+                  return (
+                    <td 
+                      key={c} 
+                      className={`p-2.5 border border-slate-200 dark:border-slate-755 text-center transition-all duration-300 tabular-nums ${
+                        isActive 
+                          ? 'bg-blue-600 text-white dark:bg-blue-500 font-black scale-102 shadow-lg z-10 relative rounded-md' 
+                          : isRowActive
+                            ? 'bg-blue-100/40 text-blue-900 dark:bg-blue-900/20 dark:text-blue-300 font-extrabold'
+                            : isColActive
+                              ? 'bg-indigo-100/40 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300 font-extrabold'
+                              : 'text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-800 font-medium'
+                      }`}
+                    >
+                      {val.toFixed(4)}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
   return (
-    <div className={`overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-lg ${!showSearch ? 'mt-8' : ''}`}>
+    <div className={`overflow-hidden border rounded-2xl shadow-xl transition-all ${
+      theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+    } ${!showSearch ? 'mt-4' : ''}`}>
       {/* Educational Header */}
-      <div className="p-6 bg-gradient-to-br from-slate-800 to-slate-900 text-white">
+      <div className="p-6 bg-gradient-to-br from-slate-800 to-slate-950 text-white">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-blue-500 rounded-lg shadow-lg shadow-blue-500/20">
-            <Info size={20} className="text-white" />
+          <div className="p-2.5 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/20">
+            <BookOpen size={20} className="text-white" />
           </div>
           <h3 className="text-lg font-bold tracking-tight">איך קוראים את טבלת Z?</h3>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-right">
           <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-2 text-blue-400 font-bold">
-              <div className="w-2 h-2 rounded-full bg-blue-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-400" />
               ערך ה-Z (ציון התקן)
             </div>
             <p className="text-sm text-slate-300 leading-relaxed">
-              מופיע <strong>בשולי הטבלה</strong>. השורה מייצגת את הספרה הראשונה אחרי הנקודה, והעמודה מייצגת את הספרה השנייה.
+              מופיע <strong>בשולי הטבלה</strong> (אנכית ואופקית). השורה מציינת את השלם והעשירית, והעמודה את המאית.
             </p>
-            <div className="text-xs bg-blue-500/10 p-2 rounded border border-blue-500/20 text-blue-200">
-              דוגמה: עבור <InlineMath math="Z=1.96" />, נחפש שורה 1.9 ועמודה 0.06.
+            <div className="text-xs bg-blue-500/15 p-2 rounded-lg border border-blue-500/20 text-blue-200" dir="rtl">
+              דוגמה: למציאת <InlineMath math="Z=1.96" />, נבחר שורה 1.9 ועמודה 0.06.
             </div>
           </div>
           
           <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
             <div className="flex items-center gap-2 text-emerald-400 font-bold">
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               ערך ה-PHI (ההסתברות)
             </div>
             <p className="text-sm text-slate-300 leading-relaxed">
-              מופיע <strong>בתוך תאי הטבלה</strong>. זהו השטח מתחת לעקומה משמאל לערך ה-Z.
+              מופיע <strong>בתוך הטבלה (תאים לבנים)</strong>. זהו השטח המצטבר שמתחת לעקומת הפעמון המצטבר משמאל לערך ה-Z.
             </p>
-            <div className="text-xs bg-emerald-500/10 p-2 rounded border border-emerald-500/20 text-emerald-200">
-              דוגמה: בתוך הטבלה נמצא את הערך 0.9750 שמתאים ל-Z של 1.96.
+            <div className="text-xs bg-emerald-500/15 p-2 rounded-lg border border-emerald-500/20 text-emerald-250" dir="rtl">
+              דוגמה: בתוך הטבלה נמצא את השטיח 0.9750 המייצג את הערך Z של 1.96.
             </div>
           </div>
         </div>
       </div>
 
       {/* Search Controls */}
-      <div className="p-5 bg-slate-50 border-b border-slate-200">
+      <div className={`p-5 border-b ${theme === 'dark' ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <h4 className="text-sm font-bold text-slate-700 mb-1">חיפוש בטבלה</h4>
-            <p className="text-xs text-slate-500">בחר סוג חיפוש והזן ערך כדי להבליט אותו</p>
+            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5 justify-end">
+              <span>חיפוש וחקירת ערכים בטבלה</span>
+              <Calculator size={14} className="text-blue-500" />
+            </h4>
+            <p className="text-xs text-slate-400">בחר את סוג החיפוש והזן ערך לקבלת הצלבה של הנתונים</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex flex-wrap items-center gap-4 justify-end">
+            <div className="flex p-1 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-inner">
               <button
                 onClick={() => setSearchType('z')}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  searchType === 'z' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                  searchType === 'z' 
+                    ? 'bg-blue-600 text-white shadow-md' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 חיפוש לפי Z
@@ -523,15 +737,17 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
               <button
                 onClick={() => setSearchType('phi')}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  searchType === 'phi' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'
+                  searchType === 'phi' 
+                    ? 'bg-blue-600 text-white shadow-md' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
                 חיפוש לפי PHI
               </button>
             </div>
 
-            <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-              <label className="text-xs font-bold text-slate-400 whitespace-nowrap">
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 transition-all" dir="rtl">
+              <label className="text-xs font-black text-slate-400 whitespace-nowrap">
                 {searchType === 'z' ? 'ערך Z:' : 'ערך PHI:'}
               </label>
               {searchType === 'z' ? (
@@ -541,7 +757,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
                   value={searchVal}
                   onChange={(e) => setSearchVal(e.target.value)}
                   placeholder="לדוגמה: 1.96"
-                  className="w-24 text-sm font-black outline-none text-blue-600 placeholder:text-slate-300"
+                  className="w-24 text-sm font-black outline-none bg-transparent text-blue-600 dark:text-blue-400 placeholder:text-slate-300"
                 />
               ) : (
                 <input 
@@ -552,7 +768,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
                   value={phiSearchVal}
                   onChange={(e) => setPhiSearchVal(e.target.value)}
                   placeholder="לדוגמה: 0.95"
-                  className="w-24 text-sm font-black outline-none text-emerald-600 placeholder:text-slate-300"
+                  className="w-24 text-sm font-black outline-none bg-transparent text-emerald-600 dark:text-emerald-400 placeholder:text-slate-300"
                 />
               )}
             </div>
@@ -561,101 +777,52 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
       </div>
       
       {/* Table Section */}
-      <div className="overflow-x-auto max-h-[650px] overflow-y-auto custom-scrollbar">
-        <table className="w-full text-sm md:text-base border-collapse">
-          <thead className="sticky top-0 z-30">
-            <tr className="bg-slate-100 shadow-sm">
-              <th className="p-4 border border-slate-200 text-blue-600 font-black bg-slate-100 text-lg">Z</th>
-              {cols.map(c => {
-                const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
-                return (
-                  <th 
-                    key={c} 
-                    className={`p-4 border border-slate-200 transition-colors duration-300 font-black ${
-                      isColActive ? 'bg-indigo-600 text-white shadow-inner' : 'text-slate-500 bg-slate-100'
-                    }`}
-                  >
-                    {c.toFixed(2).slice(2)}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(r => {
-              const isRowActive = lookupZ !== null && r === rowVal;
-              return (
-                <tr key={r} className="transition-colors duration-300">
-                  <td className={`p-4 border border-slate-200 font-black sticky right-0 z-20 text-center text-lg transition-colors duration-300 ${
-                    isRowActive ? 'bg-blue-600 text-white shadow-inner' : 'text-slate-800 bg-slate-50'
-                  }`}>
-                    {r.toFixed(1)}
-                  </td>
-                  {cols.map(c => {
-                    const z = r + c;
-                    const val = normalCDF(z, 0, 1);
-                    const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
-                    const isActive = isRowActive && isColActive;
-                    
-                    return (
-                      <td 
-                        key={c} 
-                        className={`p-4 border border-slate-200 text-center transition-all duration-300 tabular-nums ${
-                          isActive 
-                            ? 'bg-blue-600 text-white font-black scale-110 shadow-2xl z-10 relative rounded-md' 
-                            : isRowActive
-                              ? 'bg-blue-100/60 text-blue-900 font-bold'
-                              : isColActive
-                                ? 'bg-indigo-100/60 text-indigo-900 font-bold'
-                                : 'text-slate-700 hover:bg-blue-50/50 font-medium'
-                        }`}
-                      >
-                        {val.toFixed(4)}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 p-6">
+        <div className="space-y-2">
+          <div className="text-xs font-bold text-slate-400 border-b pb-2 border-slate-100 dark:border-slate-800">צד שמאל: ערכי Z מ-0.0 עד 1.7</div>
+          {renderTableSection(leftRows)}
+        </div>
+        <div className="space-y-2">
+          <div className="text-xs font-bold text-slate-400 border-b pb-2 border-slate-100 dark:border-slate-800">צד ימין: ערכי Z מ-1.8 עד 3.5</div>
+          {renderTableSection(rightRows)}
+        </div>
       </div>
       
       {/* Result Footer */}
       {lookupZ !== null && (
-        <div className="p-5 bg-blue-600 text-white border-t border-blue-700 shadow-[0_-4px_20px_rgba(37,99,235,0.1)]">
-          {isNegative ? (
+        <div className="p-5 bg-blue-600 dark:bg-blue-725 text-white border-t border-blue-700 shadow-inner">
+          {isZNegative ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 font-black text-lg">
-                <Info size={20} />
-                חישוב עבור ערך Z שלילי ({actualZ?.toFixed(2)})
+              <div className="flex items-center gap-2 font-black text-base">
+                <Info size={18} />
+                חישוב שלב עזר עבור ערך Z שלילי ({actualZ?.toFixed(2)})
               </div>
-              <div className="bg-white/10 backdrop-blur-sm p-5 rounded-2xl border border-white/20 space-y-3 leading-relaxed">
-                <p className="text-blue-100">כדי לחשב את הערך של <InlineMath math="\Phi" /> עבור ערך <InlineMath math="z" /> שלילי, משתמשים בכלל הסימטריה:</p>
-                <div className="text-center py-3 bg-black/10 rounded-xl overflow-x-auto">
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 space-y-3 leading-relaxed">
+                <p className="text-blue-100 text-sm">כדי למצוא את תוצאת הפונקציה <InlineMath math="\Phi" /> עבור ערך <InlineMath math="z" /> שלילי, נשתמש בכלל הסימטריה המוכר בסטטיסטיקה:</p>
+                <div className="text-center py-2.5 bg-black/15 rounded-lg overflow-x-auto text-base">
                   <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = 1 - \\Phi(${lookupZ.toFixed(2)})`} />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-right">
                   <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                    <p className="text-[10px] uppercase tracking-wider text-blue-200 mb-1">שלב 1: מציאת הערך החיובי</p>
-                    <p className="font-bold text-sm">
-                      שורה {rowVal?.toFixed(1)}, עמודה {colVal?.toFixed(2).slice(2)}
+                    <p className="text-[10px] uppercase tracking-wider text-blue-205 mb-1 font-bold">שלב 1: מציאת הערך החיובי בטבלה</p>
+                    <p className="font-bold text-xs">
+                      הצלבנו שורה {rowVal?.toFixed(1)}, עמודה {colVal?.toFixed(2).slice(2)}
                     </p>
-                    <p className="text-lg font-black mt-1">
+                    <p className="text-base font-black mt-1">
                       <InlineMath math={`\\Phi(${lookupZ.toFixed(2)}) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
                     </p>
                   </div>
                   <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                    <p className="text-[10px] uppercase tracking-wider text-blue-200 mb-1">שלב 2: חיסור מ-1</p>
-                    <p className="font-bold text-sm">
+                    <p className="text-[10px] uppercase tracking-wider text-blue-205 mb-1 font-bold">שלב 2: חיסור ההסתברות המצטברת מ-1</p>
+                    <p className="font-bold text-xs">
                       <InlineMath math={`1 - ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
                     </p>
-                    <p className="text-lg font-black mt-1 text-emerald-300">
+                    <p className="text-base font-black mt-1 text-emerald-300">
                       = {normalCDF(actualZ!, 0, 1).toFixed(4)}
                     </p>
                   </div>
                 </div>
-                <p className="font-black text-center text-xl pt-2 border-t border-white/10">
+                <p className="font-black text-center text-lg pt-3 border-t border-white/10">
                   תוצאה סופית: <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = ${normalCDF(actualZ!, 0, 1).toFixed(4)}`} />
                 </p>
               </div>
@@ -664,24 +831,24 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white/20 rounded-lg">
-                  <Calculator size={20} />
+                  <Calculator size={18} />
                 </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-blue-200 font-bold">תוצאת חיפוש בטבלה</div>
-                  <div className="text-lg font-black">
-                    עבור <InlineMath math={`Z = ${lookupZ.toFixed(2)}`} /> נמצא <InlineMath math={`\\Phi(z) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
+                <div className="text-right">
+                  <div className="text-[10px] uppercase font-black text-blue-200">תוצאה מתוך הצלבת נתוני הטבלה</div>
+                  <div className="text-sm sm:text-base font-extrabold leading-normal">
+                    עבור <InlineMath math={`Z = ${lookupZ.toFixed(2)}`} /> התקבלה הסתברות <InlineMath math={`\\Phi(z) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-sm bg-white/10 px-4 py-2 rounded-xl border border-white/20">
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-blue-200 uppercase">שורה</span>
-                  <span className="font-bold">{rowVal?.toFixed(1)}</span>
+              <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border border-white/20">
+                <div className="flex flex-col text-center">
+                  <span className="text-[10px] text-blue-100 font-bold">שורה</span>
+                  <span className="font-black text-sm">{rowVal?.toFixed(1)}</span>
                 </div>
                 <div className="w-px h-6 bg-white/20" />
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-blue-200 uppercase">עמודה</span>
-                  <span className="font-bold">{colVal?.toFixed(2).slice(2)}</span>
+                <div className="flex flex-col text-center">
+                  <span className="text-[10px] text-blue-100 font-bold">עמודה</span>
+                  <span className="font-black text-sm">{colVal?.toFixed(2).slice(2)}</span>
                 </div>
               </div>
             </div>
@@ -695,9 +862,16 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
 export default function NormalDistributionCalculator() {
   const [mode, setMode] = useState<CalcMode>('forward');
   const [mean, setMean] = useState<number>(170);
+  const [meanInput, setMeanInput] = useState<string>('170');
+  const [meanError, setMeanError] = useState<string | null>(null);
+
   const [stdDev, setStdDev] = useState<number>(5);
+  const [stdDevInput, setStdDevInput] = useState<string>('5');
+  const [stdDevError, setStdDevError] = useState<string | null>(null);
+
   const [type, setType] = useState<CalcType>('below');
   const [inverseType, setInverseType] = useState<'lower' | 'upper'>('lower');
+  
   const [x1, setX1] = useState<number>(165);
   const [x2, setX2] = useState<number>(175);
   const [condType, setCondType] = useState<CondType>('above');
@@ -706,85 +880,139 @@ export default function NormalDistributionCalculator() {
   const [condX2, setCondX2] = useState<number>(180);
   const [percentile, setPercentile] = useState<number>(90);
 
+  // Theme support
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const rootEl = document.documentElement;
+    if (theme === 'dark') {
+      rootEl.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      rootEl.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  // Inputs handler with inline validations
+  const handleMeanChange = (val: string) => {
+    setMeanInput(val);
+    const parsed = parseFloat(val);
+    if (val.trim() === '') {
+      setMeanError('שדה חובה');
+    } else if (isNaN(parsed)) {
+      setMeanError('אנא הזן מספר תקין');
+    } else {
+      setMeanError(null);
+      setMean(parsed);
+    }
+  };
+
+  const handleStdDevChange = (val: string) => {
+    setStdDevInput(val);
+    const parsed = parseFloat(val);
+    if (val.trim() === '') {
+      setStdDevError('שדה חובה');
+    } else if (isNaN(parsed)) {
+      setStdDevError('אנא הזן מספר תקין');
+    } else if (parsed <= 0) {
+      setStdDevError('סטיית התקן חייבת להיות גדולה מ-0 בלבד!');
+    } else {
+      setStdDevError(null);
+      setStdDev(parsed);
+    }
+  };
+
+  // Quick validations check before processing
+  const isValidToCalculate = useMemo(() => {
+    return stdDev > 0 && !isNaN(mean) && !stdDevError && !meanError;
+  }, [stdDev, mean, stdDevError, meanError]);
+
   const result = useMemo((): CalculationResult => {
+    if (!isValidToCalculate) {
+      return { probability: 0, z1: 0, steps: [] };
+    }
+
     const steps: string[] = [];
-    steps.push(`נתונים: [MATH]\\mu = ${mean}, \\sigma = ${stdDev}[/MATH]`);
+    steps.push(`נתוני ההתפלגות שלנו: [MATH]\\mu = ${mean}, \\sigma = ${stdDev}[/MATH]`);
 
     if (mode === 'inverse') {
       const pInput = percentile / 100;
-      // If upper, we want P(X > x) = pInput, which means P(X < x) = 1 - pInput
       const pLookup = inverseType === 'lower' ? pInput : 1 - pInput;
       const z = inverseNormalCDF(pLookup);
-      const x = mean + z * stdDev;
+      const calculatedX = mean + z * stdDev;
       
-      steps.push(`נבצע חישוב הפוך (מציאת ערך X לפי אחוזון ${inverseType === 'lower' ? 'תחתון' : 'עליון'}):`);
+      steps.push(`נבצע חישוב הפוך למציאת ערך X לפי אחוזון ${inverseType === 'lower' ? 'תחתון' : 'עליון'} של ${percentile}%:`);
       
       if (inverseType === 'lower') {
-        steps.push(`שלב 1: מציאת ערך ה-Z המתאים להסתברות המצטברת [MATH]P(X < x) = ${pLookup.toFixed(4)}[/MATH] מטבלת ה-Z:`);
+        steps.push(`שלב 1: נמצא את ספרת ה-Z המתאימה להסתברות השטח משמאל [MATH]P(X < x) = ${pLookup.toFixed(4)}[/MATH] מתוך טבלת ה-Z המותאמת:`);
       } else {
-        steps.push(`שלב 1: אנחנו מחפשים ערך [MATH]x[/MATH] כך שהשטח מימינו הוא [MATH]${pInput.toFixed(4)}[/MATH].`);
-        steps.push(`זה שקול למציאת ערך [MATH]x[/MATH] שהשטח משמאלו הוא [MATH]1 - ${pInput.toFixed(4)} = ${pLookup.toFixed(4)}[/MATH].`);
-        steps.push(`נחפש את ה-Z המתאים ל-[MATH]P(X < x) = ${pLookup.toFixed(4)}[/MATH] בטבלה:`);
+        steps.push(`שלב 1: אנו מחפשים שטח מימין הגדול מ-[MATH]${pInput.toFixed(4)}[/MATH].`);
+        steps.push(`נוסחה שקולה לשטח המשלים משמאל: [MATH]1 - ${pInput.toFixed(4)} = ${pLookup.toFixed(4)}[/MATH].`);
+        steps.push(`נאתר את ה-Z המתאים ל-[MATH]P(X < x) = ${pLookup.toFixed(4)}[/MATH] בטבלה:`);
       }
       
       steps.push(`[MATH]\\mathbf{Z = \\Phi^{-1}(${pLookup.toFixed(4)}) = ${z.toFixed(4)}}[/MATH]`);
-      steps.push(`שלב 2: שימוש בנוסחת ה"תקנון" (בצורה הפוכה) למציאת [MATH]X[/MATH]:`);
+      steps.push(`שלב 2: נשתמש בנוסחת הקשר הפיזי (טרנספורמציה הפוכה) של ציון תקנון למציאת [MATH]X[/MATH]:`);
       steps.push(`[MATH]\\mathbf{X = \\mu + Z \\cdot \\sigma}[/MATH]`);
-      steps.push(`נציב את הנתונים:`);
+      steps.push(`נציג מילוי של הנתונים שלנו:`);
       steps.push(`[MATH]\\mathbf{X = ${mean} + (${z.toFixed(4)}) \\cdot ${stdDev}}[/MATH]`);
-      steps.push(`[MATH]\\mathbf{X = ${x.toFixed(4)}}[/MATH]`);
-      steps.push(`תוצאה סופית: הערך המבוקש עבור אחוזון ${inverseType === 'lower' ? 'תחתון' : 'עליון'} של ${percentile}% הוא [MATH]\\mathbf{X = ${x.toFixed(4)}}[/MATH]`);
+      steps.push(`[MATH]\\mathbf{X = ${calculatedX.toFixed(4)}}[/MATH]`);
+      steps.push(`תוצאה סופית: ערך ה-X המבוקש התואם לאחוזון הוא [MATH]\\mathbf{X = ${calculatedX.toFixed(4)}}[/MATH]`);
       
-      return { probability: pInput, z1: z, steps, calculatedX: x };
+      return { probability: pInput, z1: z, steps, calculatedX };
     }
 
     const z1 = (x1 - mean) / stdDev;
     const z2 = (x2 - mean) / stdDev;
     let prob = 0;
 
-    if (type === 'conditional') {
-      // P(A | B) = P(A and B) / P(B)
-      // Event A is defined by (type, x1, x2) - but we need a sub-type for A in conditional mode
-      // Let's assume for simplicity that in conditional mode, we use a sub-type for A
-    }
-
     switch (type) {
       case 'below':
         prob = normalCDF(x1, mean, stdDev);
-        steps.push(`נחשב את ציון התקן עבור [MATH]X = ${x1}[/MATH]:`);
+        steps.push(`שלב 1: נחשב את ציון התקן (Z-score) עבור ערך הגבול [MATH]X = ${x1}[/MATH]:`);
         steps.push(`[MATH]Z = \\frac{X - \\mu}{\\sigma} = \\frac{${x1} - ${mean}}{${stdDev}} = ${z1.toFixed(4)}[/MATH]`);
         
         if (z1 < 0) {
           const absZ = Math.abs(z1);
           const phiAbsZ = normalCDF(absZ, 0, 1);
-          steps.push(`מכיוון ש-[MATH]Z[/MATH] שלילי, נשתמש בתכונת הסימטריה:`);
+          steps.push(`מכיוון שערך ה-Z שקיבלנו הוא שלילי, נפעל על פי כלל הסימטריה:`);
           steps.push(`[MATH]P(Z < ${z1.toFixed(4)}) = P(Z > ${absZ.toFixed(4)}) = 1 - \\Phi(${absZ.toFixed(4)})[/MATH]`);
-          steps.push(`נחפש בטבלה את [MATH]\\Phi(${absZ.toFixed(4)}) = ${phiAbsZ.toFixed(4)}[/MATH]:`);
-          steps.push(`[MATH]1 - ${phiAbsZ.toFixed(4)} = ${prob.toFixed(4)}[/MATH]`);
+          steps.push(`נשלוף מטבלת ה-Z המורחבת את [MATH]\\Phi(${absZ.toFixed(4)}) = ${phiAbsZ.toFixed(4)}[/MATH] ואז נחסיר מ-1:`);
+          steps.push(`[MATH]P(X < ${x1}) = 1 - ${phiAbsZ.toFixed(4)} = ${prob.toFixed(4)}[/MATH]`);
         } else {
-          steps.push(`נחפש בטבלת ההתפלגות הנורמלית את השטח משמאל ל-[MATH]Z = ${z1.toFixed(4)}[/MATH]:`);
+          steps.push(`נאתר בטבלת ההתפלגות הנורמלית את שטח ההסתברות המצטברת משמאל עבור [MATH]Z = ${z1.toFixed(4)}[/MATH]:`);
           steps.push(`[MATH]P(X < ${x1}) = P(Z < ${z1.toFixed(4)}) = ${prob.toFixed(4)}[/MATH]`);
         }
-        steps.push(`תוצאה סופית: ההסתברות היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
+        steps.push(`תוצאה סופית: ההסתברות הנדרשת השווה לשטח היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
         return { probability: prob, z1, steps };
       
       case 'above':
         prob = 1 - normalCDF(x1, mean, stdDev);
-        steps.push(`נחשב את ציון התקן עבור [MATH]X = ${x1}[/MATH]:`);
+        steps.push(`שלב 1: נחשב את ציון התקן (Z-score) עבור ערך הגבול [MATH]X = ${x1}[/MATH]:`);
         steps.push(`[MATH]Z = \\frac{X - \\mu}{\\sigma} = \\frac{${x1} - ${mean}}{${stdDev}} = ${z1.toFixed(4)}[/MATH]`);
         
         if (z1 < 0) {
           const absZ = Math.abs(z1);
           const phiAbsZ = normalCDF(absZ, 0, 1);
-          steps.push(`אנחנו רוצים את השטח מימין ל-[MATH]Z[/MATH] שלילי:`);
+          steps.push(`כיוון שערך ציון התקן Z שלילי, נחשב את השטח מימין המצוי מעבר לו:`);
           steps.push(`[MATH]P(Z > ${z1.toFixed(4)}) = P(Z < ${absZ.toFixed(4)}) = \\Phi(${absZ.toFixed(4)})[/MATH]`);
-          steps.push(`נחפש בטבלה את [MATH]\\Phi(${absZ.toFixed(4)}) = ${phiAbsZ.toFixed(4)}[/MATH]`);
+          steps.push(`נמצא את הערך התואם בטבלה [MATH]\\Phi(${absZ.toFixed(4)}) = ${phiAbsZ.toFixed(4)}[/MATH]`);
         } else {
           const phiZ = normalCDF(z1, 0, 1);
-          steps.push(`נחפש את השטח משמאל ל-[MATH]Z[/MATH] ואז נחסיר מ-1 (כי אנחנו רוצים את השטח מימין):`);
+          steps.push(`נאתר את כלל השטח משמאל ל-Z שלידינו ולאחר מכן נפקיר את המשלים (פחות 1):`);
           steps.push(`[MATH]P(X > ${x1}) = 1 - P(Z < ${z1.toFixed(4)}) = 1 - ${phiZ.toFixed(4)} = ${prob.toFixed(4)}[/MATH]`);
         }
-        steps.push(`תוצאה סופית: ההסתברות היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
+        steps.push(`תוצאה סופית: ההסתברות המבוקשת היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
         return { probability: prob, z1, steps };
 
       case 'between':
@@ -795,13 +1023,13 @@ export default function NormalDistributionCalculator() {
         const pMax = normalCDF(maxX, mean, stdDev);
         const pMin = normalCDF(minX, mean, stdDev);
         prob = pMax - pMin;
-        steps.push(`נחשב את ציוני התקן עבור שני הערכים:`);
-        steps.push(`[MATH]Z_1 = \\frac{${minX} - ${mean}}{${stdDev}} = ${minZ.toFixed(4)}[/MATH]`);
-        steps.push(`[MATH]Z_2 = \\frac{${maxX} - ${mean}}{${stdDev}} = ${maxZ.toFixed(4)}[/MATH]`);
-        steps.push(`השטח בין הערכים הוא ההפרש בין השטחים המצטברים:`);
+        steps.push(`שלב 1: נבצע סטנדרטיזציה ונקבע ציוני תקן לשני הערכים שהוזנו:`);
+        steps.push(`[MATH]Z_1 (\\text{נמוך}) = \\frac{${minX} - ${mean}}{${stdDev}} = ${minZ.toFixed(4)}[/MATH]`);
+        steps.push(`[MATH]Z_2 (\\text{גבוה}) = \\frac{${maxX} - ${mean}}{${stdDev}} = ${maxZ.toFixed(4)}[/MATH]`);
+        steps.push(`שלב 2: ההסתברות בין הערכים מיוצגת על ידי הפרש השטחים המצטברים:`);
         steps.push(`[MATH]P(${minX} < X < ${maxX}) = P(Z < ${maxZ.toFixed(4)}) - P(Z < ${minZ.toFixed(4)})[/MATH]`);
-        steps.push(`[MATH]= ${pMax.toFixed(4)} - ${pMin.toFixed(4)} = ${prob.toFixed(4)}[/MATH]`);
-        steps.push(`תוצאה סופית: ההסתברות היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
+        steps.push(`[MATH]= \\Phi(${maxZ.toFixed(4)}) - \\Phi(${minZ.toFixed(4)}) = ${pMax.toFixed(4)} - ${pMin.toFixed(4)} = ${prob.toFixed(4)}[/MATH]`);
+        steps.push(`תוצאה סופית: ההסתברות לקבל ערך בטווח הזה היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
         return { probability: prob, z1: minZ, z2: maxZ, steps };
 
       case 'outside':
@@ -812,44 +1040,41 @@ export default function NormalDistributionCalculator() {
         const pS = normalCDF(sX, mean, stdDev);
         const pE = 1 - normalCDF(eX, mean, stdDev);
         prob = pS + pE;
-        steps.push(`נחשב את ציוני התקן עבור שני הקצוות:`);
+        steps.push(`שלב 1: נמצא ציוני Z-score לכל אחד מקצוות השטח המבוקש:`);
         steps.push(`[MATH]Z_1 = \\frac{${sX} - ${mean}}{${stdDev}} = ${sZ.toFixed(4)}[/MATH]`);
         steps.push(`[MATH]Z_2 = \\frac{${eX} - ${mean}}{${stdDev}} = ${eZ.toFixed(4)}[/MATH]`);
-        steps.push(`השטח מחוץ לטווח הוא סכום השטחים בקצוות:`);
+        steps.push(`שלב 2: ההסתברות מחוץ לטווח משולבת מסכום השטחים הקיצוניים:`);
         steps.push(`[MATH]P(X < ${sX} \\text{ או } X > ${eX}) = P(Z < ${sZ.toFixed(4)}) + P(Z > ${eZ.toFixed(4)})[/MATH]`);
         steps.push(`[MATH]= ${pS.toFixed(4)} + ${pE.toFixed(4)} = ${prob.toFixed(4)}[/MATH]`);
-        steps.push(`תוצאה סופית: ההסתברות היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
+        steps.push(`תוצאה סופית: ההסתברות הכוללת היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
         return { probability: prob, z1: sZ, z2: eZ, steps };
 
       case 'conditional':
-        const getRange = (t: string, v1: number, v2: number): [number, number] => {
+        const getRangeBounds = (t: string, v1: number, v2: number): [number, number] => {
           if (t === 'below') return [-Infinity, v1];
           if (t === 'above') return [v1, Infinity];
           return [Math.min(v1, v2), Math.max(v1, v2)];
         };
 
-        const rA = getRange(condTypeA, x1, x2); 
-        const rB = getRange(condType, condX1, condX2);
+        const rA = getRangeBounds(condTypeA, x1, x2); 
+        const rB = getRangeBounds(condType, condX1, condX2);
 
         const intersectStart = Math.max(rA[0], rB[0]);
         const intersectEnd = Math.min(rA[1], rB[1]);
 
-        // Calculate probabilities using Z-scores
-        const getZ = (x: number) => (x - mean) / stdDev;
+        const getZRatio = (x: number) => (x - mean) / stdDev;
         
-        // Probability of B
         let probB = 0;
-        const zB1 = rB[0] === -Infinity ? -Infinity : getZ(rB[0]);
-        const zB2 = rB[1] === Infinity ? Infinity : getZ(rB[1]);
+        const zB1 = rB[0] === -Infinity ? -Infinity : getZRatio(rB[0]);
+        const zB2 = rB[1] === Infinity ? Infinity : getZRatio(rB[1]);
         
         if (condType === 'below') probB = normalCDF(condX1, mean, stdDev);
         else if (condType === 'above') probB = 1 - normalCDF(condX1, mean, stdDev);
         else probB = Math.abs(normalCDF(condX2, mean, stdDev) - normalCDF(condX1, mean, stdDev));
 
-        // Probability of A and B
         let probAandB = 0;
-        const zI1 = intersectStart === -Infinity ? -Infinity : getZ(intersectStart);
-        const zI2 = intersectEnd === Infinity ? Infinity : getZ(intersectEnd);
+        const zI1 = intersectStart === -Infinity ? -Infinity : getZRatio(intersectStart);
+        const zI2 = intersectEnd === Infinity ? Infinity : getZRatio(intersectEnd);
         
         if (intersectStart < intersectEnd) {
           const pStart = intersectStart === -Infinity ? 0 : normalCDF(intersectStart, mean, stdDev);
@@ -859,67 +1084,66 @@ export default function NormalDistributionCalculator() {
 
         prob = probB > 0 ? probAandB / probB : 0;
 
-        steps.push(`נחשב הסתברות מותנית לפי הנוסחה: [MATH]P(A|B) = \\frac{P(A \\cap B)}{P(B)}[/MATH]`);
+        steps.push(`נפתור הסתברות מותנית לפי הנוסחה הקלאסית: [MATH]P(A|B) = \\frac{P(A \\cap B)}{P(B)}[/MATH]`);
         
-        const getEventLabel = (t: CondType, v1: number, v2: number) => {
+        const getDescText = (t: CondType, v1: number, v2: number) => {
           if (t === 'below') return `X < ${v1}`;
           if (t === 'above') return `X > ${v1}`;
           return `${v1} < X < ${v2}`;
         };
 
-        steps.push(`המאורעות שלנו:`);
-        steps.push(`[MATH]A: ${getEventLabel(condTypeA, x1, x2)}[/MATH]`);
-        steps.push(`[MATH]B: ${getEventLabel(condType, condX1, condX2)}[/MATH]`);
+        steps.push(`המאורעות בהם אנו דנים:`);
+        steps.push(`[MATH]A (\\text{המטרה}): ${getDescText(condTypeA, x1, x2)}[/MATH]`);
+        steps.push(`[MATH]B (\\text{התנאי}): ${getDescText(condType, condX1, condX2)}[/MATH]`);
 
-        steps.push(`שלב 1: נחשב את ההסתברות של התנאי [MATH]P(B)[/MATH] באמצעות סטנדרטיזציה:`);
+        steps.push(`שלב 1: נחשב תחילה את ההסתברות המוחלטת של התנאי [MATH]P(B)[/MATH]:`);
         if (condType === 'below') {
-          steps.push(`[MATH]Z_B = \\frac{${condX1} - ${mean}}{${stdDev}} = ${zB2.toFixed(4)}[/MATH]`);
-          steps.push(`[MATH]P(B) = P(X < ${condX1}) = P(Z < ${zB2.toFixed(4)}) = ${probB.toFixed(4)}[/MATH]`);
+          steps.push(`[MATH]Z_{B} = \\frac{${condX1} - ${mean}}{${stdDev}} = ${zB2.toFixed(4)}[/MATH]`);
+          steps.push(`[MATH]P(B) = P(X < ${condX1}) = \\Phi(${zB2.toFixed(4)}) = ${probB.toFixed(4)}[/MATH]`);
         } else if (condType === 'above') {
-          steps.push(`[MATH]Z_B = \\frac{${condX1} - ${mean}}{${stdDev}} = ${zB1.toFixed(4)}[/MATH]`);
-          steps.push(`[MATH]P(B) = P(X > ${condX1}) = P(Z > ${zB1.toFixed(4)}) = ${probB.toFixed(4)}[/MATH]`);
+          steps.push(`[MATH]Z_{B} = \\frac{${condX1} - ${mean}}{${stdDev}} = ${zB1.toFixed(4)}[/MATH]`);
+          steps.push(`[MATH]P(B) = P(X > ${condX1}) = 1 - \\Phi(${zB1.toFixed(4)}) = ${probB.toFixed(4)}[/MATH]`);
         } else {
           steps.push(`[MATH]Z_{B1} = \\frac{${condX1} - ${mean}}{${stdDev}} = ${zB1.toFixed(4)}[/MATH]`);
           steps.push(`[MATH]Z_{B2} = \\frac{${condX2} - ${mean}}{${stdDev}} = ${zB2.toFixed(4)}[/MATH]`);
-          steps.push(`[MATH]P(B) = P(${condX1} < X < ${condX2}) = P(${zB1.toFixed(4)} < Z < ${zB2.toFixed(4)}) = ${probB.toFixed(4)}[/MATH]`);
+          steps.push(`[MATH]P(B) = \\Phi(${zB2.toFixed(4)}) - \\Phi(${zB1.toFixed(4)}) = ${probB.toFixed(4)}[/MATH]`);
         }
 
-        steps.push(`שלב 2: נחשב את הסתברות החיתוך [MATH]P(A \\cap B)[/MATH]:`);
+        steps.push(`שלב 2: נחשב את הסתברות החיתוך המשותף [MATH]P(A \\cap B)[/MATH]:`);
         
         if (intersectStart < intersectEnd) {
-          steps.push(`החיתוך הוא הטווח המשותף של המאורעות: [MATH]${intersectStart === -Infinity ? '(-\\infty' : intersectStart} < X < ${intersectEnd === Infinity ? '\\infty)' : intersectEnd}[/MATH]`);
+          steps.push(`טווח החיתוך המשותף שמתקבל: [MATH]${intersectStart === -Infinity ? '(-\\infty' : intersectStart} < X < ${intersectEnd === Infinity ? '\\infty)' : intersectEnd}[/MATH]`);
           
           if (intersectStart !== -Infinity && intersectEnd !== Infinity) {
-            steps.push(`נבצע סטנדרטיזציה לגבולות החיתוך:`);
+            steps.push(`נבצע תקנון לגבולות המפגש של שטח החיתוך:`);
             steps.push(`[MATH]Z_{I1} = \\frac{${intersectStart} - ${mean}}{${stdDev}} = ${zI1.toFixed(4)}[/MATH]`);
             steps.push(`[MATH]Z_{I2} = \\frac{${intersectEnd} - ${mean}}{${stdDev}} = ${zI2.toFixed(4)}[/MATH]`);
-            steps.push(`[MATH]P(A \\cap B) = P(${zI1.toFixed(4)} < Z < ${zI2.toFixed(4)}) = ${probAandB.toFixed(4)}[/MATH]`);
+            steps.push(`[MATH]P(A \\cap B) = \\Phi(${zI2.toFixed(4)}) - \\Phi(${zI1.toFixed(4)}) = ${probAandB.toFixed(4)}[/MATH]`);
           } else if (intersectStart !== -Infinity) {
-            steps.push(`נבצע סטנדרטיזציה לגבול החיתוך:`);
+            steps.push(`ציון תקנון עבור גבול החיתוך:`);
             steps.push(`[MATH]Z_I = \\frac{${intersectStart} - ${mean}}{${stdDev}} = ${zI1.toFixed(4)}[/MATH]`);
-            steps.push(`[MATH]P(A \\cap B) = P(Z > ${zI1.toFixed(4)}) = ${probAandB.toFixed(4)}[/MATH]`);
+            steps.push(`[MATH]P(A \\cap B) = 1 - \\Phi(${zI1.toFixed(4)}) = ${probAandB.toFixed(4)}[/MATH]`);
           } else {
-            steps.push(`נבצע סטנדרטיזציה לגבול החיתוך:`);
+            steps.push(`ציון תקנון עבור גבול החיתוך:`);
             steps.push(`[MATH]Z_I = \\frac{${intersectEnd} - ${mean}}{${stdDev}} = ${zI2.toFixed(4)}[/MATH]`);
-            steps.push(`[MATH]P(A \\cap B) = P(Z < ${zI2.toFixed(4)}) = ${probAandB.toFixed(4)}[/MATH]`);
+            steps.push(`[MATH]P(A \\cap B) = \\Phi(${zI2.toFixed(4)}) = ${probAandB.toFixed(4)}[/MATH]`);
           }
         } else {
-          steps.push(`אין חיתוך בין המאורעות (הטווחים זרים).`);
+          steps.push(`השטחים זרים לחלוטין - אין חיתוך אופרטיבי בין המאורעות.`);
           steps.push(`[MATH]P(A \\cap B) = 0[/MATH]`);
         }
 
-        steps.push(`שלב 3: נציב בנוסחת ההסתברות המותנית:`);
+        steps.push(`שלב 3: נפעיל את חוק בייס לקבלת ההסתברות המותנית:`);
         steps.push(`[MATH]P(A|B) = \\frac{P(A \\cap B)}{P(B)} = \\frac{${probAandB.toFixed(4)}}{${probB.toFixed(4)}} = ${prob.toFixed(4)}[/MATH]`);
-        steps.push(`תוצאה סופית: ההסתברות המותנית היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
+        steps.push(`תוצאה סופית: ההסתברות המותנית המחושבת היא [MATH]${prob.toFixed(4)}[/MATH] (או [MATH]${(prob * 100).toFixed(2)}\\%[/MATH])`);
         
-        return { probability: prob, z1: (x1-mean)/stdDev, steps };
+        return { probability: prob, z1: (x1 - mean) / stdDev, steps };
       
       default:
         return { probability: 0, z1: 0, steps: [] };
     }
-  }, [mean, stdDev, type, x1, x2, condType, condTypeA, condX1, condX2, mode, percentile, inverseType]);
+  }, [mean, stdDev, type, x1, x2, condType, condTypeA, condX1, condX2, mode, percentile, inverseType, isValidToCalculate]);
 
-  // Group steps to avoid numbering math blocks separately
   const stepGroups = useMemo(() => {
     const groups: string[][] = [];
     result.steps.forEach((step) => {
@@ -937,480 +1161,503 @@ export default function NormalDistributionCalculator() {
   }, [result.steps]);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100" dir="rtl">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div className={`min-h-screen font-sans selection:bg-blue-200 transition-colors duration-300 ${
+      theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+    }`} dir="rtl">
+      
+      {/* Header */}
+      <header className={`border-b sticky top-0 z-40 transition-colors shadow-sm ${
+        theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+      }`}>
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-200">
-              <Calculator size={24} />
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+              <Calculator size={22} className="stroke-[2.5]" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-800">מחשבון התפלגות נורמלית מתקדם</h1>
+            <div>
+              <h1 className="text-sm sm:text-lg font-black tracking-tight">מחשבון התפלגות נורמלית מתקדם</h1>
+              <p className="text-[10px] text-slate-400 font-bold hidden sm:block">כלי למידה אינטראקטיבי ואינפורמטיבי</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-slate-500 text-sm">
-            <Info size={16} />
-            <span>כלי עזר לסטודנטים</span>
+          
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2.5 rounded-xl border transition-all ${
+                theme === 'dark' 
+                  ? 'bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700' 
+                  : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-250'
+              }`}
+              title={theme === 'dark' ? 'למצב מואר' : 'למצב חשוך'}
+            >
+              {theme === 'dark' ? <Sun size={17} className="stroke-[2.5]" /> : <Moon size={17} />}
+            </button>
+            
+            <div className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-400">
+              <Info size={14} className="text-blue-500" />
+              <span>גרסאות למידה</span>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Tabs for Mode Selection */}
-        <div className="lg:col-span-12 flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm mb-2">
-          <button
-            onClick={() => setMode('forward')}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
-              mode === 'forward' 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            חישוב הסתברות (X → P)
-          </button>
-          <button
-            onClick={() => setMode('inverse')}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
-              mode === 'inverse' 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            חישוב ערך X (אחוזון → X)
-          </button>
-          <button
-            onClick={() => setMode('table')}
-            className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
-              mode === 'table' 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'text-slate-500 hover:bg-slate-50'
-            }`}
-          >
-            טבלת Z
-          </button>
-        </div>
+      <main className="w-full py-8">
+        <div className="max-w-5xl mx-auto px-4">
+          
+          {/* Navigation/Modes Tabs */}
+          <div className={`p-1 rounded-2xl border shadow-inner mb-6 flex transition-all ${
+            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+          }`}>
+            <button
+              onClick={() => setMode('forward')}
+              className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'forward' 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+              }`}
+            >
+              חישוב הסתברות (X ← P)
+            </button>
+            <button
+              onClick={() => setMode('inverse')}
+              className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'inverse' 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+              }`}
+            >
+              חישוב הפוך (אחוזון → X)
+            </button>
+            <button
+              onClick={() => setMode('table')}
+              className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'table' 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+              }`}
+            >
+              טבלת Z מלאה
+            </button>
+          </div>
 
-        {/* Formal Notation Header - Full Width */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-12 mb-8"
-        >
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-200 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-600 to-blue-500" />
-            <div className="text-blue-600/60 text-[11px] font-bold uppercase tracking-[0.2em] mb-4">הגדרה פורמלית של ההתפלגות הנורמלית</div>
-            <div className="py-4 px-2" dir="ltr">
-              <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter drop-shadow-sm">
-                <InlineMath math={`X \\sim N(\\mu = ${mean}, \\sigma^2 = ${(stdDev * stdDev).toFixed(2)})`} />
-              </div>
+          {/* Notation Header Banner */}
+          <div className={`rounded-3xl border p-6 text-center relative overflow-hidden mb-8 shadow-sm transition-all ${
+            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+          }`}>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-600 to-green-500" />
+            <div className="text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">הגדרה פורמלית של משתנה מקרי נורמלי</div>
+            <div className="py-2 overflow-x-auto text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight" dir="ltr">
+              <InlineMath math={`X \\sim N(\\mu = ${isValidToCalculate ? mean : '?'}, \\sigma^2 = ${isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'})`} />
             </div>
-            <div className="mt-4 flex items-center justify-center gap-6 text-xs font-bold text-slate-400">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-black text-slate-400">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-blue-500" />
-                תוחלת: {mean}
+                תוחלת (ממוצע): {isValidToCalculate ? mean : '?'}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                סטיית תקן: {isValidToCalculate ? stdDev : '?'}
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                שונות: {(stdDev * stdDev).toFixed(2)}
+                שונות: {isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'}
               </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Input Controls & Main Content */}
-        {mode === 'table' ? (
-          <section className="lg:col-span-12">
+          {mode === 'table' ? (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
+              className={`rounded-2xl p-6 border shadow-sm transition-all ${
+                theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+              }`}
             >
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-slate-900 mb-2">טבלת התפלגות נורמלית סטנדרטית</h2>
-                <p className="text-sm text-slate-500">
-                  השתמש בטבלה זו כדי למצוא את הערך של <InlineMath math="\Phi(z)" /> עבור ערכי Z שונים. 
-                  ניתן להזין ערך Z ספציפי בשדה החיפוש כדי להבליט אותו בטבלה.
+                <h2 className="text-xl font-bold mb-2">טבלת התפלגות נורמלית סטנדרטית (Z)</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  השתמש בטבלה השלמה כדי לאתר ערכים מוגדרים של ה-CDF, המייצגים את פונקציית <InlineMath math="\Phi" />. 
+                  ניתן להקליד ערכי חיפוש כדי להצליב את השורה והעמודה בדיוק כחץ מכוון.
                 </p>
               </div>
-              <ZTable showSearch={true} />
+              <ZTable showSearch={true} theme={theme} />
             </motion.div>
-          </section>
-        ) : (
-          <>
-            <section className="lg:col-span-5 space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            {/* Hero Block - Distribution Notation */}
-            <div className="mb-8">
-              {/* Explanation Box */}
-              <div className="p-6 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg shadow-blue-200 relative overflow-hidden" dir="ltr">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-400/20 rounded-full -ml-12 -mb-12 blur-xl" />
-                
-                <div className="relative z-10 text-white">
-                  <div className="flex items-start gap-3">
-                    <Info size={20} className="text-blue-200 shrink-0 mt-0.5" />
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium leading-relaxed">
-                        התפלגות נורמלית מוגדרת ע"י <strong>תוחלת (μ)</strong> ו-<strong>שונות (σ²)</strong>. 
-                      </p>
-                      <p className="text-xs text-blue-100/90 leading-relaxed">
-                        השונות היא <strong>סטיית התקן בריבוע</strong>: 
-                        <span className="inline-block mx-1 font-bold text-white bg-white/10 px-2 py-0.5 rounded ml-2">
-                          <InlineMath math={`\\sigma^2 = ${stdDev}^2 = ${(stdDev * stdDev).toFixed(2)}`} />
-                        </span>
-                      </p>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              
+              {/* Left Column Input Panel */}
+              <section className="lg:col-span-5 space-y-6">
+                <div className={`rounded-2xl p-6 border shadow-sm transition-all ${
+                  theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                }`}>
+                  
+                  {/* Informational Widget */}
+                  <div className="mb-6">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-md relative overflow-hidden" dir="ltr">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl" />
+                      <div className="relative z-10 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Info size={16} className="text-blue-200" />
+                          <p className="text-xs font-black tracking-wide text-blue-100">סטיית תקן μ ו-σ</p>
+                        </div>
+                        <p className="text-xs text-slate-100 leading-relaxed text-right">
+                          בסטטיסטיקה, מעבר לערכים אמיתיים משתמשים בנוסחת התקנון להפיכת המשתנה המקרי ל-Z (התפלגות סטנדרטית בעלת תוחלת 0 וסטיית תקן 1).
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <RefreshCw size={18} className="text-blue-600" />
-              הזנת נתונים
-            </h2>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="space-y-1.5">
-                <Tooltip content="הערך הממוצע של האוכלוסייה (מרכז הפעמון)">
-                  <label className="text-sm font-bold text-slate-700 mr-1 cursor-help border-b border-dotted border-slate-300">תוחלת (μ):</label>
-                </Tooltip>
-                <input 
-                  type="number" 
-                  value={mean} 
-                  onChange={(e) => setMean(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-bold text-slate-900"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Tooltip content="מדד לפיזור הנתונים סביב הממוצע">
-                  <label className="text-sm font-bold text-slate-700 mr-1 cursor-help border-b border-dotted border-slate-300">סטיית תקן (σ):</label>
-                </Tooltip>
-                <input 
-                  type="number" 
-                  value={stdDev} 
-                  min="0.0001"
-                  onChange={(e) => setStdDev(Math.max(0.0001, Number(e.target.value)))}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-bold text-slate-900"
-                />
-              </div>
-            </div>
-            
-            <p className="text-xs text-slate-400 mb-8 leading-relaxed italic">
-              דוגמה: גובה של נערים. מתפלג נורמלית, עם תוחלת של 170 ס"מ וסטיית תקן - 5 ס"מ.
-            </p>
-
-            <AnimatePresence mode="wait">
-              {mode === 'forward' ? (
-                <motion.div 
-                  key="forward-mode"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    סוג החישוב
-                    <Tooltip content="בחר את השטח מתחת לעקומה שברצונך לחשב">
-                      <HelpCircle size={14} className="text-slate-400 cursor-help" />
-                    </Tooltip>
+                  <h2 className="text-base font-black mb-4 flex items-center gap-2">
+                    <RefreshCw size={16} className="text-blue-500" />
+                    פרמטרי ההתפלגות
                   </h2>
-                  <div className="grid grid-cols-2 gap-2 mb-8">
-                    {[
-                      { id: 'below', label: 'מתחת ל-X' },
-                      { id: 'above', label: 'מעל ל-X' },
-                      { id: 'between', label: 'בין X₁ ל-X₂' },
-                      { id: 'outside', label: 'מחוץ ל-X₁ ו-X₂' },
-                      { id: 'conditional', label: 'הסתברות מותנית' }
-                    ].map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => setType(item.id as CalcType)}
-                        className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                          type === item.id 
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-100' 
-                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+
+                  {/* Input Fields */}
+                  <div className="space-y-4 mb-6">
+                    {/* Mean Input */}
+                    <div className="space-y-1">
+                      <Tooltip content="הערך המרכזי של פעמון ההתפלגות (התוחלת)" theme={theme}>
+                        <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">תוחלת (μ):</label>
+                      </Tooltip>
+                      <input 
+                        type="text" 
+                        value={meanInput} 
+                        onChange={(e) => handleMeanChange(e.target.value)}
+                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border rounded-xl outline-none transition-all font-mono font-bold ${
+                          meanError 
+                            ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
+                            : 'border-slate-200 dark:border-slate-800 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 dark:text-slate-100'
                         }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+                        placeholder="הזן ממוצע, לדוגמה: 170"
+                      />
+                      {meanError && (
+                        <p className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
+                          <AlertCircle size={10} className="stroke-[2.5]" />
+                          <span>{meanError}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Standard Deviation Input (Strict Validation > 0) */}
+                    <div className="space-y-1">
+                      <Tooltip content="מדד הפיזור של הערכים סביב הממוצע (חייב להיו חיובי וגדול מ-0)" theme={theme}>
+                        <label className="text-xs font-black text-slate-400 ml-1 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700">סטיית תקן (σ):</label>
+                      </Tooltip>
+                      <input 
+                        type="text" 
+                        value={stdDevInput} 
+                        onChange={(e) => handleStdDevChange(e.target.value)}
+                        className={`w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border rounded-xl outline-none transition-all font-mono font-bold ${
+                          stdDevError 
+                            ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
+                            : 'border-slate-200 dark:border-slate-800 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 dark:text-slate-100'
+                        }`}
+                        placeholder="חייב להיות גדול מ-0"
+                      />
+                      {stdDevError ? (
+                        <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 p-2.5 rounded-lg mt-1 space-y-1">
+                          <p className="text-[11px] text-red-500 font-black flex items-center gap-1">
+                            <AlertCircle size={12} className="stroke-[2.5]" />
+                            <span>שגיאת קלט חסומה!</span>
+                          </p>
+                          <p className="text-[10px] text-red-500/80 leading-tight">
+                            {stdDevError}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-slate-400">יש להקפיד על ערך חיובי בלבד כדי למנוע חלוקה באפס.</p>
+                      )}
+                    </div>
                   </div>
 
                   <AnimatePresence mode="wait">
-                    {type === 'conditional' ? (
+                    {mode === 'forward' ? (
                       <motion.div 
-                        key="conditional-inputs"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="space-y-6 p-4 bg-blue-50/30 rounded-2xl border border-blue-100 overflow-hidden"
+                        key="forward-container"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="space-y-6"
                       >
-                        <div className="space-y-6">
-                          <h3 className="text-base font-bold text-blue-700">מאורע A (ההסתברות המבוקשת):</h3>
-                          <div className="grid grid-cols-1 gap-4">
-                            <div>
-                              <label className="block text-sm font-bold text-slate-700 mb-1.5">סוג המאורע:</label>
+                        <div className="border-t pt-4 border-slate-100 dark:border-slate-800">
+                          <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5">
+                            מאורע הסתברות
+                            <HelpCircle size={13} />
+                          </h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: 'below', label: 'מתחת ל- X' },
+                              { id: 'above', label: 'מעל ל- X' },
+                              { id: 'between', label: 'בין X₁ ל- X₂' },
+                              { id: 'outside', label: 'מחוץ לטווח' },
+                              { id: 'conditional', label: 'מותנה מראש' }
+                            ].map((item) => (
+                              <button
+                                key={item.id}
+                                onClick={() => setType(item.id as CalcType)}
+                                className={`px-3 py-2 text-xs font-black rounded-lg transition-all border ${
+                                  type === item.id 
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10' 
+                                    : 'bg-slate-50 dark:bg-slate-850 text-slate-600 dark:text-slate-350 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                }`}
+                              >
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {type === 'conditional' ? (
+                          <div className="p-4 bg-slate-50 dark:bg-slate-850/60 rounded-xl border border-slate-100 dark:border-slate-800 space-y-4">
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-black text-blue-500">מאורע A (ההסתברות המבוקשת)</h4>
                               <select 
                                 value={condTypeA}
                                 onChange={(e) => setCondTypeA(e.target.value as CondType)}
-                                className="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none font-bold text-base"
+                                className="w-full p-2 text-xs bg-white dark:bg-slate-800 border rounded-lg outline-none font-bold"
                               >
                                 <option value="below">X &lt; x</option>
                                 <option value="above">X &gt; x</option>
                                 <option value="between">x1 &lt; X &lt; x2</option>
                               </select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5">{condTypeA === 'between' ? 'x1:' : 'ערך x:'}</label>
+                              <div className="grid grid-cols-2 gap-2">
                                 <input 
                                   type="number" 
-                                  value={x1} 
+                                  value={x1}
                                   onChange={(e) => setX1(Number(e.target.value))}
-                                  className="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none font-bold text-base"
+                                  className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
+                                  placeholder="x1"
                                 />
-                              </div>
-                              {condTypeA === 'between' && (
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 mb-1.5">x2:</label>
+                                {condTypeA === 'between' && (
                                   <input 
                                     type="number" 
-                                    value={x2} 
+                                    value={x2}
                                     onChange={(e) => setX2(Number(e.target.value))}
-                                    className="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none font-bold text-base"
+                                    className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
+                                    placeholder="x2"
                                   />
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-6 border-t border-blue-100 pt-6">
-                          <h3 className="text-base font-bold text-blue-800">מאורע B (התנאי):</h3>
-                          <div className="grid grid-cols-1 gap-4">
-                            <div>
-                              <label className="block text-sm font-bold text-slate-700 mb-1.5">סוג התנאי:</label>
+                            
+                            <div className="space-y-2 border-t pt-3 border-slate-200/50 dark:border-slate-800">
+                              <h4 className="text-xs font-black text-emerald-500">מאורע B (התנאי הנתון)</h4>
                               <select 
                                 value={condType}
                                 onChange={(e) => setCondType(e.target.value as CondType)}
-                                className="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none font-bold text-base"
+                                className="w-full p-2 text-xs bg-white dark:bg-slate-800 border rounded-lg outline-none font-bold"
                               >
                                 <option value="below">X &lt; x</option>
                                 <option value="above">X &gt; x</option>
                                 <option value="between">x1 &lt; X &lt; x2</option>
                               </select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1.5">{condType === 'between' ? 'x1:' : 'ערך x:'}</label>
+                              <div className="grid grid-cols-2 gap-2">
                                 <input 
                                   type="number" 
-                                  value={condX1} 
+                                  value={condX1}
                                   onChange={(e) => setCondX1(Number(e.target.value))}
-                                  className="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none font-bold text-base"
+                                  className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
+                                  placeholder="x1"
                                 />
-                              </div>
-                              {condType === 'between' && (
-                                <div>
-                                  <label className="block text-sm font-bold text-slate-700 mb-1.5">x2:</label>
+                                {condType === 'between' && (
                                   <input 
                                     type="number" 
-                                    value={condX2} 
+                                    value={condX2}
                                     onChange={(e) => setCondX2(Number(e.target.value))}
-                                    className="w-full p-3 bg-white border border-slate-300 rounded-xl outline-none font-bold text-base"
+                                    className="p-2 text-xs font-bold border rounded-lg outline-none bg-white dark:bg-slate-800"
+                                    placeholder="x2"
                                   />
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="space-y-1">
+                              <label className="text-xs font-black text-slate-400">
+                                {type === 'between' || type === 'outside' ? 'גבול תחתון X₁' : 'ערך משתנה X:'}
+                              </label>
+                              <input 
+                                type="number" 
+                                value={x1}
+                                onChange={(e) => setX1(Number(e.target.value))}
+                                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-bold text-sm"
+                              />
+                            </div>
+                            { (type === 'between' || type === 'outside') && (
+                              <div className="space-y-1">
+                                <label className="text-xs font-black text-slate-400">גבול עליון X₂:</label>
+                                <input 
+                                  type="number" 
+                                  value={x2}
+                                  onChange={(e) => setX2(Number(e.target.value))}
+                                  className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-bold text-sm"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </motion.div>
                     ) : (
                       <motion.div 
-                        key="standard-inputs"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
+                        key="inverse-container"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         className="space-y-4"
                       >
                         <div className="space-y-2">
-                          <label className="text-sm font-bold text-slate-800">
-                            {type === 'between' || type === 'outside' ? 'ערך X₁' : 'ערך X'}
-                          </label>
-                          <input 
-                            type="number" 
-                            value={x1} 
-                            onChange={(e) => setX1(Number(e.target.value))}
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-bold text-slate-900"
-                          />
-                        </div>
-                        
-                        <AnimatePresence>
-                          {(type === 'between' || type === 'outside') && (
-                            <motion.div 
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="space-y-2 overflow-hidden"
+                          <label className="text-xs font-black text-slate-400">סוג האחוזון הנדרש:</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setInverseType('lower')}
+                              className={`py-2 px-3 text-xs font-black rounded-lg transition-all border ${
+                                inverseType === 'lower' 
+                                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                                  : 'bg-slate-50 dark:bg-slate-850 text-slate-500 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
+                              }`}
                             >
-                              <label className="text-sm font-bold text-slate-800">ערך X₂</label>
-                              <input 
-                                type="number" 
-                                value={x2} 
-                                onChange={(e) => setX2(Number(e.target.value))}
-                                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-bold text-slate-900"
-                              />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                              אחוזון מצטבר משמאל
+                            </button>
+                            <button
+                              onClick={() => setInverseType('upper')}
+                              className={`py-2 px-3 text-xs font-black rounded-lg transition-all border ${
+                                inverseType === 'upper' 
+                                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                                  : 'bg-slate-50 dark:bg-slate-850 text-slate-500 border-slate-200 dark:border-slate-800 hover:bg-slate-100'
+                              }`}
+                            >
+                              אחוזון מצטבר מימין
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-black text-slate-400">ערך האחוזון (P) באחוזים:</label>
+                          <div className="relative">
+                            <input 
+                              type="number" 
+                              value={percentile} 
+                              min="0.01"
+                              max="99.99"
+                              step="0.01"
+                              onChange={(e) => setPercentile(Math.min(99.99, Math.max(0.01, Number(e.target.value))))}
+                              className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 rounded-xl outline-none font-mono font-bold text-sm pl-10"
+                            />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">%</span>
+                          </div>
+                          <p className="text-[10px] text-slate-400">הזן הסתברות בין 0.01% ל-99.99%.</p>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
-              ) : (
-                <motion.div 
-                  key="inverse-mode"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-8"
-                >
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                      סוג אחוזון
-                      <Tooltip content="אחוזון תחתון הוא השטח משמאל, אחוזון עליון הוא השטח מימין">
-                        <HelpCircle size={14} className="text-slate-400 cursor-help" />
-                      </Tooltip>
-                    </h2>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setInverseType('lower')}
-                        className={`py-3 px-4 rounded-xl text-sm font-bold transition-all border ${
-                          inverseType === 'lower' 
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-100 border-blue-600' 
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        אחוזון תחתון
-                      </button>
-                      <button
-                        onClick={() => setInverseType('upper')}
-                        className={`py-3 px-4 rounded-xl text-sm font-bold transition-all border ${
-                          inverseType === 'upper' 
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-100 border-blue-600' 
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        אחוזון עליון
-                      </button>
+                </div>
+
+                {/* Main Shaded Probability Output Card */}
+                {isValidToCalculate ? (
+                  <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl" />
+                    <span className="text-xs text-blue-105 font-bold block mb-1">
+                      {mode === 'inverse' ? 'ערך משתנה ה-X הפיזי שחושב' : 'ההסתברות שנתקבלה (P)'}
+                    </span>
+                    <div className="text-4xl font-extrabold leading-normal">
+                      {mode === 'inverse' 
+                        ? (result.calculatedX?.toFixed(4) ?? '0.0000')
+                        : `${(result.probability * 100).toFixed(2)}%`}
+                    </div>
+                    <div className="text-xs text-blue-200 mt-2">
+                      {mode === 'inverse' 
+                        ? `עבור אחוזון ${percentile}%`
+                        : `ערך עשרוני מדויק: ${result.probability.toFixed(4)}`}
                     </div>
                   </div>
+                ) : (
+                  <div className="bg-red-50 dark:bg-red-950/20 text-red-600 rounded-2xl p-5 border border-red-100 dark:border-red-900/30 text-center text-xs font-black">
+                    ממתין להזנת נתונים תקינים בפנל הקלטים כדי לבצע חישוב.
+                  </div>
+                )}
+              </section>
 
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-800">הסתברות מצטברת (אחוזון) ב-%:</label>
-                      <div className="relative">
-                        <input 
-                          type="number" 
-                          value={percentile} 
-                          min="0.01"
-                          max="99.99"
-                          step="0.1"
-                          onChange={(e) => setPercentile(Math.min(99.99, Math.max(0.01, Number(e.target.value))))}
-                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none font-bold text-slate-900"
-                        />
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
-                      </div>
-                      <p className="text-[10px] text-slate-400">
-                        {inverseType === 'lower' 
-                          ? 'לדוגמה: 90% תחתון = הערך ש-90% מהמקרים קטנים ממנו' 
-                          : 'לדוגמה: 10% עליון = הערך ש-10% מהמקרים גדולים ממנו'}
-                      </p>
+              {/* Right Column Visualization & Step Breakdown */}
+              <section className="lg:col-span-7 space-y-8">
+                
+                {/* Dynamically Styled Math steps */}
+                <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
+                  theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                }`}>
+                  <h2 className="text-base font-black mb-4 flex items-center gap-2 border-b pb-3 border-slate-100 dark:border-slate-800">
+                    <Calculator size={16} className="text-blue-500" />
+                    שלבי פתרון מתמטיים מפורטים
+                  </h2>
+                  
+                  {isValidToCalculate ? (
+                    <div className="space-y-4">
+                      {stepGroups.map((group, idx) => (
+                        <div key={idx} className="flex gap-4 items-start text-right">
+                          <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900 flex items-center justify-center text-xs font-black text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                            {idx + 1}
+                          </div>
+                          <div className="flex-1 space-y-2 w-full">
+                            {group.map((step, sIdx) => (
+                              <FormattedStep key={sIdx} text={step} theme={theme} />
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center text-slate-400">
+                      <AlertCircle className="mx-auto mb-2 text-slate-300" size={32} />
+                      <p className="text-xs font-bold">הזן פרמטרים תקינים כדי לצפות בצעדי הפתרון המפורטים.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Curve Visualization Area */}
+                <div className={`rounded-2xl p-6 border shadow-sm transition-colors ${
+                  theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                }`}>
+                  <NormalChart 
+                    mean={mean} 
+                    stdDev={stdDev} 
+                    type={mode === 'inverse' ? (inverseType === 'lower' ? 'below' : 'above') : type} 
+                    x1={mode === 'inverse' ? (result.calculatedX ?? 0) : x1} 
+                    x2={x2} 
+                    condType={condType}
+                    condTypeA={condTypeA}
+                    condX1={condX1}
+                    condX2={condX2}
+                    probability={result.probability}
+                    mode={mode}
+                    theme={theme}
+                  />
+                </div>
+
+                {/* Z-Table Lookup helper links right beneath the core loop */}
+                {isValidToCalculate && (result.z1 !== undefined || result.z2 !== undefined) && (
+                  <div className={`rounded-2xl p-5 border shadow-sm transition-colors ${
+                    theme === 'dark' ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-200'
+                  }`}>
+                    <h3 className="text-sm font-black mb-3 text-slate-400 flex items-center gap-1.5 leading-none">
+                      <Info size={14} className="text-blue-500" />
+                      איתור ציוני Z בטבלה
+                    </h3>
+                    <div className="space-y-6">
+                      <ZTable activeZ={result.z1} theme={theme} />
+                      {result.z2 !== undefined && <ZTable activeZ={result.z2} theme={theme} />}
                     </div>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                )}
+              </section>
 
-          <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-xl shadow-blue-200 relative overflow-hidden group">
-            <div className="text-blue-100 text-sm mb-1 flex items-center gap-1">
-              {mode === 'inverse' ? 'ערך X המחושב' : 'הסתברות (P)'}
-              <Tooltip content={mode === 'inverse' ? "הערך בציר ה-X שמתאים להסתברות שצוינה" : "השטח מתחת לעקומה בטווח שנבחר"}>
-                <HelpCircle size={12} className="text-blue-200 cursor-help" />
-              </Tooltip>
             </div>
-            <div className="text-4xl font-bold">
-              {mode === 'inverse' 
-                ? (result.calculatedX?.toFixed(4) ?? '0.0000')
-                : `${(result.probability * 100).toFixed(2)}%`}
-            </div>
-            <div className="text-blue-100 text-xs mt-2">
-              {mode === 'inverse' 
-                ? `עבור אחוזון ${percentile}%`
-                : `ערך עשרוני: ${result.probability.toFixed(4)}`}
-            </div>
-          </div>
-        </section>
+          )}
 
-        {/* Visualization & Steps */}
-        <section className="lg:col-span-7 space-y-6">
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <HelpCircle size={18} className="text-blue-600" />
-              תצוגה ויזואלית
-            </h2>
-            <NormalChart 
-              mean={mean} 
-              stdDev={stdDev} 
-              type={mode === 'inverse' ? (inverseType === 'lower' ? 'below' : 'above') : type} 
-              x1={mode === 'inverse' ? (result.calculatedX ?? 0) : x1} 
-              x2={x2} 
-              condType={condType}
-              condTypeA={condTypeA}
-              condX1={condX1}
-              condX2={condX2}
-              probability={result.probability}
-              mode={mode}
-            />
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <Calculator size={18} className="text-blue-600" />
-              שלבי החישוב
-            </h2>
-            <div className="space-y-6">
-              {stepGroups.map((group, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="flex gap-4 items-start"
-                >
-                  <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-sm font-bold text-blue-600 shrink-0 mt-0.5">
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    {group.map((step, sIdx) => (
-                      <FormattedStep key={sIdx} text={step} />
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <ZTable activeZ={result.z1} />
-            {result.z2 !== undefined && <ZTable activeZ={result.z2} />}
-          </div>
-        </section>
-        </>
-        )}
+        </div>
       </main>
 
-      <footer className="max-w-5xl mx-auto px-4 py-12 text-center text-slate-500 text-sm font-bold">
-        <p>© {new Date().getFullYear()} מחשבון התפלגות נורמלית - כל הזכויות שמורות לרוברט תיגר</p>
+      {/* Footer */}
+      <footer className="max-w-5xl mx-auto px-4 py-12 text-center text-xs font-bold text-slate-400/80 tracking-wide border-t border-slate-100 dark:border-slate-850 mt-12">
+        <p>© {new Date().getFullYear()} מחשבון התפלגות נורמלית מתקדם - פותח על ידי רוברט תיגר עבור סטודנטים</p>
       </footer>
     </div>
   );
