@@ -29,6 +29,7 @@ import {
   ReferenceLine,
   CartesianGrid
 } from 'recharts';
+import HypothesisTestingCalculator from './components/HypothesisTestingCalculator';
 
 // --- Math Utilities ---
 
@@ -90,7 +91,7 @@ function inverseNormalCDF(p: number): number {
 
 // --- Types ---
 
-type CalcMode = 'forward' | 'inverse' | 'table';
+type CalcMode = 'forward' | 'inverse' | 'table' | 'hypothesis';
 type CalcType = 'below' | 'above' | 'between' | 'outside' | 'conditional';
 type CondType = 'below' | 'above' | 'between';
 
@@ -1206,12 +1207,12 @@ export default function NormalDistributionCalculator() {
         <div className="max-w-5xl mx-auto px-4">
           
           {/* Navigation/Modes Tabs */}
-          <div className={`p-1 rounded-2xl border shadow-inner mb-6 flex transition-all ${
+          <div className={`p-1 rounded-2xl border shadow-inner mb-6 flex flex-wrap transition-all ${
             theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
             <button
               onClick={() => setMode('forward')}
-              className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[120px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'forward' 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1221,7 +1222,7 @@ export default function NormalDistributionCalculator() {
             </button>
             <button
               onClick={() => setMode('inverse')}
-              className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[120px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'inverse' 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1231,7 +1232,7 @@ export default function NormalDistributionCalculator() {
             </button>
             <button
               onClick={() => setMode('table')}
-              className={`flex-1 py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[110px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'table' 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1239,34 +1240,53 @@ export default function NormalDistributionCalculator() {
             >
               טבלת Z מלאה
             </button>
+            <button
+              onClick={() => setMode('hypothesis')}
+              className={`flex-1 min-w-[135px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'hypothesis' 
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+              }`}
+            >
+              מחשבון בדיקת השערות
+            </button>
           </div>
 
           {/* Notation Header Banner */}
-          <div className={`rounded-3xl border p-6 text-center relative overflow-hidden mb-8 shadow-sm transition-all ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-          }`}>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-600 to-green-500" />
-            <div className="text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">הגדרה פורמלית של משתנה מקרי נורמלי</div>
-            <div className="py-2 overflow-x-auto text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight" dir="ltr">
-              <InlineMath math={`X \\sim N(\\mu = ${isValidToCalculate ? mean : '?'}, \\sigma^2 = ${isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'})`} />
+          {mode !== 'hypothesis' && (
+            <div className={`rounded-3xl border p-6 text-center relative overflow-hidden mb-8 shadow-sm transition-all ${
+              theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+            }`}>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-600 to-green-500" />
+              <div className="text-blue-500 dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">הגדרה פורמלית של משתנה מקרי נורמלי</div>
+              <div className="py-2 overflow-x-auto text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight" dir="ltr">
+                <InlineMath math={`X \\sim N(\\mu = ${isValidToCalculate ? mean : '?'}, \\sigma^2 = ${isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'})`} />
+              </div>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-black text-slate-400">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
+                  תוחלת (ממוצע): {isValidToCalculate ? mean : '?'}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  סטיית תקן: {isValidToCalculate ? stdDev : '?'}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                  שונות: {isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'}
+                </div>
+              </div>
             </div>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-black text-slate-400">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                תוחלת (ממוצע): {isValidToCalculate ? mean : '?'}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                סטיית תקן: {isValidToCalculate ? stdDev : '?'}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                שונות: {isValidToCalculate ? (stdDev * stdDev).toFixed(2) : '?'}
-              </div>
-            </div>
-          </div>
+          )}
 
-          {mode === 'table' ? (
+          {mode === 'hypothesis' ? (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <HypothesisTestingCalculator theme={theme} />
+            </motion.div>
+          ) : mode === 'table' ? (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
