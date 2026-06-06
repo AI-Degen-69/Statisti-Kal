@@ -366,57 +366,129 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
   return (
     <div className="space-y-8" dir="rtl">
       
-      {/* Title block */}
-      <div className={`rounded-3xl border p-8 md:p-10 text-right relative overflow-hidden shadow-lg transition-all ${
+      {/* Decision Matrix Hero */}
+      <div className={`rounded-3xl border p-6 md:p-8 text-right relative overflow-hidden shadow-lg transition-all ${
         theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'
       }`}>
-        <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-red-650 via-indigo-700 to-emerald-600" />
+        
+        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-105 dark:border-slate-800 pb-5">
           <div>
-            <div className="text-indigo-700 dark:text-indigo-400 text-sm sm:text-base font-black uppercase tracking-wider mb-2.5 flex items-center gap-2">
-              <Award size={18} />
+            <span className="text-indigo-650 dark:text-indigo-400 text-xs sm:text-sm font-black uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Award size={16} />
               <span>מבחני מובהקות וניתוח עוצמה סטטיסטית (Power Analysis)</span>
-            </div>
-            <h1 className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight ${theme === 'dark' ? 'text-slate-50' : 'text-slate-950'}`}>
-              מחשבון בדיקת השערות מקיף
+            </span>
+            <h1 className={`text-xl sm:text-2xl md:text-3xl font-black tracking-tight ${theme === 'dark' ? 'text-slate-50' : 'text-slate-950'}`}>
+              מטריצת החלטה דינמית ודילמת הטעויות במחקר (2x2 Matrix)
             </h1>
-            {/* Quick Reference Handy Cheat-Sheet */}
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl text-right">
-              <div className="p-4 rounded-xl bg-slate-150/40 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="text-xs font-black text-indigo-600 dark:text-indigo-400 mb-1.5">💡 כלל החלטה מהיר (Decision Rule)</div>
-                <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1 font-bold">
-                  <li>• <span className="font-mono">P-Value &lt; &alpha;</span> ➔ דוחים את <InlineMath math="H_0" /> (מובהק!)</li>
-                  <li>• <span className="font-mono">P-Value &ge; &alpha;</span> ➔ לא דוחים את השערת האפס</li>
-                </ul>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-150/40 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 mb-1.5">📊 ערכי Z קריטיים נפוצים (דו-צדדי)</div>
-                <div className="text-xs text-slate-600 dark:text-slate-300 space-y-1 font-mono font-black" dir="ltr">
-                  <div>• &alpha; = 0.05 (95%) ➔ Z_crit = ±1.96</div>
-                  <div>• &alpha; = 0.01 (99%) ➔ Z_crit = ±2.58</div>
-                </div>
-              </div>
-              <div className="p-4 rounded-xl bg-slate-150/40 dark:bg-slate-800/60 border border-slate-200/50 dark:border-slate-800/50">
-                <div className="text-xs font-black text-amber-600 dark:text-amber-400 mb-1.5">⚠️ סיווג טעויות במחקר</div>
-                <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1 font-bold">
-                  <li>• <strong>סוג I (&alpha;):</strong> דחיית השערת אפס תקינה ונכונה</li>
-                  <li>• <strong>סוג II (&beta;):</strong> קבלה ואי-דחיית השערה כרוזת שקר</li>
-                </ul>
-              </div>
-            </div>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-semibold leading-relaxed">
+              הצטלבות בין ההחלטה הסטטיסטית במבחן לבין מצב האמת במציאות. כלי דינמי לחיזוי סיכויי התרחישים ועוצמת המבחן.
+            </p>
           </div>
-          <button 
-            onClick={handleReset}
-            className={`flex items-center gap-2 py-3.5 px-6 rounded-2xl border text-sm sm:text-base font-black transition-all shrink-0 shadow-md ${
-              theme === 'dark'
-                ? 'bg-slate-800 text-slate-100 border-slate-700 hover:bg-slate-700 hover:text-white'
-                : 'bg-slate-100 text-slate-900 border-slate-300 hover:bg-slate-200 hover:text-slate-950'
-            }`}
-          >
-            <RefreshCw size={16} />
-            איפוס נתונים
-          </button>
         </div>
+
+        {isValid && stats ? (
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/25">
+            <table className="w-full text-sm text-right border-collapse">
+              <thead>
+                <tr className="bg-slate-100/70 dark:bg-slate-805/70 text-xs text-slate-850 dark:text-slate-250 font-extrabold border-b border-slate-200 dark:border-slate-800">
+                  <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black text-slate-900 dark:text-slate-100 bg-slate-200/30 dark:bg-slate-800/25 w-1/4">החלטת המבחן</th>
+                  <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black bg-blue-50/40 dark:bg-blue-900/10">H₀ נכונה במציאות (אין אפקט)</th>
+                  <th className="p-4 text-center font-black bg-amber-50/30 dark:bg-amber-900/10">H₁ נכונה במציאות (קיים אפקט)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Row 1: Fail to reject H0 (Accept H0) */}
+                <tr className="border-b border-slate-200 dark:border-slate-800 font-semibold text-slate-950 dark:text-slate-50">
+                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
+                    <span className="text-base font-black block">קבלת <InlineMath math="H_0" /></span>
+                    <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">אי-דחיית השערת האפס</span>
+                  </td>
+                  
+                  {/* Cell 1-1: Accept H0 and H0 is true => Correct decision */}
+                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-emerald-50/20 dark:bg-emerald-950/10 hover:bg-emerald-50/35 dark:hover:bg-emerald-950/20 transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5 text-xs sm:text-sm">
+                        <CheckCircle size={15} className="text-emerald-600 dark:text-emerald-450" />
+                        החלטה נכונה
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">1 - α</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black mt-2 font-mono text-emerald-850 dark:text-emerald-300">
+                      {((1 - alpha) * 100).toFixed(1)}%
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                      רמת הסמך הסטטיסטית (Confidence Level) – הסיכוי לא לקפוץ למסקנות שווא כאשר ההשערה אינה נכונה.
+                    </p>
+                  </td>
+
+                  {/* Cell 1-2: Accept H0 but H1 is true => Type II Error Beta */}
+                  <td className="p-4 sm:p-5 bg-amber-50/20 dark:bg-amber-950/10 hover:bg-amber-50/35 dark:hover:bg-amber-950/20 transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 text-xs sm:text-sm">
+                        <XCircle size={15} className="text-amber-600" />
+                        טעות מסוג II
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">β (Beta)</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-750 dark:text-amber-300 font-mono">
+                      {(stats.beta * 100).toFixed(2)}%
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                      קבלת השערת האפס אף על פי שהיא שקרית – החמצת גילוי של אפקט או הבדל קיים במציאות.
+                    </p>
+                  </td>
+                </tr>
+
+                {/* Row 2: Reject H0 */}
+                <tr className="font-semibold text-slate-950 dark:text-slate-50">
+                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
+                    <span className="text-base font-black block">דחיית <InlineMath math="H_0" /></span>
+                    <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
+                  </td>
+
+                  {/* Cell 2-1: Reject H0 and H0 is true => Type I Error Alpha */}
+                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-red-50/20 dark:bg-red-950/10 hover:bg-red-50/35 dark:hover:bg-red-950/20 transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-red-700 dark:text-red-400 flex items-center gap-1.5 text-xs sm:text-sm">
+                        <XCircle size={15} className="text-red-650" />
+                        טעות מסוג I
+                      </span>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">α (Alpha)</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-red-750 dark:text-red-300 font-mono">
+                      {(alpha * 100).toFixed(1)}%
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                      רמת המובהקות – הסיכוי לדחות בטעות את השערת האפס הנכונה, כלומר לטעון לקשר או אפקט שאינו קיים באמת.
+                    </p>
+                  </td>
+
+                  {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
+                  <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 dark:from-indigo-950/10 dark:to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 dark:hover:from-indigo-950/15 dark:hover:to-emerald-950/15 transition-all">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-extrabold text-indigo-750 dark:text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
+                        <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-400" />
+                        החלטה נכונה (עוצמה)
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 font-mono" dir="ltr">1 - β (Power)</span>
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-450 tracking-tight font-mono">
+                      {(stats.power * 100).toFixed(2)}%
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                      עוצמת המבחן – ההסתברות של המחקר לזהות ולדחות השערה מוטעית, ובכך להוכיח את קיומו של אפקט אמיתי.
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-12 text-center text-slate-500 font-bold text-sm">
+            נא להזין ערכי קלט תקינים להצגת מטריצת החלטה מלאה ומפורטת.
+          </div>
+        )}
       </div>
 
       {/* Main Grid Layout */}
@@ -1049,103 +1121,7 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
             </div>
           </div>
 
-          {/* Dynamic 2x2 Decision vs Reality Matrix */}
-          <div className={`rounded-2xl p-5 md:p-6 border shadow-sm transition-all ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'
-          }`}>
-            <h3 className="text-lg sm:text-xl font-black flex items-center gap-2 mb-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-slate-900 dark:text-slate-100">
-              <BarChart2 size={18} className="text-indigo-600 dark:text-indigo-400" />
-              מטריצת החלטה ודילמת הטעויות (2x2 Matrix)
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed font-semibold">
-              מטריצה דינאמית החושבת את סיכויי התרחיש המצטלבים בין ההחלטה במבחן לבין האמת במציאות.
-            </p>
 
-            {isValid && stats ? (
-              <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-slate-800">
-                <table className="w-full text-sm text-right border-collapse">
-                  <thead>
-                    <tr className="bg-slate-100 dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 font-extrabold">
-                      <th className="p-3 border-b border-l border-slate-300 dark:border-slate-800 text-center font-black">החלטת המבחן</th>
-                      <th className="p-3 border-b border-l border-slate-300 dark:border-slate-800 text-center font-black bg-blue-50/50 dark:bg-blue-900/20">H₀ נכונה (מציאות)</th>
-                      <th className="p-3 border-b border-slate-300 dark:border-slate-800 text-center font-black bg-amber-50/40 dark:bg-amber-900/20">H₁ נכונה (מציאות)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    
-                    {/* Row 1: Fail to reject H0 (Accept H0) */}
-                    <tr className="border-b border-slate-200 dark:border-slate-800 font-semibold text-slate-900 dark:text-slate-100">
-                      <td className="p-3.5 border-l border-slate-300 dark:border-slate-800 font-extrabold bg-slate-50 dark:bg-slate-900/50">
-                        <span className="text-base font-black block">קבלת <InlineMath math="H_0" /></span>
-                        <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">אי-דחיית השערת האפס</span>
-                      </td>
-                      
-                      {/* Cell 1-1: Accept H0 and H0 is true => Correct decision */}
-                      <td className="p-3.5 border-l border-slate-300 dark:border-slate-800 bg-emerald-50/40 dark:bg-emerald-950/20">
-                        <span className="font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-1">
-                          <CheckCircle size={14} className="text-emerald-600 dark:text-emerald-450" />
-                          החלטה נכונה
-                        </span>
-                        <div className="text-lg font-black mt-1.5 font-mono text-emerald-850 dark:text-emerald-300">
-                          {((1 - alpha) * 100).toFixed(1)}%
-                        </div>
-                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block" dir="ltr">1 - α</span>
-                      </td>
-
-                      {/* Cell 1-2: Accept H0 but H1 is true => Type II Error Beta */}
-                      <td className="p-3.5 bg-amber-50/40 dark:bg-amber-950/20">
-                        <span className="font-extrabold text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                          <XCircle size={14} className="text-amber-600" />
-                          טעות מסוג II
-                        </span>
-                        <div className="text-lg font-black mt-1.5 text-amber-750 dark:text-amber-300 font-mono">
-                          {(stats.beta * 100).toFixed(2)}%
-                        </div>
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block" dir="ltr">β (Beta)</span>
-                      </td>
-                    </tr>
-
-                    {/* Row 2: Reject H0 */}
-                    <tr className="font-semibold text-slate-900 dark:text-slate-100">
-                      <td className="p-3.5 border-l border-slate-300 dark:border-slate-800 font-extrabold bg-slate-50 dark:bg-slate-900/50">
-                        <span className="text-base font-black block">דחיית <InlineMath math="H_0" /></span>
-                        <span className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
-                      </td>
-
-                      {/* Cell 2-1: Reject H0 and H0 is true => Type I Error Alpha */}
-                      <td className="p-3.5 border-l border-slate-300 dark:border-slate-800 bg-red-50/40 dark:bg-red-950/20">
-                        <span className="font-extrabold text-red-700 dark:text-red-400 flex items-center gap-1">
-                          <XCircle size={14} className="text-red-600" />
-                          טעות מסוג I
-                        </span>
-                        <div className="text-lg font-black mt-1.5 text-red-750 dark:text-red-300 font-mono">
-                          {(alpha * 100).toFixed(1)}%
-                        </div>
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block" dir="ltr">α (Alpha)</span>
-                      </td>
-
-                      {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
-                      <td className="p-3.5 bg-emerald-50/40 dark:bg-emerald-950/20">
-                        <span className="font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-1">
-                          <CheckCircle size={14} className="text-emerald-600 dark:text-emerald-450" />
-                          החלטה נכונה (עוצמה)
-                        </span>
-                        <div className="text-lg font-black mt-1.5 text-emerald-850 dark:text-emerald-300 font-mono">
-                          {(stats.power * 100).toFixed(2)}%
-                        </div>
-                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block" dir="ltr">1 - β (Power)</span>
-                      </td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="py-12 text-center text-slate-500 font-bold text-sm">
-                הזן פרמטרים תקינים כדי להציג את מטריצת ההחלטה הדינמית.
-              </div>
-            )}
-          </div>
 
           {/* Theoretical Help widget inside side panel */}
           <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 border border-slate-800 text-white shadow-md relative overflow-hidden" dir="rtl">

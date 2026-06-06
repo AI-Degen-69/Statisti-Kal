@@ -89,6 +89,89 @@ function inverseNormalCDF(p: number): number {
   return p < 0.5 ? -z : z;
 }
 
+/**
+ * Student's T Cumulative Distribution Function (CDF)
+ * Accurate analytical trigonometric formula for any integer degrees of freedom
+ */
+function studentTCDF(t: number, df: number): number {
+  if (df <= 0) return 0.5;
+  
+  if (df >= 500) {
+    return normalCDF(t, 0, 1);
+  }
+  
+  const theta = Math.atan(t / Math.sqrt(df));
+  
+  if (df === 1) {
+    return 0.5 + theta / Math.PI;
+  }
+  
+  const cosT = Math.cos(theta);
+  const sinT = Math.sin(theta);
+  
+  let sum = 1;
+  let term = 1;
+  
+  if (df % 2 === 0) {
+    for (let i = 2; i <= df - 2; i += 2) {
+      term *= (cosT * cosT * (i - 1)) / i;
+      sum += term;
+    }
+    return 0.5 + 0.5 * sinT * sum;
+  } else {
+    for (let i = 3; i <= df - 2; i += 2) {
+      term *= (cosT * cosT * (i - 1)) / i;
+      sum += term;
+    }
+    return 0.5 + (theta + sinT * cosT * sum) / Math.PI;
+  }
+}
+
+/**
+ * Student's T Inverse CDF (Quantile/Critical Value Function)
+ * Extremely fast, precise bisection solver using the exact CDF above
+ */
+function studentTInverseCDF(p: number, df: number): number {
+  if (p <= 0) return -999;
+  if (p >= 1) return 999;
+  if (p === 0.5) return 0;
+  
+  if (df === 1) {
+    return Math.tan(Math.PI * (p - 0.5));
+  }
+  
+  if (df >= 500) {
+    return inverseNormalCDF(p);
+  }
+  
+  // Use a targeted, range-narrowed solver starting around Z margin
+  const z = inverseNormalCDF(p);
+  let low = z < 0 ? z * 10 - 2 : 0;
+  let high = z < 0 ? 0 : z * 10 + 2;
+  
+  // Double-check extreme bounds
+  if (studentTCDF(high, df) < p) {
+    high *= 5;
+  }
+  if (studentTCDF(low, df) > p) {
+    low *= 5;
+  }
+
+  for (let iter = 0; iter < 100; iter++) {
+    const mid = (low + high) / 2;
+    const val = studentTCDF(mid, df);
+    if (Math.abs(val - p) < 1e-12) {
+      return mid;
+    }
+    if (val < p) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return (low + high) / 2;
+}
+
 // --- Types ---
 
 type CalcMode = 'forward' | 'inverse' | 'table' | 'hypothesis';
@@ -550,7 +633,12 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   const [searchVal, setSearchVal] = useState<string>(activeZ?.toFixed(2) || '');
   const [phiSearchVal, setPhiSearchVal] = useState<string>('');
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
-  
+
+  // Student's T-distribution states
+  const [tDf, setTDf] = useState<number>(10);
+  const [tAlpha, setTAlpha] = useState<number>(0.05);
+  const [tSide, setTSide] = useState<'two'>('two');
+
   useEffect(() => {
     if (activeZ !== null) {
       setSearchVal(activeZ.toFixed(2));
@@ -560,9 +648,22 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
 
   const rows = useMemo(() => Array.from({ length: 36 }, (_, i) => i / 10), []);
   const cols = useMemo(() => Array.from({ length: 10 }, (_, i) => i / 100), []);
-  
-  const leftRows = useMemo(() => rows.slice(0, 18), [rows]);
-  const rightRows = useMemo(() => rows.slice(18), [rows]);
+
+  const dfList = useMemo(() => [
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
+    40, 50, 60, 80, 100, 120, 500
+  ], []);
+
+  const tCols = useMemo(() => [
+    { oneTail: 0.10, twoTail: 0.20 },
+    { oneTail: 0.05, twoTail: 0.10 },
+    { oneTail: 0.025, twoTail: 0.05 },
+    { oneTail: 0.01, twoTail: 0.02 },
+    { oneTail: 0.005, twoTail: 0.01 },
+    { oneTail: 0.0005, twoTail: 0.001 }
+  ], []);
 
   const findZByPhiVal = (targetPhi: number) => {
     let closestZ = 0;
@@ -601,18 +702,25 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
   const rowVal = lookupZ !== null ? Math.floor(lookupZ * 10) / 10 : null;
   const colVal = lookupZ !== null ? Math.round((lookupZ - rowVal!) * 100) / 100 : null;
 
+  const computedTCritical = useMemo(() => {
+    if (tDf <= 0 || isNaN(tDf)) return null;
+    const targetP = tSide === 'two' ? 1 - (tAlpha / 2) : 1 - tAlpha;
+    if (targetP <= 0 || targetP >= 1 || isNaN(targetP)) return null;
+    return studentTInverseCDF(targetP, tDf);
+  }, [tDf, tAlpha, tSide]);
+
   const renderTableSection = (tableRows: number[]) => (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+    <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 max-h-[480px]">
       <table className="w-full text-xs sm:text-sm border-collapse">
         <thead>
           <tr className="bg-slate-100 dark:bg-slate-800">
-            <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-400 font-black text-center text-sm w-14 bg-slate-100 dark:bg-slate-800">Z</th>
+            <th className="sticky top-0 right-0 p-2.5 border border-slate-200 dark:border-slate-700 text-blue-700 dark:text-blue-400 font-extrabold text-center text-sm w-14 bg-slate-100 dark:bg-slate-800 z-30">Z</th>
             {cols.map(c => {
               const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
               return (
                 <th 
                   key={c} 
-                  className={`p-2.5 border border-slate-200 dark:border-slate-700 transition-colors duration-300 font-extrabold text-center min-w-[58px] ${
+                  className={`sticky top-0 p-2.5 border border-slate-200 dark:border-slate-700 transition-colors duration-300 font-extrabold text-center min-w-[58px] z-20 ${
                     isColActive 
                       ? 'bg-blue-600 text-white dark:bg-blue-500' 
                       : 'text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800'
@@ -633,7 +741,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   ? theme === 'dark' ? 'bg-blue-950/20' : 'bg-blue-50/50' 
                   : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
               }`}>
-                <td className={`p-2.5 border border-slate-200 dark:border-slate-700 font-black text-center text-sm transition-colors duration-300 ${
+                <td className={`sticky right-0 p-2.5 border border-slate-200 dark:border-slate-700 font-black text-center text-sm transition-colors duration-300 z-10 ${
                   isRowActive 
                     ? 'bg-blue-600 text-white dark:bg-blue-500' 
                     : 'text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900'
@@ -649,14 +757,91 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
                   return (
                     <td 
                       key={c} 
+                      className={`p-2.5 border border-slate-200 dark:border-slate-705 text-center transition-all duration-300 tabular-nums ${
+                        isActive 
+                          ? 'bg-blue-600 text-white dark:bg-blue-500 font-extrabold scale-102 shadow-lg z-10 relative rounded-md' 
+                          : isRowActive
+                            ? 'bg-blue-100/40 text-blue-900 dark:bg-blue-900/20 dark:text-blue-300 font-semibold'
+                            : isColActive
+                              ? 'bg-indigo-100/40 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300 font-semibold'
+                              : 'text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-800 font-medium'
+                      }`}
+                    >
+                      {val.toFixed(4)}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderTTableSection = () => (
+    <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 max-h-[480px]">
+      <table className="w-full text-xs sm:text-sm border-collapse">
+        <thead>
+          <tr className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+            <th rowSpan={2} className="sticky top-0 right-0 p-3 border border-slate-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-400 font-black text-center text-xs sm:text-sm w-16 bg-slate-100 dark:bg-slate-800 z-30">
+              דרגות חופש <br/> (df)
+            </th>
+            <th colSpan={6} className="sticky top-0 p-1.5 border-b border-slate-200 dark:border-slate-700 font-extrabold text-center text-xs bg-slate-100 dark:bg-slate-800 z-20">
+              רמת מובהקות עבור התפלגות T
+            </th>
+          </tr>
+          <tr className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+            {tCols.map((c, idx) => {
+              const isActiveCol = (tSide === 'two' && Math.abs(tAlpha - c.twoTail) < 0.0001);
+              return (
+                <th
+                  key={idx}
+                  className={`sticky top-0 p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-center transition-colors min-w-[70px] z-20 ${
+                    isActiveCol
+                      ? 'bg-indigo-600 text-white dark:bg-indigo-550'
+                      : 'bg-slate-100 dark:bg-slate-800'
+                  }`}
+                >
+                  <div className="text-[10px] opacity-75">חד-צדדי: {c.oneTail}</div>
+                  <div className="text-xs">דו-צדדי: {c.twoTail}</div>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {dfList.map(df => {
+            const isRowActive = df === tDf;
+            return (
+              <tr key={df} className={`transition-colors duration-200 ${
+                isRowActive 
+                  ? theme === 'dark' ? 'bg-indigo-950/20' : 'bg-indigo-50/50' 
+                  : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/20'
+              }`}>
+                <td className={`sticky right-0 p-2.5 border border-slate-200 dark:border-slate-700 font-black text-center text-xs sm:text-sm transition-colors duration-300 z-10 ${
+                  isRowActive 
+                    ? 'bg-indigo-600 text-white dark:bg-indigo-500' 
+                    : 'text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900'
+                }`}>
+                  {df === 500 ? '∞ (Z)' : df}
+                </td>
+                {tCols.map((c, colIdx) => {
+                  const val = studentTInverseCDF(1 - c.oneTail, df);
+                  const isActiveCol = (tSide === 'two' && Math.abs(tAlpha - c.twoTail) < 0.0001);
+                  const isActive = isRowActive && isActiveCol;
+
+                  return (
+                    <td
+                      key={colIdx}
                       className={`p-2.5 border border-slate-200 dark:border-slate-700 text-center transition-all duration-300 tabular-nums ${
                         isActive 
-                          ? 'bg-blue-600 text-white dark:bg-blue-500 font-black scale-102 shadow-lg z-10 relative rounded-md' 
+                          ? 'bg-indigo-600 text-white dark:bg-indigo-550 font-black scale-102 shadow-lg z-10 relative rounded-md' 
                           : isRowActive
-                            ? 'bg-blue-100/40 text-blue-900 dark:bg-blue-900/20 dark:text-blue-300 font-extrabold'
-                            : isColActive
-                              ? 'bg-indigo-100/40 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300 font-extrabold'
-                              : 'text-slate-600 dark:text-slate-350 hover:bg-blue-50 dark:hover:bg-slate-800 font-medium'
+                            ? 'bg-indigo-100/40 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300 font-semibold'
+                            : isActiveCol
+                              ? 'bg-indigo-50/60 text-indigo-900 dark:bg-indigo-950/20 dark:text-indigo-300 font-semibold'
+                              : 'text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium'
                       }`}
                     >
                       {val.toFixed(4)}
@@ -679,7 +864,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
       <button 
         type="button"
         onClick={() => setIsGuideOpen(!isGuideOpen)}
-        className="w-full text-right p-5 bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-between hover:from-slate-750 hover:to-slate-900 transition-all cursor-pointer border-b border-white/5 active:scale-[0.99]"
+        className="w-full text-right p-5 bg-gradient-to-br from-slate-800 to-slate-950 text-white flex items-center justify-between hover:from-slate-755 hover:to-slate-900 transition-all cursor-pointer border-b border-white/5 active:scale-[0.99]"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/30">
@@ -687,10 +872,10 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
-              איך קוראים את טבלת Z?
+              מדריכי קריאה מהירים לטבלאות Z ו-T
             </h3>
             <p className="text-xs text-slate-350 mt-0.5 font-bold">
-              {isGuideOpen ? 'לחץ לכיווץ והסתרת ההנחיות' : 'לחץ להצגת הסבר קצר ושימושי לקריאת הטבלה'}
+              {isGuideOpen ? 'לחץ לכיווץ והסתרת ההנחיות' : 'לחץ להצגת הסברים לקריאת טבלת נורמלית (Z) וטבלת Student-t'}
             </p>
           </div>
         </div>
@@ -715,26 +900,28 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
               <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
                 <div className="flex items-center gap-2 text-blue-400 font-bold">
                   <div className="w-2.5 h-2.5 rounded-full bg-blue-400" />
-                  ערך ה-Z (ציון התקן)
+                  איך קוראים את טבלת Z?
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed font-semibold">
-                  מופיע <strong>בשולי הטבלה</strong> (אנכית ואופקית). השורה מציינת את השלם והעשירית, והעמודה את המאית.
+                  ערך ה-Z מופיע <strong>בשולי הטבלה</strong> (אנכית השורה עם השלם והעשירית, ואופקית העמודה עם המאית). 
+                  ערך ה-PHI (ההסתברות המצטברת משמאל) מופיע <strong>בתוך תאי הטבלה</strong>.
                 </p>
                 <div className="text-xs bg-blue-500/15 p-2 rounded-lg border border-blue-500/20 text-blue-200" dir="rtl">
-                  דוגמה: למציאת <InlineMath math="Z=1.96" />, נבחר שורה 1.9 ועמודה 0.06.
+                  דוגמה: למציאת <InlineMath math="Z=1.96" />, נצליב שורה 1.9 ועמודה 0.06 כדי לקבל <InlineMath math="0.9750" />.
                 </div>
               </div>
               
               <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/10">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                  ערך ה-PHI (ההסתברות)
+                <div className="flex items-center gap-2 text-indigo-400 font-bold">
+                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
+                  איך קוראים את טבלת T?
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed font-semibold">
-                  מופיע <strong>בתוך הטבלה (תאים לבנים)</strong>. זהו השטח המצטבר שמתחת לעקומת הפעמון המצטבר משמאל לערך ה-Z.
+                  דרגות החופש (df) מופיעות <strong>בשורה האנכית הימנית</strong>, ואילו רמות המובהקות (<InlineMath math="\alpha" /> חד-צדדי או דו-צדדי) מופיעות <strong>בראש העמודות</strong>. 
+                  מפגש השורה והעמודה נותן את ערך ה-T הפיזי הקריטי המבוקש.
                 </p>
-                <div className="text-xs bg-emerald-500/15 p-2 rounded-lg border border-emerald-500/20 text-emerald-250" dir="rtl">
-                  דוגמה: בתוך הטבלה נמצא את השטח 0.9750 המייצג את הערך Z של 1.96.
+                <div className="text-xs bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20 text-indigo-250" dir="rtl">
+                  דוגמה: עבור <InlineMath math="df = 10" /> ובדיקה דו-צדדית עם <InlineMath math="\alpha = 0.05" />, נקבל ערך קריטי של <InlineMath math="t = 2.2281" />.
                 </div>
               </div>
             </div>
@@ -742,118 +929,188 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
         )}
       </AnimatePresence>
 
-      {/* Search Controls */}
-      <div className={`p-5 border-b ${theme === 'dark' ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div>
-            <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5 justify-end">
-              <span>חיפוש וחקירת ערכים בטבלה</span>
-              <Calculator size={14} className="text-blue-500" />
-            </h4>
-            <p className="text-xs text-slate-400">בחר את סוג החיפוש והזן ערך לקבלת הצלבה של הנתונים</p>
+      <div className="p-6 space-y-10" dir="rtl">
+        {/* SECTION 1: CONSOLIDATED Z-TABLE */}
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-3 border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                טבלת Z מלאה (התפלגות נורמלית סטנדרטית)
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">טבלה אחת אחודה של סימטריה חיובית, המקיפה את שטחי ההסתברות המצטברת משמאל לערך ה-Z</p>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-2 rounded-xl">
+              <div className="flex p-0.5 rounded-lg border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setSearchType('z')}
+                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all ${
+                    searchType === 'z' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  לפי Z
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchType('phi')}
+                  className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all ${
+                    searchType === 'phi' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-slate-500 dark:text-slate-400'
+                  }`}
+                >
+                  לפי PHI
+                </button>
+              </div>
+
+              <div className="flex items-center gap-1.5 px-2">
+                <label className="text-[11px] font-black text-slate-450">
+                  {searchType === 'z' ? 'ערך לזיהוי:' : 'PHI לזיהוי:'}
+                </label>
+                {searchType === 'z' ? (
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    min="0"
+                    max="3.99"
+                    value={searchVal}
+                    onChange={(e) => setSearchVal(e.target.value)}
+                    placeholder="1.96"
+                    className="w-16 text-xs font-black outline-none bg-transparent text-blue-600 dark:text-blue-400 border-b border-slate-200 dark:border-slate-705 text-center"
+                  />
+                ) : (
+                  <input 
+                    type="number" 
+                    step="0.0001"
+                    min="0.5"
+                    max="0.9999"
+                    value={phiSearchVal}
+                    onChange={(e) => setPhiSearchVal(e.target.value)}
+                    placeholder="0.95"
+                    className="w-16 text-xs font-black outline-none bg-transparent text-emerald-600 dark:text-emerald-400 border-b border-slate-200 dark:border-slate-705 text-center"
+                  />
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 justify-end">
-            <div className="flex p-1 rounded-xl border transition-colors bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-inner">
-              <button
-                onClick={() => setSearchType('z')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  searchType === 'z' 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                חיפוש לפי Z
-              </button>
-              <button
-                onClick={() => setSearchType('phi')}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  searchType === 'phi' 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                חיפוש לפי PHI
-              </button>
-            </div>
+          {renderTableSection(rows)}
+        </div>
 
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500/20 transition-all" dir="rtl">
-              <label className="text-xs font-black text-slate-400 whitespace-nowrap">
-                {searchType === 'z' ? 'ערך Z:' : 'ערך PHI:'}
-              </label>
-              {searchType === 'z' ? (
+        {/* SECTION 2: STUDENT'S T-TABLE WITH INTERACTIVE CALCULATOR */}
+        <div className="space-y-4 pt-4 border-t border-slate-150 dark:border-slate-800">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b pb-3 border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                טבלת T קריטית (התפלגות Student's t)
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">ערכי סף קריטיים וערכי מובהקות אלפא לפי דרגות חופש</p>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2.5 rounded-xl text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-slate-400">דרגות חופש (df):</span>
                 <input 
                   type="number" 
-                  step="0.01"
-                  value={searchVal}
-                  onChange={(e) => setSearchVal(e.target.value)}
-                  placeholder="לדוגמה: 1.96"
-                  className="w-24 text-sm font-black outline-none bg-transparent text-blue-600 dark:text-blue-400 placeholder:text-slate-300"
+                  min="1" 
+                  max="500" 
+                  value={tDf}
+                  onChange={(e) => setTDf(Math.max(1, parseInt(e.target.value) || 10))}
+                  className="w-12 px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-indigo-600 dark:text-indigo-400"
                 />
-              ) : (
-                <input 
-                  type="number" 
-                  step="0.0001"
-                  min="0.5"
-                  max="0.9999"
-                  value={phiSearchVal}
-                  onChange={(e) => setPhiSearchVal(e.target.value)}
-                  placeholder="לדוגמה: 0.95"
-                  className="w-24 text-sm font-black outline-none bg-transparent text-emerald-600 dark:text-emerald-400 placeholder:text-slate-300"
-                />
-              )}
+              </div>
+
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-slate-400">רמת אלפא (α):</span>
+                <select 
+                  value={tAlpha}
+                  onChange={(e) => setTAlpha(parseFloat(e.target.value))}
+                  className="px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded font-bold font-mono text-center text-indigo-600 dark:text-indigo-400 cursor-pointer text-xs"
+                >
+                  <option value={0.20}>0.20</option>
+                  <option value={0.10}>0.10</option>
+                  <option value={0.05}>0.05</option>
+                  <option value={0.02}>0.02</option>
+                  <option value={0.01}>0.01</option>
+                  <option value={0.002}>0.002</option>
+                  <option value={0.001}>0.001</option>
+                </select>
+              </div>
             </div>
           </div>
+
+          {/* Interactive Calculation Result Banner */}
+          {computedTCritical !== null && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 bg-indigo-50/60 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200 border border-indigo-150 dark:border-indigo-900/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 font-sans shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                  <Calculator size={18} className="stroke-[2.5]" />
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-black uppercase text-indigo-500">ערך קריטי מסף המחשב הדינמי</div>
+                  <div className="text-xs sm:text-sm font-extrabold leading-normal mt-0.5">
+                    עבור התפלגות T עם <InlineMath math={`df = ${tDf === 500 ? '\\infty' : tDf}`} /> במובהקות דו-צדדית <InlineMath math={`\\alpha_{two-tail} = ${tAlpha}`} /> ({`חד-צדדית: \\alpha_{one-tail} = ${(tAlpha/2)}`}):
+                  </div>
+                </div>
+              </div>
+              <div className="bg-indigo-600 text-white border border-indigo-700 py-1.5 px-4 rounded-xl font-bold shadow-md select-all tabular-nums text-sm sm:text-base">
+                <InlineMath math={`t_{crit} = ${computedTCritical.toFixed(4)}`} />
+              </div>
+            </motion.div>
+          )}
+
+          {renderTTableSection()}
         </div>
       </div>
-      
-      {/* Table Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 p-6">
-        <div className="space-y-2">
-          <div className="text-xs font-bold text-slate-400 border-b pb-2 border-slate-100 dark:border-slate-800">צד שמאל: ערכי Z מ-0.0 עד 1.7</div>
-          {renderTableSection(leftRows)}
-        </div>
-        <div className="space-y-2">
-          <div className="text-xs font-bold text-slate-400 border-b pb-2 border-slate-100 dark:border-slate-800">צד ימין: ערכי Z מ-1.8 עד 3.5</div>
-          {renderTableSection(rightRows)}
-        </div>
-      </div>
-      
+
       {/* Result Footer */}
       {lookupZ !== null && (
-        <div className="p-5 bg-blue-600 dark:bg-blue-725 text-white border-t border-blue-700 shadow-inner">
+        <div className={`p-5 border-t font-sans shadow-inner rounded-b-2xl transition-colors ${
+          theme === 'dark' ? 'bg-slate-950/60 border-slate-800 text-slate-100' : 'bg-slate-50 border-slate-200 text-slate-800'
+        }`}>
           {isZNegative ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 font-black text-base">
-                <Info size={18} />
-                חישוב שלב עזר עבור ערך Z שלילי ({actualZ?.toFixed(2)})
+              <div className="flex items-center gap-2 font-black text-sm text-blue-600 dark:text-blue-400">
+                <Info size={18} className="text-blue-500 shrink-0" />
+                <span>חישוב שלב עזר עבור ערך Z שלילי ({actualZ?.toFixed(2)})</span>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 space-y-3 leading-relaxed">
-                <p className="text-blue-100 text-sm">כדי למצוא את תוצאת הפונקציה <InlineMath math="\Phi" /> עבור ערך <InlineMath math="z" /> שלילי, נשתמש בכלל הסימטריה המוכר בסטטיסטיקה:</p>
-                <div className="text-center py-2.5 bg-black/15 rounded-lg overflow-x-auto text-base">
+              <div className="space-y-3 leading-relaxed">
+                <p className="text-sm text-slate-600 dark:text-slate-350 font-semibold">כדי למצוא את תוצאת הפונקציה <InlineMath math="\Phi" /> עבור ערך <InlineMath math="z" /> שלילי, נשתמש בכלל הסימטריה המוכר בסטטיסטיקה:</p>
+                <div className="text-center py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-x-auto text-sm sm:text-base font-bold shadow-sm text-blue-600 dark:text-blue-300">
                   <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = 1 - \\Phi(${lookupZ.toFixed(2)})`} />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-right">
-                  <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                    <p className="text-[10px] uppercase tracking-wider text-blue-205 mb-1 font-bold">שלב 1: מציאת הערך החיובי בטבלה</p>
-                    <p className="font-bold text-xs">
+                  <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-extrabold">שלב 1: מציאת הערך החיובי בטבלה</p>
+                    <p className="font-bold text-xs text-slate-500 dark:text-slate-400">
                       הצלבנו שורה {rowVal?.toFixed(1)}, עמודה {colVal?.toFixed(2).slice(2)}
                     </p>
-                    <p className="text-base font-black mt-1">
+                    <p className="text-sm sm:text-base font-black text-slate-850 dark:text-slate-100 mt-1">
                       <InlineMath math={`\\Phi(${lookupZ.toFixed(2)}) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
                     </p>
                   </div>
-                  <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                    <p className="text-[10px] uppercase tracking-wider text-blue-205 mb-1 font-bold">שלב 2: חיסור ההסתברות המצטברת מ-1</p>
-                    <p className="font-bold text-xs">
+                  <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-1">
+                    <p className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-extrabold">שלב 2: חיסור ההסתברות המצטברת מ-1</p>
+                    <p className="font-bold text-xs text-slate-500 dark:text-slate-400">
                       <InlineMath math={`1 - ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
                     </p>
-                    <p className="text-base font-black mt-1 text-emerald-300">
+                    <p className="text-sm sm:text-base font-black text-emerald-600 dark:text-emerald-400 mt-1">
                       = {normalCDF(actualZ!, 0, 1).toFixed(4)}
                     </p>
                   </div>
                 </div>
-                <p className="font-black text-center text-lg pt-3 border-t border-white/10">
+                <p className="font-black text-center text-base sm:text-lg pt-4 border-t border-slate-200 dark:border-slate-800 text-indigo-600 dark:text-indigo-400">
                   תוצאה סופית: <InlineMath math={`\\Phi(${actualZ?.toFixed(2)}) = ${normalCDF(actualZ!, 0, 1).toFixed(4)}`} />
                 </p>
               </div>
@@ -861,25 +1118,25 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean; theme: '
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <Calculator size={18} />
+                <div className="p-2.5 bg-blue-500/10 dark:bg-blue-550/10 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-500/20">
+                  <Calculator size={18} className="stroke-[2.5]" />
                 </div>
                 <div className="text-right">
-                  <div className="text-[10px] uppercase font-black text-blue-200">תוצאה מתוך הצלבת נתוני הטבלה</div>
-                  <div className="text-sm sm:text-base font-extrabold leading-normal">
+                  <div className="text-[10px] uppercase font-bold text-slate-550 dark:text-slate-400">תוצאה מתוך הצלבת נתוני הטבלה</div>
+                  <div className="text-sm sm:text-base font-black leading-normal text-slate-900 dark:text-slate-50">
                     עבור <InlineMath math={`Z = ${lookupZ.toFixed(2)}`} /> התקבלה הסתברות <InlineMath math={`\\Phi(z) = ${normalCDF(lookupZ, 0, 1).toFixed(4)}`} />
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-xl border border-white/20">
+              <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="flex flex-col text-center">
-                  <span className="text-[10px] text-blue-100 font-bold">שורה</span>
-                  <span className="font-black text-sm">{rowVal?.toFixed(1)}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">שורה</span>
+                  <span className="font-black text-sm text-slate-800 dark:text-slate-200">{rowVal?.toFixed(1)}</span>
                 </div>
-                <div className="w-px h-6 bg-white/20" />
+                <div className="w-px h-6 bg-slate-200 dark:bg-slate-800" />
                 <div className="flex flex-col text-center">
-                  <span className="text-[10px] text-blue-100 font-bold">עמודה</span>
-                  <span className="font-black text-sm">{colVal?.toFixed(2).slice(2)}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">עמודה</span>
+                  <span className="font-black text-sm text-slate-800 dark:text-slate-200">{colVal?.toFixed(2).slice(2)}</span>
                 </div>
               </div>
             </div>
@@ -992,13 +1249,13 @@ export default function NormalDistributionCalculator() {
         steps.push(`נאתר את ה-Z המתאים ל-[MATH]P(X < x) = ${pLookup.toFixed(4)}[/MATH] בטבלה:`);
       }
       
-      steps.push(`[MATH]\\mathbf{Z = \\Phi^{-1}(${pLookup.toFixed(4)}) = ${z.toFixed(4)}}[/MATH]`);
+      steps.push(`[MATH]Z = \\Phi^{-1}(${pLookup.toFixed(4)}) = ${z.toFixed(4)}[/MATH]`);
       steps.push(`שלב 2: נשתמש בנוסחת הקשר הפיזי (טרנספורמציה הפוכה) של ציון תקנון למציאת [MATH]X[/MATH]:`);
-      steps.push(`[MATH]\\mathbf{X = \\mu + Z \\cdot \\sigma}[/MATH]`);
+      steps.push(`[MATH]X = \\mu + Z \\cdot \\sigma[/MATH]`);
       steps.push(`נציג מילוי של הנתונים שלנו:`);
-      steps.push(`[MATH]\\mathbf{X = ${mean} + (${z.toFixed(4)}) \\cdot ${stdDev}}[/MATH]`);
-      steps.push(`[MATH]\\mathbf{X = ${calculatedX.toFixed(4)}}[/MATH]`);
-      steps.push(`תוצאה סופית: ערך ה-X המבוקש התואם לאחוזון הוא [MATH]\\mathbf{X = ${calculatedX.toFixed(4)}}[/MATH]`);
+      steps.push(`[MATH]X = ${mean} + (${z.toFixed(4)}) \\cdot ${stdDev}[/MATH]`);
+      steps.push(`[MATH]X = ${calculatedX.toFixed(4)}[/MATH]`);
+      steps.push(`תוצאה סופית: ערך ה-X המבוקש התואם לאחוזון הוא [MATH]X = ${calculatedX.toFixed(4)}[/MATH]`);
       
       return { probability: pInput, z1: z, steps, calculatedX };
     }
@@ -1601,30 +1858,6 @@ export default function NormalDistributionCalculator() {
                     )}
                   </AnimatePresence>
                 </div>
-
-                {/* Main Shaded Probability Output Card */}
-                {isValidToCalculate ? (
-                  <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl" />
-                    <span className="text-xs text-blue-105 font-bold block mb-1">
-                      {mode === 'inverse' ? 'ערך משתנה ה-X הפיזי שחושב' : 'ההסתברות שנתקבלה (P)'}
-                    </span>
-                    <div className="text-4xl font-extrabold leading-normal">
-                      {mode === 'inverse' 
-                        ? (result.calculatedX?.toFixed(4) ?? '0.0000')
-                        : `${(result.probability * 100).toFixed(2)}%`}
-                    </div>
-                    <div className="text-xs text-blue-200 mt-2">
-                      {mode === 'inverse' 
-                        ? `עבור אחוזון ${percentile}%`
-                        : `ערך עשרוני מדויק: ${result.probability.toFixed(4)}`}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-red-50 dark:bg-red-950/20 text-red-600 rounded-2xl p-5 border border-red-100 dark:border-red-900/30 text-center text-xs font-black">
-                    ממתין להזנת נתונים תקינים בפנל הקלטים כדי לבצע חישוב.
-                  </div>
-                )}
               </section>
 
               {/* Right Column Visualization & Step Breakdown */}
