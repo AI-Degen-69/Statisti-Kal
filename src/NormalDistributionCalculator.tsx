@@ -30,6 +30,7 @@ import {
   CartesianGrid
 } from 'recharts';
 import HypothesisTestingCalculator from './components/HypothesisTestingCalculator';
+import FormulaSheet from './components/FormulaSheet';
 
 // --- Math Utilities ---
 
@@ -174,7 +175,7 @@ function studentTInverseCDF(p: number, df: number): number {
 
 // --- Types ---
 
-type CalcMode = 'forward' | 'inverse' | 'table' | 'hypothesis';
+type CalcMode = 'forward' | 'inverse' | 'table' | 'hypothesis' | 'formula-sheet';
 type CalcType = 'below' | 'above' | 'between' | 'outside' | 'conditional';
 type CondType = 'below' | 'above' | 'between';
 
@@ -1494,12 +1495,12 @@ export default function NormalDistributionCalculator() {
         <div className="max-w-5xl mx-auto px-4">
           
           {/* Navigation/Modes Tabs */}
-          <div className={`p-1 rounded-2xl border shadow-inner mb-6 flex flex-wrap transition-all ${
+          <div className={`p-1 rounded-2xl border shadow-inner mb-6 flex flex-wrap transition-all gap-1 ${
             theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
           }`}>
             <button
               onClick={() => setMode('forward')}
-              className={`flex-1 min-w-[120px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[124px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'forward' 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1509,7 +1510,7 @@ export default function NormalDistributionCalculator() {
             </button>
             <button
               onClick={() => setMode('inverse')}
-              className={`flex-1 min-w-[120px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[124px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'inverse' 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1519,7 +1520,7 @@ export default function NormalDistributionCalculator() {
             </button>
             <button
               onClick={() => setMode('table')}
-              className={`flex-1 min-w-[110px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[124px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'table' 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1529,7 +1530,7 @@ export default function NormalDistributionCalculator() {
             </button>
             <button
               onClick={() => setMode('hypothesis')}
-              className={`flex-1 min-w-[135px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+              className={`flex-1 min-w-[124px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
                 mode === 'hypothesis' 
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' 
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -1537,10 +1538,20 @@ export default function NormalDistributionCalculator() {
             >
               מחשבון בדיקת השערות
             </button>
+            <button
+              onClick={() => setMode('formula-sheet')}
+              className={`flex-1 min-w-[124px] py-3 px-2 rounded-xl text-xs sm:text-sm font-black transition-all ${
+                mode === 'formula-sheet' 
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20' 
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+              }`}
+            >
+              דף נוסחאות בסטטיסטיקה
+            </button>
           </div>
 
           {/* Notation Header Banner */}
-          {mode !== 'hypothesis' && (
+          {mode !== 'hypothesis' && mode !== 'formula-sheet' && (
             <div className={`rounded-3xl border p-6 text-center relative overflow-hidden mb-8 shadow-sm transition-all ${
               theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
             }`}>
@@ -1589,6 +1600,13 @@ export default function NormalDistributionCalculator() {
                 </p>
               </div>
               <ZTable showSearch={true} theme={theme} />
+            </motion.div>
+          ) : mode === 'formula-sheet' ? (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <FormulaSheet theme={theme} />
             </motion.div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
