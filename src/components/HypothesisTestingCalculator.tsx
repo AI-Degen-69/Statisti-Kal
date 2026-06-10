@@ -1076,10 +1076,10 @@ export default function HypothesisTestingCalculator() {
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
   {/* RIGHT Column - Dashboard & Visual Analytics */}
-  <div className="space-y-8 w-full min-w-0">
+  <div className="contents">
 
  {/* Overlapping Curves Chart */}
- <div className="rounded-3xl p-6 md:p-8 border shadow-md transition-all bg-slate-900 border-slate-800">
+ <div className="rounded-3xl p-6 md:p-8 border shadow-md transition-all bg-slate-900 border-slate-800 w-full min-w-0 order-1 lg:order-1">
  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-5">
  <h3 className="text-lg md:text-xl font-bold text-slate-100">
  ייצוג גרפי: דילמת ההתפלגויות המקבילות והחפיפה
@@ -1261,7 +1261,7 @@ export default function HypothesisTestingCalculator() {
  </div>
 
  {/* Solutions Steps Accordion / Panel */}
- <div className="rounded-3xl border shadow-md transition-all overflow-hidden bg-slate-900 border-slate-800">
+ <div className="rounded-3xl border shadow-md transition-all overflow-hidden bg-slate-900 border-slate-800 w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
  <button
  onClick={() => setShowSteps(!showSteps)}
  className="w-full px-8 py-5.5 flex items-center justify-between font-black text-slate-50 hover:bg-slate-800/40 transition-colors border-b border-slate-800/50"
@@ -1705,10 +1705,10 @@ export default function HypothesisTestingCalculator() {
  </div>
 
  {/* LEFT Column - Info & Explanations Panel */}
-  <div className="space-y-6 w-full min-w-0">
+  <div className="contents">
 
  {/* Decision Matrix Hero (Moved to side panel) */}
-  <div className="rounded-3xl border p-5 md:p-6 text-right relative overflow-hidden shadow-lg transition-all bg-slate-900 border-slate-800 mb-6">
+  <div className="rounded-3xl border p-5 md:p-6 text-right relative overflow-hidden shadow-lg transition-all bg-slate-900 border-slate-800 w-full min-w-0 order-2 lg:order-2">
     <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
     <h3 className="text-base sm:text-lg font-black mb-4 flex items-center gap-2 border-b border-slate-800 pb-2 text-slate-100">
       <Award size={18} className="text-emerald-500" />
@@ -1718,7 +1718,7 @@ export default function HypothesisTestingCalculator() {
   </div>
 
   {/* Theoretical Help widget inside side panel */}
- <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 border border-slate-800 text-white shadow-md relative overflow-hidden" dir="rtl">
+ <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 border border-slate-800 text-white shadow-md relative overflow-hidden w-full min-w-0 order-4 lg:order-4" dir="rtl">
  <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-8 -mt-8 blur-xl" />
  <h4 className="text-sm font-black flex items-center gap-2 text-indigo-300 mb-2">
  <Info size={16} />
