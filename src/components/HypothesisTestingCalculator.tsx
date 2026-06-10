@@ -1017,37 +1017,18 @@ export default function HypothesisTestingCalculator() {
 
     {/* Formal Hypotheses Display */}
     <div className="flex flex-col items-center justify-center p-3 bg-slate-950/90 border border-slate-800 rounded-xl min-w-[180px] shrink-0 text-center shadow-sm">
-      <div className="text-sm sm:text-base font-extrabold text-slate-100 font-mono tracking-wide" dir="ltr">
+      <div className="text-sm sm:text-base font-extrabold text-slate-100 font-mono tracking-wide flex justify-center w-full" dir="ltr">
         <InlineMath math={getFormalHypothesisMath()} />
       </div>
-      <div className="text-[10px] text-slate-500 font-mono mt-1.5 border-t border-dotted border-slate-800 pt-1" dir="ltr">
+      <div className="text-[10px] text-slate-500 font-mono mt-1.5 border-t border-dotted border-slate-800 pt-1 flex justify-center w-full" dir="ltr">
         <InlineMath math={getGeneralFormalHypothesisMath()} />
       </div>
     </div>
   </div>
 
-  {/* Test Direction and Alpha Below Table */}
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6" dir="rtl">
- {/* Test Direction select */}
- <div className="space-y-1.5 text-right font-sans">
- <div className="flex justify-between items-center px-0.5">
- <InputTooltip content="כיוון השערת המחקר (H₁) - חד-צדדית או דו-צדדית">
- <label className="text-xs font-black text-slate-300 cursor-help border-b border-dotted border-slate-400 border-slate-500 ml-1">השערת המחקר (H₁):</label>
- </InputTooltip>
- </div>
- <select 
- value={tailType}
- onChange={(e) => setTailType(e.target.value as TailType)}
- className="w-full px-3 py-2.5 text-xs bg-slate-900 border border-slate-800 rounded-xl outline-none font-bold text-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
- 
- >
- <option value="right" className="bg-slate-900 text-white">חד-צדדי ימני (μ &gt; μ₀)</option>
- <option value="left" className="bg-slate-900 text-white">חד-צדדי שמאלי (μ &lt; μ₀)</option>
- <option value="two-tailed" className="bg-slate-900 text-white">דו-צדדי (μ ≠ μ₀)</option>
- </select>
- </div>
-
- {/* Alpha Input & Presets */}
+  {/* Alpha Input & Presets Below Table */}
+  <div className="flex justify-start" dir="rtl">
+  {/* Alpha Input & Presets */}
  <div className="space-y-1.5 text-right font-sans">
  <div className="flex justify-between items-center px-0.5">
  <InputTooltip content="רמת מובהקות (α) - ההסתברות המרבית לכל היותר לדחות בטעות את השערת האפס">
