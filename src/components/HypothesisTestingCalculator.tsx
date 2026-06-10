@@ -97,6 +97,171 @@ interface HTCalculatorProps {
   theme: 'light' | 'dark';
 }
 
+// --- Decision Matrix Helper Component ---
+interface DecisionMatrixProps {
+  theme: 'light' | 'dark';
+  isValid: boolean;
+  stats: any;
+  alpha: number;
+}
+
+function DecisionMatrix({ theme, isValid, stats, alpha }: DecisionMatrixProps) {
+  if (!isValid || !stats) {
+    return (
+      <div className="py-12 text-center text-slate-500 font-bold text-sm">
+        נא להזין ערכי קלט תקינים להצגת מטריצת החלטה מלאה ומפורטת.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-55 dark:bg-slate-950/25">
+      <table className="w-full text-sm text-right border-collapse">
+        <thead>
+          <tr className="bg-slate-100/70 dark:bg-slate-800/70 text-xs text-slate-800 dark:text-slate-300 font-extrabold border-b border-slate-200 dark:border-slate-800">
+            <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black text-slate-900 dark:text-slate-100 bg-slate-200/30 dark:bg-slate-800/25 w-1/4">החלטת המבחן</th>
+            <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black bg-blue-50/40 dark:bg-blue-900/10" style={{ minWidth: '180px' }}>H₀ נכונה במציאות (אין אפקט)</th>
+            <th className="p-4 text-center font-black bg-amber-50/30 dark:bg-amber-900/10" style={{ minWidth: '180px' }}>H₁ נכונה במציאות (קיים אפקט)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* Row 1: Fail to reject H0 (Accept H0) */}
+          <tr className="border-b border-slate-200 dark:border-slate-800 font-semibold text-slate-950 dark:text-slate-50">
+            <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
+              <span className="text-base font-black block">קבלת <InlineMath math="H_0" /></span>
+              <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">אי-דחיית השערת האפס</span>
+            </td>
+            
+            {/* Cell 1-1: Accept H0 and H0 is true => Correct decision */}
+            <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-emerald-50/20 dark:bg-emerald-950/10 hover:bg-emerald-50/35 dark:hover:bg-emerald-950/20 transition-all">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5 text-xs sm:text-sm">
+                  <CheckCircle size={15} className="text-emerald-600 dark:text-emerald-450" />
+                  החלטה נכונה
+                </span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - α</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black mt-2 text-emerald-850 dark:text-emerald-300">
+                {((1 - alpha) * 100).toFixed(1)}%
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                רמת הסמך הסטטיסטית (Confidence Level) – הסיכוי לא לקפוץ למסקנות שווא כאשר ההשערה אינה נכונה.
+              </p>
+            </td>
+
+            {/* Cell 1-2: Accept H0 but H1 is true => Type II Error Beta */}
+            <td className="p-4 sm:p-5 bg-amber-50/20 dark:bg-amber-950/10 hover:bg-amber-50/35 dark:hover:bg-amber-950/20 transition-all">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-extrabold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 text-xs sm:text-sm">
+                  <XCircle size={15} className="text-amber-600" />
+                  טעות מסוג II
+                </span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">β (Beta)</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-750 dark:text-amber-305">
+                {(stats.beta * 100).toFixed(2)}%
+              </div>
+              <p className="text-[11px] text-slate-605 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                קבלת השערת האפס אף על פי שהיא שקרית – החמצת גילוי של אפקט או הבדל קיים במציאות.
+              </p>
+            </td>
+          </tr>
+
+          {/* Row 2: Reject H0 */}
+          <tr className="font-semibold text-slate-950 dark:text-slate-50">
+            <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
+              <span className="text-base font-black block">דחיית <InlineMath math="H_0" /></span>
+              <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
+            </td>
+
+            {/* Cell 2-1: Reject H0 and H0 is true => Type I Error Alpha */}
+            <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-red-50/20 dark:bg-red-950/10 hover:bg-red-50/35 dark:hover:bg-red-950/20 transition-all">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-extrabold text-red-700 dark:text-red-400 flex items-center gap-1.5 text-xs sm:text-sm">
+                  <XCircle size={15} className="text-red-655" />
+                  טעות מסוג I
+                </span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">α (Alpha)</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black mt-2 text-red-700 dark:text-red-300">
+                {(alpha * 100).toFixed(1)}%
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                רמת המובהקות – הסיכוי לדחות בטעות את השערת האפס הנכונה, כלומר לטעון לקשר או אפקט שאינו קיים באמת.
+              </p>
+            </td>
+
+            {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
+            <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 dark:from-indigo-950/10 dark:to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 dark:hover:from-indigo-950/15 dark:hover:to-emerald-950/15 transition-all">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
+                  <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-405" />
+                  החלטה נכונה (עוצמה)
+                </span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - β (Power)</span>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight">
+                {(stats.power * 100).toFixed(2)}%
+              </div>
+              <p className="text-[11px] text-slate-605 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
+                עוצמת המבחן – ההסתברות של המחקר לזהות ולדחות השערה מוטעית, ובכך להוכיח את קיומו של אפקט אמיתי.
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// --- Tooltip helper for Input Labels ---
+interface InputTooltipProps {
+  content: string;
+  children: React.ReactNode;
+  theme: 'light' | 'dark';
+}
+
+const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, theme }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const showTooltip = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsVisible(true);
+  };
+
+  const hideTooltip = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsVisible(false);
+    }, 100);
+  };
+
+  return (
+    <div className="relative inline-block" onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
+      {children}
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 5, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+            className={`absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 text-xs rounded-xl shadow-xl pointer-events-none text-center leading-normal font-medium ${
+              theme === 'dark' 
+                ? 'bg-slate-800 text-slate-100 border border-slate-700' 
+                : 'bg-slate-900 text-white'
+            }`}
+          >
+            {content}
+            <div className={`absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent ${
+              theme === 'dark' ? 'border-t-slate-800' : 'border-t-slate-900'
+            }`} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps) {
   // Input states
   const [mu0, setMu0] = useState<number>(100);
@@ -347,15 +512,15 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
           <p className="font-bold text-sm text-indigo-600 dark:text-indigo-400 mb-1 border-b pb-1 border-slate-200 dark:border-slate-800">ערכי צפיפות (PDF)</p>
           <div className="flex justify-between gap-6">
             <span>ערך המשתנה (X):</span>
-            <span className="font-mono font-bold">{data.x.toFixed(2)}</span>
+            <span className="font-mono font-bold">{data.x.toFixed(3)}</span>
           </div>
-          <div className="flex justify-between gap-6 text-blue-600 dark:text-blue-400">
+          <div className="flex justify-between gap-6">
             <span>צפיפות תחת H₀:</span>
-            <span className="font-mono font-bold">{data.pdfH0.toFixed(4)}</span>
+            <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{data.pdfH0.toFixed(4)}</span>
           </div>
-          <div className="flex justify-between gap-6 text-amber-600 dark:text-amber-400">
+          <div className="flex justify-between gap-6">
             <span>צפיפות תחת H₁:</span>
-            <span className="font-mono font-bold">{data.pdfH1.toFixed(4)}</span>
+            <span className="font-mono font-bold text-amber-600 dark:text-amber-400">{data.pdfH1.toFixed(4)}</span>
           </div>
         </div>
       );
@@ -364,123 +529,208 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
   };
 
   return (
-    <div className="space-y-8" dir="rtl">
-      
-      {/* Decision Matrix Hero */}
-      <div className={`rounded-3xl border p-4 sm:p-5 text-right relative overflow-hidden shadow-lg transition-all ${
+    <div className="space-y-8 font-sans" dir="rtl">
+
+      {/* Parameters Input Card */}
+      <div className={`rounded-3xl p-5 md:p-6 border shadow-md transition-colors ${
         theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'
       }`}>
-        <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
-        
-        {isValid && stats ? (
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-950/25">
-            <table className="w-full text-sm text-right border-collapse">
-              <thead>
-                <tr className="bg-slate-100/70 dark:bg-slate-800/70 text-xs text-slate-800 dark:text-slate-300 font-extrabold border-b border-slate-200 dark:border-slate-800">
-                  <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black text-slate-900 dark:text-slate-100 bg-slate-200/30 dark:bg-slate-800/25 w-1/4">החלטת המבחן</th>
-                  <th className="p-4 border-l border-slate-200 dark:border-slate-800 text-center font-black bg-blue-50/40 dark:bg-blue-900/10">H₀ נכונה במציאות (אין אפקט)</th>
-                  <th className="p-4 text-center font-black bg-amber-50/30 dark:bg-amber-900/10">H₁ נכונה במציאות (קיים אפקט)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Row 1: Fail to reject H0 (Accept H0) */}
-                <tr className="border-b border-slate-200 dark:border-slate-800 font-semibold text-slate-950 dark:text-slate-50">
-                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
-                    <span className="text-base font-black block">קבלת <InlineMath math="H_0" /></span>
-                    <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">אי-דחיית השערת האפס</span>
-                  </td>
-                  
-                  {/* Cell 1-1: Accept H0 and H0 is true => Correct decision */}
-                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-emerald-50/20 dark:bg-emerald-950/10 hover:bg-emerald-50/35 dark:hover:bg-emerald-950/20 transition-all">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-emerald-800 dark:text-emerald-400 flex items-center gap-1.5 text-xs sm:text-sm">
-                        <CheckCircle size={15} className="text-emerald-600 dark:text-emerald-450" />
-                        החלטה נכונה
-                      </span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - α</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-emerald-850 dark:text-emerald-300">
-                      {((1 - alpha) * 100).toFixed(1)}%
-                    </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
-                      רמת הסמך הסטטיסטית (Confidence Level) – הסיכוי לא לקפוץ למסקנות שווא כאשר ההשערה אינה נכונה.
-                    </p>
-                  </td>
- 
-                  {/* Cell 1-2: Accept H0 but H1 is true => Type II Error Beta */}
-                  <td className="p-4 sm:p-5 bg-amber-50/20 dark:bg-amber-950/10 hover:bg-amber-50/35 dark:hover:bg-amber-950/20 transition-all">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-amber-700 dark:text-amber-400 flex items-center gap-1.5 text-xs sm:text-sm">
-                        <XCircle size={15} className="text-amber-600" />
-                        טעות מסוג II
-                      </span>
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">β (Beta)</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-amber-750 dark:text-amber-300">
-                      {(stats.beta * 100).toFixed(2)}%
-                    </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
-                      קבלת השערת האפס אף על פי שהיא שקרית – החמצת גילוי של אפקט או הבדל קיים במציאות.
-                    </p>
-                  </td>
-                </tr>
- 
-                {/* Row 2: Reject H0 */}
-                <tr className="font-semibold text-slate-950 dark:text-slate-50">
-                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 font-extrabold bg-slate-100/30 dark:bg-slate-900/40">
-                    <span className="text-base font-black block">דחיית <InlineMath math="H_0" /></span>
-                    <span className="block text-[11px] font-bold text-slate-400 dark:text-slate-400 mt-1">קבלת הטענה האלטרנטיבית</span>
-                  </td>
- 
-                  {/* Cell 2-1: Reject H0 and H0 is true => Type I Error Alpha */}
-                  <td className="p-4 sm:p-5 border-l border-slate-200 dark:border-slate-800 bg-red-50/20 dark:bg-red-950/10 hover:bg-red-50/35 dark:hover:bg-red-950/20 transition-all">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-red-700 dark:text-red-400 flex items-center gap-1.5 text-xs sm:text-sm">
-                        <XCircle size={15} className="text-red-650" />
-                        טעות מסוג I
-                      </span>
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400" dir="ltr">α (Alpha)</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-red-700 dark:text-red-300">
-                      {(alpha * 100).toFixed(1)}%
-                    </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
-                      רמת המובהקות – הסיכוי לדחות בטעות את השערת האפס הנכונה, כלומר לטעון לקשר או אפקט שאינו קיים באמת.
-                    </p>
-                  </td>
- 
-                  {/* Cell 2-2: Reject H0 and H1 is true => Correct decision Power! */}
-                  <td className="p-4 sm:p-5 bg-gradient-to-br from-indigo-50/30 to-emerald-50/30 dark:from-indigo-950/10 dark:to-emerald-950/10 hover:from-indigo-50/45 hover:to-emerald-50/45 dark:hover:from-indigo-950/15 dark:hover:to-emerald-950/15 transition-all">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-extrabold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5 text-xs sm:text-sm">
-                        <CheckCircle size={15} className="text-indigo-600 dark:text-indigo-405" />
-                        החלטה נכונה (עוצמה)
-                      </span>
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400" dir="ltr">1 - β (Power)</span>
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-black mt-2 text-indigo-700 dark:text-indigo-400 tracking-tight">
-                      {(stats.power * 100).toFixed(2)}%
-                    </div>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-normal font-medium max-w-sm">
-                      עוצמת המבחן – ההסתברות של המחקר לזהות ולדחות השערה מוטעית, ובכך להוכיח את קיומו של אפקט אמיתי.
-                    </p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-5">
+          <div className="flex items-center gap-2">
+            <Sliders size={20} className="text-indigo-500" />
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
+              פרמטרים והשערות מחקר
+            </h3>
           </div>
-        ) : (
-          <div className="py-12 text-center text-slate-500 font-bold text-sm">
-            נא להזין ערכי קלט תקינים להצגת מטריצת החלטה מלאה ומפורטת.
+          
+          {/* Main Test Statistic Type (Single, Mean, Sum) Selector */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs sm:text-sm font-black text-slate-500 dark:text-slate-400">סטטיסטי המבחן:</span>
+            <div className="flex p-0.5 bg-slate-100 dark:bg-slate-800 rounded-xl border dark:border-slate-800">
+              <button 
+                type="button"
+                onClick={() => setTestType('single')}
+                className={`py-1.5 px-3 rounded-lg text-xs font-black transition-all ${
+                  testType === 'single'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                תצפית X
+              </button>
+              <button 
+                type="button"
+                onClick={() => setTestType('mean')}
+                className={`py-1.5 px-3 rounded-lg text-xs font-black transition-all ${
+                  testType === 'mean'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                ממוצע X̄
+              </button>
+              <button 
+                type="button"
+                onClick={() => setTestType('sum')}
+                className={`py-1.5 px-3 rounded-lg text-xs font-black transition-all ${
+                  testType === 'sum'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                סכום ΣX
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* Inputs Layout columns: U0, STD, Size, U1, Test, Alpha */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-start" dir="ltr">
+          
+          {/* 1. U0 Input */}
+          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+            <div className="flex justify-between items-center px-0.5">
+              <InputTooltip content="תוחלת אוכלוסיית הבסיס (השערת האפס H₀)" theme={theme}>
+                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">תוחלת (μ₀):</label>
+              </InputTooltip>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold">H0</span>
+            </div>
+            <input 
+              type="text" 
+              value={mu0Input}
+              onChange={(e) => handleMu0Change(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-left"
+              placeholder="100"
+              dir="ltr"
+            />
+            {errors.mu0 && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.mu0}</p>}
+          </div>
+
+          {/* 2. STD Input (σ) */}
+          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+            <div className="flex justify-between items-center px-0.5">
+              <InputTooltip content="מדד הפיזור של הערכים סביב הממוצע (חייב להיות חיובי וגדול מ-0)" theme={theme}>
+                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">סטיית תקן (σ):</label>
+              </InputTooltip>
+            </div>
+            <input 
+              type="text" 
+              value={sigmaInput}
+              onChange={(e) => handleSigmaChange(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/85 border border-slate-300 dark:border-slate-700/80 rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-505 text-left"
+              placeholder="15"
+              dir="ltr"
+            />
+            {errors.sigma && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.sigma}</p>}
+          </div>
+
+          {/* 3. Size Input (n) */}
+          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+            <div className="flex justify-between items-center px-0.5">
+              <InputTooltip content="מספר התצפיות במדגם (n)" theme={theme}>
+                <label className={`text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1 ${testType === 'single' ? 'opacity-30' : ''}`}>גודל המדגם (n):</label>
+              </InputTooltip>
+            </div>
+            <input 
+              type="text" 
+              value={testType === 'single' ? '1' : nInput}
+              disabled={testType === 'single'}
+              onChange={(e) => handleNChange(e.target.value)}
+              className={`w-full px-3 py-2 border rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 text-left ${
+                testType === 'single'
+                  ? 'bg-slate-100 dark:bg-slate-800/20 text-slate-400 border-transparent opacity-50 cursor-not-allowed'
+                  : 'bg-slate-55 dark:bg-slate-800/80 border-slate-300 dark:border-slate-700/80 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
+              } ${errors.n && testType !== 'single' ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' : 'border-slate-300 dark:border-slate-700/80'}`}
+              placeholder="36"
+              dir="ltr"
+            />
+            {errors.n && testType !== 'single' && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.n}</p>}
+          </div>
+
+          {/* 4. U1 Input (Expectation alternative H1) */}
+          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+            <div className="flex justify-between items-center px-0.5">
+              <InputTooltip content="התוחלת המשוערת תחת השערת המחקר (האלטרנטיבה H₁)" theme={theme}>
+                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">תוחלת (μ₁):</label>
+              </InputTooltip>
+              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-amber-600 dark:text-amber-400 font-bold">H1</span>
+            </div>
+            <input 
+              type="text" 
+              value={mu1Input}
+              onChange={(e) => handleMu1Change(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl outline-none transition-all font-mono font-bold text-sm text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-left"
+              placeholder="108"
+              dir="ltr"
+            />
+            {errors.mu1 && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.mu1}</p>}
+          </div>
+
+          {/* 5. Test Direction select */}
+          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+            <div className="flex justify-between items-center px-0.5">
+              <InputTooltip content="כיוון השערת המחקר (H₁) - חד-צדדית או דו-צדדית" theme={theme}>
+                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">השערת המחקר (H₁):</label>
+              </InputTooltip>
+            </div>
+            <select 
+              value={tailType}
+              onChange={(e) => setTailType(e.target.value as TailType)}
+              className="w-full px-2 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl outline-none font-bold text-slate-800 dark:text-slate-100 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+            >
+              <option value="right">חד-צדדי ימני (μ &gt; μ₀)</option>
+              <option value="left">חד-צדדי שמאלי (μ &lt; μ₀)</option>
+              <option value="two-tailed">דו-צדדי (μ ≠ μ₀)</option>
+            </select>
+          </div>
+
+          {/* 6. Alpha Input & Presets */}
+          <div className="space-y-1.5 text-right font-sans" dir="rtl">
+            <div className="flex justify-between items-center px-0.5">
+              <InputTooltip content="רמת מובהקות (α) - ההסתברות המרבית לכל היותר לדחות בטעות את השערת האפס" theme={theme}>
+                <label className="text-[12px] sm:text-xs font-black text-slate-500 dark:text-slate-400 cursor-help border-b border-dotted border-slate-300 dark:border-slate-700 ml-1">מובהקות (α):</label>
+              </InputTooltip>
+            </div>
+            <div className="flex gap-1" dir="ltr">
+              <input 
+                type="text" 
+                value={alphaInput}
+                onChange={(e) => handleAlphaChange(e.target.value)}
+                className={`w-14 px-1 py-2 bg-slate-50 dark:bg-slate-800/80 border rounded-xl outline-none transition-all font-mono font-bold text-xs text-slate-900 dark:text-slate-100 ${
+                  errors.alpha 
+                    ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
+                    : 'border-slate-300 dark:border-slate-700/80 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
+                }`}
+                placeholder="0.05"
+              />
+              <div className="flex-1 grid grid-cols-3 gap-0.5">
+                {[0.10, 0.05, 0.01].map((pVal) => (
+                  <button
+                    key={pVal}
+                    type="button"
+                    onClick={() => applyAlphaPreset(pVal)}
+                    className={`py-1 text-[9px] font-black rounded-lg transition-all border ${
+                      alpha === pVal 
+                        ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750'
+                    }`}
+                  >
+                    {pVal * 100}%
+                  </button>
+                ))}
+              </div>
+            </div>
+            {errors.alpha && <p className="text-[11px] text-red-655 dark:text-red-400 font-bold leading-tight mt-1">{errors.alpha}</p>}
+          </div>
+
+        </div>
       </div>
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* RIGHT Column - Dashboard & Visual Analytics */}
-        <div className="lg:col-span-8 space-y-8 order-1 lg:order-2">
+        <div className="lg:col-span-9 space-y-8 order-1 lg:order-2">
 
           {/* Quick Stats Grid Widgets */}
           {isValid && stats && (
@@ -916,198 +1166,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
 
         </div>
 
-
-
-        {/* LEFT Column - Controls Panel & Error Matrices */}
-        <div className="lg:col-span-4 space-y-6 order-2 lg:order-1">
-          
-          {/* Inputs Panel card */}
-          <div className={`rounded-2xl p-5 md:p-6 border shadow-sm transition-colors ${
-            theme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-300'
-          }`}>
-            <h3 className="text-lg sm:text-xl font-black flex items-center gap-2 mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">
-              <Sliders size={18} className="text-indigo-500" />
-              פרמטרים והשערות מחקר
-            </h3>
-
-            <div className="space-y-4">
-              
-              {/* Type of Test selector */}
-              <div className="space-y-1">
-                <label className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300">ישויות נבדקות במדגם (סטטיסטי):</label>
-                <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-50 dark:bg-slate-800 border dark:border-slate-800 rounded-xl">
-                  <button 
-                    onClick={() => setTestType('single')}
-                    className={`py-2 px-1 rounded-lg text-xs sm:text-sm md:text-base font-black transition-all ${
-                      testType === 'single'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    תצפית בודדת X
-                  </button>
-                  <button 
-                    onClick={() => setTestType('mean')}
-                    className={`py-2 px-1 rounded-lg text-xs sm:text-sm md:text-base font-black transition-all ${
-                      testType === 'mean'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    ממוצע מדגם X̄
-                  </button>
-                  <button 
-                    onClick={() => setTestType('sum')}
-                    className={`py-2 px-1 rounded-lg text-xs sm:text-sm md:text-base font-black transition-all ${
-                      testType === 'sum'
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    סכום מדגם ΣX
-                  </button>
-                </div>
-              </div>
-
-              {/* Alternative Hypothesis Selector */}
-              <div className="space-y-1">
-                <label className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300">אופן השערת המחקר האלטרנטיבית (H₁):</label>
-                <select 
-                  value={tailType}
-                  onChange={(e) => setTailType(e.target.value as TailType)}
-                  className="w-full p-3 text-sm sm:text-base bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-800 rounded-xl outline-none font-bold text-slate-800 dark:text-slate-100"
-                >
-                  <option value="right">חד-צדדי ימני (H₁: μ &gt; μ₀)</option>
-                  <option value="left">חד-צדדי שמאלי (H₁: μ &lt; μ₀)</option>
-                  <option value="two-tailed">דו-צידי (H₁: μ ≠ μ₀)</option>
-                </select>
-              </div>
-
-              <hr className="border-slate-200 dark:border-slate-800" />
-
-              {/* Mean H0 baseline input */}
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300">ממוצע תחת השערת אפס (μ₀):</label>
-                  <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-indigo-600 dark:text-indigo-400">H0 baseline</span>
-                </div>
-                <input 
-                  type="text" 
-                  value={mu0Input}
-                  onChange={(e) => handleMu0Change(e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 ${
-                    errors.mu0 
-                      ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                      : 'border-slate-300 dark:border-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
-                  }`}
-                  placeholder="לדוגמה: 100"
-                />
-                {errors.mu0 && <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-bold mt-1">{errors.mu0}</p>}
-              </div>
-                        {/* Mean H1 alternative input */}
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300">ממוצע תחת השערת חלופית (μ₁):</label>
-                  <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md text-amber-600 dark:text-amber-400">Alternative</span>
-                </div>
-                <input 
-                  type="text" 
-                  value={mu1Input}
-                  onChange={(e) => handleMu1Change(e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 ${
-                    errors.mu1 
-                      ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                      : 'border-slate-300 dark:border-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
-                  }`}
-                  placeholder="לדוגמה: 108"
-                />
-                {errors.mu1 && <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-bold mt-1">{errors.mu1}</p>}
-              </div>
-
-              {/* Population SD sigma input */}
-              <div className="space-y-1">
-                <label className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300">סטיית תקן של האוכלוסייה (σ):</label>
-                <input 
-                  type="text" 
-                  value={sigmaInput}
-                  onChange={(e) => handleSigmaChange(e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 ${
-                    errors.sigma 
-                      ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                      : 'border-slate-300 dark:border-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
-                  }`}
-                  placeholder="סטיית תקן המקורית שנתונה"
-                />
-                {errors.sigma && <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-bold mt-1">{errors.sigma}</p>}
-              </div>
-
-              {/* Sample size n input (disabled for Single Item test type) */}
-              <div className="space-y-1">
-                <label className={`text-sm sm:text-base font-black text-slate-700 dark:text-slate-300 ${testType === 'single' ? 'opacity-30' : ''}`}>
-                  גודל המדגם (n):
-                </label>
-                <input 
-                  type="text" 
-                  value={nInput}
-                  disabled={testType === 'single'}
-                  onChange={(e) => handleNChange(e.target.value)}
-                  className={`w-full px-4 py-2.5 border rounded-xl outline-none transition-all font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 ${
-                    testType === 'single'
-                      ? 'bg-slate-100 dark:bg-slate-800/20 text-slate-400 border-transparent opacity-60 cursor-not-allowed'
-                      : 'bg-slate-50 dark:bg-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
-                  } ${errors.n ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' : 'border-slate-300 dark:border-slate-700'}`}
-                  placeholder="36"
-                />
-                {testType === 'single' && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-none mt-1">
-                    עבור תצפית בודדת, גודל המדגם מוגדר קשיח כ-n=1.
-                  </p>
-                )}
-                {errors.n && testType !== 'single' && <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-bold mt-1">{errors.n}</p>}
-              </div>
-
-              {/* Alpha inputs significance level */}
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300">רמת מובהקות המבחן (α):</label>
-                  <span className="text-xs font-bold text-red-600 dark:text-red-400 font-black">Type I error max</span>
-                </div>
-                <input 
-                  type="text" 
-                  value={alphaInput}
-                  onChange={(e) => handleAlphaChange(e.target.value)}
-                  className={`w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none transition-all font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-slate-100 ${
-                    errors.alpha 
-                      ? 'border-red-500 text-red-500 ring-4 ring-red-500/10' 
-                      : 'border-slate-300 dark:border-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500'
-                  }`}
-                  placeholder="0.05"
-                />
-                {errors.alpha && <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-bold mt-1">{errors.alpha}</p>}
-                
-                {/* Alpha Quick Presets Buttons */}
-                <div className="flex gap-1.5 mt-2.5">
-                  {[0.10, 0.05, 0.01, 0.001].map((pVal) => (
-                    <button
-                      key={pVal}
-                      type="button"
-                      onClick={() => applyAlphaPreset(pVal)}
-                      className={`flex-1 py-1.5 text-xs sm:text-sm font-black rounded-lg transition-all border ${
-                        alpha === pVal 
-                          ? 'bg-red-600 text-white border-red-700 shadow-md'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {pVal * 100}%
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-
+        {/* LEFT Column - Info & Explanations Panel */}
+        <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
 
           {/* Theoretical Help widget inside side panel */}
           <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 border border-slate-800 text-white shadow-md relative overflow-hidden" dir="rtl">
@@ -1116,8 +1176,8 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
               <Info size={16} />
               הוראות הסבר מהירות:
             </h4>
-            <ul className="text-xs space-y-2 text-slate-300 leading-relaxed pr-2 list-disc list-inside font-semibold">
-              <li><strong>ממוצע H₀ המרכזי</strong> מבסס את קו התחלת הבסיס להשוואה.</li>
+            <ul className="text-xs space-y-2 text-slate-300 leading-relaxed pr-2 list-disc list-inside font-semibold font-sans">
+              <li><strong>ממוצע H₀ המרכזי</strong> מבסס את קו התחלת הבסיס להשוואה (H₀ baseline).</li>
               <li><strong>אלטרנטיבה H₁</strong> מגדירה את המיקום השני המשוער בפועל.</li>
               <li>ככל ש-<strong>גודל המדגם (n)</strong> גדול יותר, שגיאת התקן מתכווצת, הקומות הופכות צרות יותר ועוצמת המבחן משתפרת פלאים.</li>
             </ul>
@@ -1125,6 +1185,18 @@ export default function HypothesisTestingCalculator({ theme }: HTCalculatorProps
 
         </div>
 
+      </div>
+
+      {/* Decision Matrix Hero (Moved Down & Polished) */}
+      <div className="mt-8 rounded-3xl border p-5 md:p-6 text-right relative overflow-hidden shadow-lg transition-all bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800">
+        <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-red-600 via-indigo-700 to-emerald-600" />
+        
+        <h3 className="text-base sm:text-lg font-black mb-4 flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 text-slate-905 dark:text-slate-100">
+          <Award size={18} className="text-emerald-500" />
+          מטריצת החלטה ורמות מובהקות (ארבעת מצבי עולם הסקה סטטיסטית)
+        </h3>
+
+        <DecisionMatrix theme={theme} isValid={isValid} stats={stats} alpha={alpha} />
       </div>
 
     </div>
