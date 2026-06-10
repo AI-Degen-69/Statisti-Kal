@@ -1,3 +1,4 @@
+import { useLocalStorageState } from '../hooks/useLocalStorageState';
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -364,25 +365,25 @@ const InputTooltip: React.FC<InputTooltipProps> = ({ content, children }) => {
 
 export default function HypothesisTestingCalculator() {
  // Input states
- const [varianceKnown, setVarianceKnown] = useState<boolean>(true);
+ const [varianceKnown, setVarianceKnown] = useLocalStorageState<boolean>('HT_varianceKnown', true);
 
- const [mu0, setMu0] = useState<number>(100);
- const [mu0Input, setMu0Input] = useState<string>('100');
+ const [mu0, setMu0] = useLocalStorageState<number>('HT_mu0', 100);
+ const [mu0Input, setMu0Input] = useLocalStorageState<string>('HT_mu0Input', '100');
  
- const [mu1, setMu1] = useState<number>(108);
- const [mu1Input, setMu1Input] = useState<string>('108');
+ const [mu1, setMu1] = useLocalStorageState<number>('HT_mu1', 108);
+ const [mu1Input, setMu1Input] = useLocalStorageState<string>('HT_mu1Input', '108');
 
- const [sigma, setSigma] = useState<number>(15);
- const [sigmaInput, setSigmaInput] = useState<string>('15');
+ const [sigma, setSigma] = useLocalStorageState<number>('HT_sigma', 15);
+ const [sigmaInput, setSigmaInput] = useLocalStorageState<string>('HT_sigmaInput', '15');
 
- const [n, setN] = useState<number>(36);
- const [nInput, setNInput] = useState<string>('36');
+ const [n, setN] = useLocalStorageState<number>('HT_n', 36);
+ const [nInput, setNInput] = useLocalStorageState<string>('HT_nInput', '36');
 
- const [alpha, setAlpha] = useState<number>(0.05);
- const [alphaInput, setAlphaInput] = useState<string>('0.05');
+ const [alpha, setAlpha] = useLocalStorageState<number>('HT_alpha', 0.05);
+ const [alphaInput, setAlphaInput] = useLocalStorageState<string>('HT_alphaInput', '0.05');
 
- const [testType, setTestType] = useState<TestType>('mean');
- const [tailType, setTailType] = useState<TailType>('right');
+ const [testType, setTestType] = useLocalStorageState<TestType>('HT_testType', 'mean');
+ const [tailType, setTailType] = useLocalStorageState<TailType>('HT_tailType', 'right');
 
  const statSymbol = testType ==='single' ?'X' : testType ==='sum' ?'\\sum X' :'\\bar{X}';
  const statName = testType ==='single' ?'הערך הבודד' : testType ==='sum' ?'סכום המדגם' :'ממוצע המדגם';

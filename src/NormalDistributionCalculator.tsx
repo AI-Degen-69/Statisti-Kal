@@ -1,3 +1,4 @@
+import { useLocalStorageState } from './hooks/useLocalStorageState';
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -607,16 +608,16 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
 };
 
 const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ activeZ = null, showSearch = false }) => {
- const [searchType, setSearchType] = useState<'z' |'phi'>('z');
- const [searchVal, setSearchVal] = useState<string>(activeZ?.toFixed(2) ||'');
- const [phiSearchVal, setPhiSearchVal] = useState<string>('');
+ const [searchType, setSearchType] = useLocalStorageState<'z' |'phi'>('ND_searchType', 'z');
+ const [searchVal, setSearchVal] = useLocalStorageState<string>('ND_searchVal', activeZ?.toFixed(2) ||'');
+ const [phiSearchVal, setPhiSearchVal] = useLocalStorageState<string>('ND_phiSearchVal', '');
  const [isZGuideOpen, setIsZGuideOpen] = useState<boolean>(false);
  const [isTGuideOpen, setIsTGuideOpen] = useState<boolean>(false);
 
  // Student's T-distribution states
- const [tDf, setTDf] = useState<number>(10);
- const [tAlpha, setTAlpha] = useState<number>(0.05);
- const [tSide, setTSide] = useState<'two'>('two');
+ const [tDf, setTDf] = useLocalStorageState<number>('ND_tDf', 10);
+ const [tAlpha, setTAlpha] = useLocalStorageState<number>('ND_tAlpha', 0.05);
+ const [tSide, setTSide] = useLocalStorageState<'two'>('ND_tSide', 'two');
 
  useEffect(() => {
  if (activeZ !== null) {
@@ -1127,9 +1128,9 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
 
 const TTable: React.FC<{}> = () => {
  const [isTGuideOpen, setIsTGuideOpen] = useState<boolean>(false);
- const [tDf, setTDf] = useState<number>(10);
- const [tAlpha, setTAlpha] = useState<number>(0.05);
- const [tSide, setTSide] = useState<'two'>('two');
+ const [tDf, setTDf] = useLocalStorageState<number>('ND_tDf', 10);
+ const [tAlpha, setTAlpha] = useLocalStorageState<number>('ND_tAlpha', 0.05);
+ const [tSide, setTSide] = useLocalStorageState<'two'>('ND_tSide', 'two');
 
  const dfList = useMemo(() => [
  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
@@ -1353,28 +1354,28 @@ const TTable: React.FC<{}> = () => {
 };
 
 export default function NormalDistributionCalculator() {
- const [mode, setMode] = useState<CalcMode>('forward');
+ const [mode, setMode] = useLocalStorageState<CalcMode>('ND_mode', 'forward');
  const [isInputPanelOpen, setIsInputPanelOpen] = useState<boolean>(true);
- const [mean, setMean] = useState<number>(170);
- const [meanInput, setMeanInput] = useState<string>('170');
+ const [mean, setMean] = useLocalStorageState<number>('ND_mean', 170);
+ const [meanInput, setMeanInput] = useLocalStorageState<string>('ND_meanInput', '170');
  const [meanError, setMeanError] = useState<string | null>(null);
 
- const [stdDev, setStdDev] = useState<number>(5);
- const [stdDevInput, setStdDevInput] = useState<string>('5');
+ const [stdDev, setStdDev] = useLocalStorageState<number>('ND_stdDev', 5);
+ const [stdDevInput, setStdDevInput] = useLocalStorageState<string>('ND_stdDevInput', '5');
  const [stdDevError, setStdDevError] = useState<string | null>(null);
- const [varianceInput, setVarianceInput] = useState<string>('25');
+ const [varianceInput, setVarianceInput] = useLocalStorageState<string>('ND_varianceInput', '25');
  const [varianceError, setVarianceError] = useState<string | null>(null);
 
- const [type, setType] = useState<CalcType>('below');
- const [inverseType, setInverseType] = useState<'lower' |'upper'>('lower');
+ const [type, setType] = useLocalStorageState<CalcType>('ND_type', 'below');
+ const [inverseType, setInverseType] = useLocalStorageState<'lower' |'upper'>('ND_inverseType', 'lower');
  
- const [x1, setX1] = useState<number>(165);
- const [x2, setX2] = useState<number>(175);
- const [condType, setCondType] = useState<CondType>('above');
- const [condTypeA, setCondTypeA] = useState<CondType>('below');
- const [condX1, setCondX1] = useState<number>(160);
- const [condX2, setCondX2] = useState<number>(180);
- const [percentile, setPercentile] = useState<number>(90);
+ const [x1, setX1] = useLocalStorageState<number>('ND_x1', 165);
+ const [x2, setX2] = useLocalStorageState<number>('ND_x2', 175);
+ const [condType, setCondType] = useLocalStorageState<CondType>('ND_condType', 'above');
+ const [condTypeA, setCondTypeA] = useLocalStorageState<CondType>('ND_condTypeA', 'below');
+ const [condX1, setCondX1] = useLocalStorageState<number>('ND_condX1', 160);
+ const [condX2, setCondX2] = useLocalStorageState<number>('ND_condX2', 180);
+ const [percentile, setPercentile] = useLocalStorageState<number>('ND_percentile', 90);
 
 
 
