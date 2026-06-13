@@ -2002,7 +2002,7 @@ export default function HypothesisTestingCalculator() {
  <div className="space-y-3 pt-6">
  <div className="flex items-center gap-3 font-extrabold text-indigo-400">
  <span className="w-9 h-9 rounded-full bg-indigo-100 bg-indigo-900/50 text-base font-black flex items-center justify-center border border-indigo-350">4</span>
- <span className="text-xl sm:text-2xl font-black">חישוב טעות מסוג שני (<InlineMath math="\\beta" />) ועוצמת המבחן (<InlineMath math="1-\\beta" />)</span>
+ <span className="text-xl sm:text-2xl font-black">חישוב טעות מסוג שני (<InlineMath math="\beta" />) ועוצמת המבחן (<InlineMath math="1-\beta" />)</span>
  </div>
  <p className="text-base sm:text-lg text-slate-200 leading-relaxed pr-9 font-semibold">
  עוצמת המבחן מייצגת את הסיכוי להגיע להחלטת דחייה מוצדקת עבור הטענה האלטרנטיבית. אנו בודקים מה השטח של התפלגות H₁ הנופל בתוך סקטור אזור הדחייה:
@@ -2154,7 +2154,7 @@ export default function HypothesisTestingCalculator() {
     <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-700/60 my-4 shadow-xl relative overflow-hidden">
       {/* Decorative quotes or watermark could be here */}
       <span className="absolute top-2 right-4 text-slate-700 text-6xl opacity-30 font-serif">"</span>
-      <p className="text-2xl sm:text-3xl font-handwriting text-slate-200 leading-relaxed text-center px-4 relative z-10" style={{ letterSpacing: '0.02em' }}>
+      <p className="text-2xl sm:text-3xl font-handwriting font-normal text-slate-200/90 leading-relaxed text-center px-4 relative z-10" style={{ letterSpacing: '0.02em', WebkitFontSmoothing: 'antialiased' }}>
       {decisionData.verbalConclusion}
       </p>
     </div>
