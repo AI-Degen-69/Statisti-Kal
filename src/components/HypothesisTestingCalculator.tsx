@@ -1382,8 +1382,8 @@ export default function HypothesisTestingCalculator() {
   <div className="contents">
 
  {/* Overlapping Curves Chart */}
- <div className="rounded-3xl p-6 md:p-8 border shadow-md transition-all bg-slate-900 border-slate-800 w-full min-w-0 order-1 lg:order-1">
- <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-slate-800 pb-4 mb-5">
+ <div className="rounded-3xl p-4 md:p-5 border shadow-md transition-all bg-slate-900 border-slate-800 w-full min-w-0 order-1 lg:order-1">
+ <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-slate-800 pb-3 mb-3">
  <div className="flex flex-wrap gap-4 text-xs sm:text-sm">
  <span className="flex items-center gap-1.5 font-black text-blue-400 select-none">
  <span className="w-3 h-3 rounded-none bg-blue-600 inline-block" />
@@ -1405,7 +1405,7 @@ export default function HypothesisTestingCalculator() {
  </div>
 
  {isValid && stats ? (
- <div className="h-[380px] w-full mt-4" dir="ltr">
+ <div className="h-[250px] w-full mt-2" dir="ltr">
  <ResponsiveContainer width="100%" height="100%">
  <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 5 }}>
   <defs>
