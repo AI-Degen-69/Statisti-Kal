@@ -1671,18 +1671,18 @@ export default function HypothesisTestingCalculator() {
  {/* H0 Card */}
  <div className="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 flex flex-col h-full text-right">
  <div className="flex items-center gap-2 text-blue-400 font-black justify-start mb-2">
- <span className="text-sm font-black px-2 py-0.5 rounded bg-blue-500/15 border border-blue-500/30 font-mono">H0</span>
- <span className="text-lg sm:text-xl font-black">השערת האפס</span>
+ <span className="text-lg font-black px-2 py-0.5 rounded bg-blue-500/15 border border-blue-500/30 font-mono">H0</span>
+ <span className="text-xl sm:text-xl font-black">השערת האפס</span>
  </div>
- <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal mb-4">
+ <p className="text-sm sm:text-sm text-slate-200 leading-relaxed font-normal mb-4">
  מניחה שאין השפעה, קשר או שינוי חדש במערכת, וכי המצב הקיים נותר <span className="font-bold underline">ללא שינוי</span>.
  הפרמטר הנבדק <span className="font-bold">שווה בדיוק</span> לערך הבסיס שהוגדר.
  </p>
- <div className="mt-auto bg-slate-950/80 py-4 px-2 rounded-xl border border-blue-500/40 text-center text-xl sm:text-2xl text-blue-100 shadow-inner" dir="ltr">
+ <div className="mt-auto bg-slate-950/80 py-2 px-1 rounded-xl border border-blue-500/40 text-center text-2xl sm:text-2xl text-blue-100 shadow-inner" dir="ltr">
  <BlockMath math={`H_0: \\mu = ${mu0}`} />
  </div>
- <p className="text-xs sm:text-sm text-slate-400 font-normal text-center mt-3">
- ℹ️ במילים: ההנחה כרגע היא כי ממוצע האוכלוסיה (<InlineMath math="\\mu" />) שווה ל-{mu0}.
+ <p className="text-sm sm:text-sm text-slate-400 font-normal text-center mt-3">
+ ℹ️ במילים: ההנחה כרגע היא כי הפרמטר הנחקר <span className="font-bold">שווה</span> ל-{mu0}.
  </p>
  </div>
 
@@ -1692,10 +1692,10 @@ export default function HypothesisTestingCalculator() {
  <span className="text-sm font-black px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 font-mono">H1</span>
  <span className="text-lg sm:text-xl font-black">השערת המחקר</span>
  </div>
- <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal mb-4">
- מייצגת את שאלת המחקר והשינוי שהחוקר מנסה להוכיח. כיוון הניסוח נקבע בהתאם לכיוון המבחן שהוגדר.
+ <p className="text-sm sm:text-sm text-slate-200 leading-relaxed font-normal mb-4">
+ משערת שקיים <span className="font-bold underline text-amber-500">שינוי</span> (קטן מ... / גדול מ... / שונה מ...) מערך הבסיס ע"פ ההתפלגות. את ההשערה הזו מוכיחים ע"י מבחן שנקבע מראש ע"י החוקר. 
  </p>
- <div className="mt-auto bg-slate-950/80 py-4 px-2 rounded-xl border border-amber-500/40 text-center text-xl sm:text-2xl text-amber-100 shadow-inner" dir="ltr">
+ <div className="mt-auto bg-slate-950/80 py-1 px-1 rounded-xl border border-amber-500/40 text-center text-2xl sm:text-2xl text-amber-100 shadow-inner" dir="ltr">
  {tailType === 'right' ? (
  <BlockMath math={`H_1: \\mu > ${mu0}`} />
  ) : tailType === 'left' ? (
@@ -1704,12 +1704,12 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`H_1: \\mu \\neq ${mu0}`} />
  )}
  </div>
- <p className="text-xs sm:text-sm text-slate-400 font-normal text-center mt-3">
- ✍️ ניסוח מילולי: תוחלת האוכלוסייה (<InlineMath math="\\mu" />) {' '}
+ <p className="text-sm sm:text-sm text-slate-400 font-normal text-center mt-3">
+ ℹ️ במילים: פרמטר האוכלוסיה הנחקר {' '}
  {tailType === 'right' ? (
- <span className="font-bold">גדולה מ-{mu0} (מבחן חד-צדדי ימני).</span>
+ <span className="font-bold">גדול מ-{mu0} (מבחן חד-צדדי ימני).</span>
  ) : tailType === 'left' ? (
- <span className="font-bold">קטנה מ-{mu0} (מבחן חד-צדדי שמאלי).</span>
+ <span className="font-bold">קטן מ-{mu0} (מבחן חד-צדדי שמאלי).</span>
  ) : (
  <span className="font-bold">שונה מ-{mu0} (מבחן דו-צדדי).</span>
  )}
@@ -1727,7 +1727,7 @@ export default function HypothesisTestingCalculator() {
  </div>
  <p className="text-base sm:text-lg text-slate-200 leading-relaxed pr-9 font-semibold">
  {varianceKnown 
- ? "לפי משפט הגבול המרכזי (CLT), שגיאת התקן מייצגת את פיזור ההתפלגות של הסטטיסטי שנמדד:"
+ ? "לפי משפט הגבול המרכזי, שגיאת התקן מייצגת את פיזור ההתפלגות של הסטטיסטי שנמדד:"
  : "מכיוון ששונות האוכלוסייה אינה ידועה, נשתמש בסטיית התקן המדגמית S כדי לאמוד את שגיאת התקן של הממוצע:"}
  </p>
  <div className="pr-9 py-3 text-xl md:text-2xl">
@@ -1738,7 +1738,7 @@ export default function HypothesisTestingCalculator() {
  ? "תצפית בודדת: הפיזור המקורי של האוכלוסייה תקף כמות שהוא."
  : "תצפית בודדת: פיזור המדגם המקורי (S) משמש ישירות כפיזור ההתפלגות."}
  </p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`SE = ${varianceKnown ?'\\sigma' :'S'} = ${sigmaInput}`} />
  </div>
@@ -1751,7 +1751,7 @@ export default function HypothesisTestingCalculator() {
  ? "ממוצע מדגם: סטיית התקן מתכווצת על פי שורש גודל המדגם."
  : "ממוצע מדגם: סטיית התקן המדגמית מתכווצת על פי שורש גודל המדגם."}
  </p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`SE = \\frac{${varianceKnown ?'\\sigma' :'S'}}{\\sqrt{n}} = \\frac{${sigmaInput}}{\\sqrt{${nInput}}} = ${stats.se.toFixed(4)}`} />
  </div>
@@ -1764,7 +1764,7 @@ export default function HypothesisTestingCalculator() {
  ? "סכום מדגם: ממוצעי ההשערה והפיזור גדלים על פי גודל המדגם."
  : "סכום מדגם: ממוצעי ההשערה והפיזור גדלים על פי גודל המדגם תוך שימוש ב-S."}
  </p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`SE = ${varianceKnown ?'\\sigma' :'S'} \\cdot \\sqrt{n} = ${sigmaInput} \\cdot \\sqrt{${nInput}} = ${stats.se.toFixed(4)}`} />
  </div>
@@ -1808,7 +1808,7 @@ export default function HypothesisTestingCalculator() {
  ? "חד-צדדי ימני: אנו מחפשים שטח עבודה משמאל בגודל 1-α."
  : "חד-צדדי ימני (מבחן t): אנו מאתרים בקצה הימני שטח ברמת מובהקות α."}
  </p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  {varianceKnown ? (
  <>
@@ -1829,38 +1829,38 @@ export default function HypothesisTestingCalculator() {
  עבור ערך קריטי מוגדר <InlineMath math="c" /> וכלל החלטה (עבור {statName} <InlineMath math={statSymbol} />):
  </p>
  
- <div className="space-y-3 pr-2">
- <div className="space-y-1">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-2">
+ <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
  <div className="flex items-start gap-2">
  <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
  <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+ <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-xs text-slate-400 font-bold italic mr-5">
- *תרגום למילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם גדולים או שווים לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).*
+ <p className="text-xs text-slate-400 font-normal italic mt-2 text-center">
+ ℹ️ במילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם גדולים או שווים לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
  </p>
  </div>
 
- <div className="space-y-1 pt-3 border-t border-dashed border-slate-800">
+ <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
  <div className="flex items-start gap-2">
  <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
  <strong className="text-red-400 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+ <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-xs text-slate-400 font-bold italic mr-5">
- *תרגום למילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים מתחת לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).*
+ <p className="text-xs text-slate-400 font-normal italic mt-2 text-center">
+ ℹ️ במילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים מתחת לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
  </p>
  </div>
  </div>
@@ -1873,7 +1873,7 @@ export default function HypothesisTestingCalculator() {
  ? "חד-צדדי שמאלי: אנו מחפשים שטח קיצון שמאלי בגודל α."
  : "חד-צדדי שמאלי (מבחן t): אנו מחפשים שטח קיצון שמאלי בגודל α בהתפלגות t."}
  </p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  {varianceKnown ? (
  <>
@@ -1894,38 +1894,38 @@ export default function HypothesisTestingCalculator() {
  עבור ערך קריטי מוגדר <InlineMath math="c" /> וכלל החלטה (עבור {statName} <InlineMath math={statSymbol} />):
  </p>
  
- <div className="space-y-3 pr-2">
- <div className="space-y-1">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-2">
+ <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
  <div className="flex items-start gap-2">
  <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
  <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+ <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-xs text-slate-400 font-bold italic mr-5">
- *תרגום למילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם קטנים או שווים לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).*
+ <p className="text-xs text-slate-400 font-normal italic mt-2 text-center">
+ ℹ️ במילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם קטנים או שווים לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
  </p>
  </div>
 
- <div className="space-y-1 pt-3 border-t border-dashed border-slate-800">
+ <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
  <div className="flex items-start gap-2">
  <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
  <strong className="text-red-400 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+ <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} > ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-xs text-slate-400 font-bold italic mr-5">
- *תרגום למילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים מעל לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).*
+ <p className="text-xs text-slate-400 font-normal italic mt-2 text-center">
+ ℹ️ במילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים מעל לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
  </p>
  </div>
  </div>
@@ -1934,7 +1934,7 @@ export default function HypothesisTestingCalculator() {
  ) : (
  <div className="space-y-4">
  <p className="text-base sm:text-lg text-slate-50 font-bold">דו-צדדי: אנו מפצלים את המובהקות לשני קצוות ההתפלגות (α/2 בכל קצה).</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  {varianceKnown ? (
  <>
@@ -1957,38 +1957,38 @@ export default function HypothesisTestingCalculator() {
  עבור שני ערכים קריטיים מוגדרים <InlineMath math="c_1, c_2" /> וכלל החלטה (עבור {statName} <InlineMath math={statSymbol} />):
  </p>
  
- <div className="space-y-3 pr-2">
- <div className="space-y-1">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-2">
+ <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
  <div className="flex items-start gap-2">
  <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-200 font-extrabold leading-relaxed">
  <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נחליט לדחות את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+ <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c1.toFixed(3)} \\;\\cup\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-xs text-slate-404 font-bold italic mr-5">
- *תרגום למילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם קטנים או שווים לערך הקריטי התחתון (<InlineMath math={`${stats.c1.toFixed(3)}`} />) או גדולים או שווים לערך הקריטי העליון (<InlineMath math={`${stats.c2.toFixed(3)}`} />).*
+ <p className="text-xs text-slate-400 font-normal italic mt-2 text-center">
+ ℹ️ במילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם קטנים או שווים לערך הקריטי התחתון (<InlineMath math={`${stats.c1.toFixed(3)}`} />) או גדולים או שווים לערך הקריטי העליון (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
  </p>
  </div>
 
- <div className="space-y-1 pt-3 border-t border-dashed border-slate-800">
+ <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
  <div className="flex items-start gap-2">
  <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
  <p className="text-xs sm:text-sm text-slate-205 text-slate-200 font-extrabold leading-relaxed">
  <strong className="text-red-400 font-black font-sans">אזור הקבלה / אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את השערת האפס <InlineMath math="H_0" />.
  </p>
  </div>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
- <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-sm sm:text-base md:text-lg font-extrabold min-w-[280px]">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+ <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${stats.c1.toFixed(3)} < ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-xs text-slate-404 font-bold italic mr-5">
- *תרגום למילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים בתחום התקין שבין שני הערכים הקריטיים שנקבעו.*
+ <p className="text-xs text-slate-400 font-normal italic mt-2 text-center">
+ ℹ️ במילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים בתחום התקין שבין שני הערכים הקריטיים שנקבעו.
  </p>
  </div>
  </div>
@@ -2013,7 +2013,7 @@ export default function HypothesisTestingCalculator() {
  tailType ==='right' ? (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">עוצמה מעל הערך הקריטי C (תחת התפלגות Z):</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`Z_{H1} = \\frac{C - \\mu_1}{SE} = \\frac{${stats.c2.toFixed(3)} - ${stats.effectH1Mean}}{${stats.se.toFixed(4)}} = ${((stats.c2 - stats.effectH1Mean) / stats.se).toFixed(4)}`} />
  <BlockMath math={`\\beta = P(Accept\\ H_0 | H_1\\ is\\ True) = \\Phi(Z_{H1}) = ${stats.beta.toFixed(4)}`} />
@@ -2024,7 +2024,7 @@ export default function HypothesisTestingCalculator() {
  ) : tailType ==='left' ? (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">עוצמה מתחת לערך הקריטי C (תחת התפלגות Z):</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`Z_{H1} = \\frac{C - \\mu_1}{SE} = \\frac{${stats.c1.toFixed(3)} - ${stats.effectH1Mean}}{${stats.se.toFixed(4)}} = ${((stats.c1 - stats.effectH1Mean) / stats.se).toFixed(4)}`} />
  <BlockMath math={`\\beta = P(Accept\\ H_0 | H_1\\ is\\ True) = 1 - \\Phi(Z_{H1}) = ${stats.beta.toFixed(4)}`} />
@@ -2035,7 +2035,7 @@ export default function HypothesisTestingCalculator() {
  ) : (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">עוצמה בשטח הדו-צדדי תחת H₁ (תחת התפלגות Z):</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`Z_{H1,1} = \\frac{C_1 - \\mu_1}{SE} = \\frac{${stats.c1.toFixed(3)} - ${stats.effectH1Mean}}{${stats.se.toFixed(4)}} = ${((stats.c1 - stats.effectH1Mean) / stats.se).toFixed(4)}`} />
  <BlockMath math={`Z_{H1,2} = \\frac{C_2 - \\mu_1}{SE} = \\frac{${stats.c2.toFixed(3)} - ${stats.effectH1Mean}}{${stats.se.toFixed(4)}} = ${((stats.c2 - stats.effectH1Mean) / stats.se).toFixed(4)}`} />
@@ -2049,7 +2049,7 @@ export default function HypothesisTestingCalculator() {
  tailType ==='right' ? (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">חישוב לפי פונקציית התפלגות t ופרמטר אי-מרכזיות (NCP):</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`NCP = \\frac{\\mu_{H1} - \\mu_{H0}}{SE} = \\frac{${stats.effectH1Mean} - ${stats.effectH0Mean}}{${stats.se.toFixed(4)}} = ${stats.ncp.toFixed(4)}`} />
  <BlockMath math={`t_{\\beta} = t_{crit} - NCP = ${stats.zCrit.toFixed(4)} - ${stats.ncp.toFixed(4)} = ${(stats.zCrit - stats.ncp).toFixed(4)}`} />
@@ -2061,7 +2061,7 @@ export default function HypothesisTestingCalculator() {
  ) : tailType ==='left' ? (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">חישוב לפי פונקציית התפלגות t ופרמטר אי-מרכזיות (NCP):</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`NCP = \\frac{\\mu_{H1} - \\mu_{H0}}{SE} = \\frac{${stats.effectH1Mean} - ${stats.effectH0Mean}}{${stats.se.toFixed(4)}} = ${stats.ncp.toFixed(4)}`} />
  <BlockMath math={`t_{\\beta} = t_{crit} - NCP = ${stats.zCrit.toFixed(4)} - ${stats.ncp.toFixed(4)} = ${(stats.zCrit - stats.ncp).toFixed(4)}`} />
@@ -2073,7 +2073,7 @@ export default function HypothesisTestingCalculator() {
  ) : (
  <div className="space-y-3">
  <p className="text-base sm:text-lg text-slate-50 font-bold">חישוב לפי פונקציית התפלגות t ופרמטר אי-מרכזיות (NCP):</p>
- <div className="w-full overflow-x-auto py-2 scrollbar-thin" dir="ltr">
+ <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-sm sm:text-base md:text-lg shadow-inner font-extrabold min-w-[280px]">
  <BlockMath math={`NCP = \\frac{\\mu_{H1} - \\mu_{H0}}{SE} = \\frac{${stats.effectH1Mean} - ${stats.effectH0Mean}}{${stats.se.toFixed(4)}} = ${stats.ncp.toFixed(4)}`} />
  <BlockMath math={`t_{\\beta, 1} = -t_{crit} - NCP = ${(-stats.zCrit).toFixed(4)} - ${stats.ncp.toFixed(4)} = ${(-stats.zCrit - stats.ncp).toFixed(4)}`} />
