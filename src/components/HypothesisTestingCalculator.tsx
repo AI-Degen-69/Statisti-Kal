@@ -1405,9 +1405,9 @@ export default function HypothesisTestingCalculator() {
  </div>
 
  {isValid && stats ? (
- <div className="h-[250px] w-full mt-2" dir="ltr">
+ <div className="h-[305px] w-full mt-2" dir="ltr">
  <ResponsiveContainer width="100%" height="100%">
- <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 5 }}>
+ <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 25 }}>
   <defs>
   <linearGradient id="h0Color" x1="0" y1="0" x2="0" y2="1">
   <stop offset="5%" stopColor={'var(--color-accent)'} stopOpacity={0.1}/>
@@ -1470,10 +1470,10 @@ export default function HypothesisTestingCalculator() {
  type="number" 
  domain={[chartLimits.xMin, chartLimits.xMax]}
  ticks={xAxisTicks}
- tick={{ fill:'var(--chart-axis-label)', fontSize: 13, fontWeight: 'bold' }}
+ tick={{ fill:'var(--chart-axis-label)', fontSize: 15, fontWeight: 'bold' }}
  axisLine={{ stroke:'var(--chart-grid)' }}
  tickLine={true}
- tickFormatter={(val) => val.toFixed(2)}
+ tickFormatter={(val) => val.toFixed(0)}
  />
  <YAxis hide={true} />
  <RechartsTooltip content={<CustomChartTooltip />} />
@@ -1486,7 +1486,7 @@ export default function HypothesisTestingCalculator() {
  strokeWidth={2} 
  fill="url(#h0Color)" 
  dot={false}
- isAnimationActive={false}
+ isAnimationActive={true}
  />
 
  {/* H1 Curve Base Area */}
@@ -1498,7 +1498,7 @@ export default function HypothesisTestingCalculator() {
  strokeWidth={2} 
  fill="url(#h1Color)" 
  dot={false}
- isAnimationActive={false}
+ isAnimationActive={true}
  />
  )}
 
@@ -1531,13 +1531,15 @@ export default function HypothesisTestingCalculator() {
   x={stats.effectH0Mean} 
   stroke="var(--color-accent)" 
   strokeWidth={1.5} 
-  strokeDasharray="4 4"
+  strokeDasharray="10 4"
   label={{
     value: "μ₀",
-    position: "top",
+    position: "bottom",
+    offset: 20,
+    dy: 15,
     fill: "var(--color-accent)",
     fontWeight: "bold",
-    fontSize: 12
+    fontSize: 15
   }}
   />
 
@@ -1546,13 +1548,15 @@ export default function HypothesisTestingCalculator() {
   x={stats.effectH1Mean} 
   stroke="var(--chart-4)" 
   strokeWidth={1.5} 
-  strokeDasharray="4 4"
+  strokeDasharray="10 4"
   label={calculatePower ? {
     value: "μ₁",
-    position: "top",
+    position: "bottom",
+    offset: 20,
+    dy: 15,
     fill: "var(--chart-4)",
     fontWeight: "bold",
-    fontSize: 12
+    fontSize: 15
   } : undefined}
   />
 
@@ -1624,7 +1628,7 @@ export default function HypothesisTestingCalculator() {
     <div className="mr-0 sm:mr-3 flex items-center shrink-0">
      {decisionData.isReject ? (
       <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.15)] leading-none">
-       <CheckCircle size={14} className="text-emerald-400 shrink-0" />
+       <CheckCircle size={18} className="text-emerald-400 shrink-0" />
        <span>החלטה: דוחים את </span>
        <span dir="ltr" className="inline-block"><InlineMath math="H_0" /></span>
       </div>
