@@ -1425,7 +1425,7 @@ export default function NormalDistributionCalculator() {
  return (
  <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-3 sm:p-6 flex flex-col items-center">
   {/* Modern Clean Header */}
-  <header className="w-full max-w-7xl mx-auto mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-850 pb-5">
+  <header className="w-full max-w-[1800px] mx-auto mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-850 pb-5">
    <div className="text-right w-full sm:w-auto" dir="rtl">
     <div className="flex items-center gap-3">
      <div className="p-2.5 bg-indigo-600/25 rounded-2xl border border-indigo-500/30 text-indigo-400">
@@ -1464,7 +1464,7 @@ export default function NormalDistributionCalculator() {
   </header>
 
   {/* Main Dashboard Panel */}
-  <main className="w-full max-w-7xl mx-auto flex flex-col gap-6" dir="rtl">
+  <main className="w-full max-w-[1800px] mx-auto flex flex-col gap-6" dir="rtl">
    <AnimatePresence mode="wait">
     {mode === 'hypothesis' ? (
      <motion.div
