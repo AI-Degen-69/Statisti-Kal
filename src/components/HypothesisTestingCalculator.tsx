@@ -2116,48 +2116,58 @@ export default function HypothesisTestingCalculator() {
       <span className="text-xl sm:text-2xl font-black">חישוב ופירוש ערך ה-P-Value</span>
     </div>
     
-    <p className="text-sm sm:text-base text-slate-100 font-extrabold mb-2 leading-relaxed">
-      ערך ה-P-Value (רמת מובהקות נצפית) מייצג את ההסתברות הסטטיסטית לקבל תוצאה במדגם שהיא קיצונית באותה מידה או יותר מהתוצאה שהתקבלה בפועל, תחת ההנחה המחמירה שהשערת האפס נכונה לחלוטין.
-    </p>
-
-    {tailType === 'two-tailed' && (
-      <p className="text-sm sm:text-base text-blue-300 font-bold leading-relaxed mt-2">
-        <span className="underline decoration-blue-500/50 underline-offset-4 decoration-2">הערה למבחן דו-צדדי:</span> מאחר ואנו בוחנים חריגה בשני הכיוונים של ההתפלגות באופן סימטרי, ההסתברות הסטטיסטית שהתקבלה מוכפלת פי שניים.
-      </p>
-    )}
-    
-    <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-2" dir="ltr">
-      <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
-        {varianceKnown ? (
-          <>
-            <BlockMath math={`Z_{stat} = \frac{\bar{X} - \mu_0}{SE} = ${decisionData.statObs.toFixed(4)}`} />
-            <BlockMath math={`P\text{-Value} = ${tailType === 'right' ? `P(Z > Z_{stat})` : tailType === 'left' ? `P(Z < Z_{stat})` : `2 \cdot P(|Z| > |Z_{stat}|)`} = ${decisionData.pValue.toFixed(4)}`} />
-          </>
-        ) : (
-          <>
-            <BlockMath math={`t_{stat} = \frac{\bar{X} - \mu_0}{SE} = ${decisionData.statObs.toFixed(4)}`} />
-            <BlockMath math={`P\text{-Value} = ${tailType === 'right' ? `P(t_{df} > t_{stat})` : tailType === 'left' ? `P(t_{df} < t_{stat})` : `2 \cdot P(|t_{df}| > |t_{stat}|)`} = ${decisionData.pValue.toFixed(4)}`} />
-          </>
-        )}
+    <div className="pr-5 py-1 space-y-4">
+      <div className="space-y-2 text-sm sm:text-base text-slate-100 font-medium leading-relaxed bg-slate-950/30 p-4 rounded-xl border border-slate-800/50">
+        <p>
+          <strong className="text-indigo-300">הרציונל הסטטיסטי למדד המבחן:</strong> מדד המבחן ({varianceKnown ? <InlineMath math="Z" /> : <InlineMath math="t" />}) מחושב על ידי בדיקת המרחק בין ממוצע המדגם שנצפה בפועל (<InlineMath math="\bar{X}" />) לבין התוחלת המשוערת תחת השערת האפס (<InlineMath math="\mu_0" />).
+          מרחק גולמי זה מחולק בשגיאת התקן (<InlineMath math="SE" />) על מנת לתקנן אותו. 
+        </p>
+        <p>
+          תקנון זה אומר לנו בדיוק <strong>כמה שגיאות תקן מרוחק המדגם שלנו</strong> מההשערה המקורית. אם המדגם קרוב לתוחלת המקורית (הפרש קרוב ל-0), התוצאה סבירה תחת <InlineMath math="H_0" />. ככל שהמרחק גדול יותר בערכו המוחלט, כך גוברות הראיות האמפיריות נגד השערת האפס.
+        </p>
       </div>
-    </div>
-    
-    <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 text-center pt-2 mt-2" style={{ letterSpacing: '0.02em', WebkitFontSmoothing: 'antialiased' }}>
-      <PenTool size={22} className="inline-block ml-2 opacity-60 text-indigo-400" /> {decisionData.pValue < alpha ? 'ההסתברות לקבל תוצאה זו מקרית הינה נמוכה ביותר, ולכן נדחה את השערת האפס.' : 'ההסתברות לקבל תוצאה זו אינה נמוכה מספיק, ולכן לא נוכל לדחות את השערת האפס.'}
-    </p>
 
-    <div className="mt-4 text-right">
-      <p className="text-sm sm:text-base text-slate-100 font-extrabold mb-2 leading-relaxed">
-        כללי הכרעה מבוססי P-Value:
+      <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-2" dir="ltr">
+        <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 space-y-3 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
+          {varianceKnown ? (
+            <>
+              <BlockMath math={`Z_{\text{stat}} = \frac{\bar{X} - \mu_0}{SE} = \frac{${mu1} - ${mu0}}{${stats.se.toFixed(4)}} = ${decisionData.statObs.toFixed(4)}`} />
+              <BlockMath math={`\text{P-Value} = ${tailType === 'right' ? `P(Z > Z_{\text{stat}})` : tailType === 'left' ? `P(Z < Z_{\text{stat}})` : `2 \cdot P(|Z| > |Z_{\text{stat}}|)`} = ${decisionData.pValue.toFixed(4)}`} />
+            </>
+          ) : (
+            <>
+              <BlockMath math={`t_{\text{stat}} = \frac{\bar{X} - \mu_0}{SE} = \frac{${mu1} - ${mu0}}{${stats.se.toFixed(4)}} = ${decisionData.statObs.toFixed(4)}`} />
+              <BlockMath math={`\text{P-Value} = ${tailType === 'right' ? `P(t_{\text{df}} > t_{\text{stat}})` : tailType === 'left' ? `P(t_{\text{df}} < t_{\text{stat}})` : `2 \cdot P(|t_{\text{df}}| > |t_{\text{stat}}|)`} = ${decisionData.pValue.toFixed(4)}`} />
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2 text-sm sm:text-base text-slate-100 font-medium leading-relaxed bg-slate-950/30 p-4 rounded-xl border border-slate-800/50 mt-4">
+        <p>
+          <strong className="text-emerald-300">חישוב ה-P-Value:</strong> רמת המובהקות הנצפית (P-Value) משקפת את ההסתברות הסטטיסטית לקבל תוצאה קיצונית באותה מידה או יותר, תחת ההנחה המחמירה ש-<InlineMath math="H_0" /> נכונה.
+        </p>
+        <p>
+          {tailType === 'right' && "במבחן חד-צדדי ימני, אנו מחשבים את ההסתברות לקבל במקרה ערך סטטיסטי הגדול או שווה לערך שחישבנו, ולכן אנו מודדים את השטח מימין למדד המבחן תחת עקומת ההתפלגות."}
+          {tailType === 'left' && "במבחן חד-צדדי שמאלי, אנו מחשבים את ההסתברות לקבל במקרה ערך סטטיסטי הקטן או שווה לערך שחישבנו, ולכן אנו מודדים את השטח משמאל למדד המבחן תחת עקומת ההתפלגות."}
+          {tailType === 'two-tailed' && "במבחן דו-צדדי, מאחר ואנו בוחנים חריגה סימטרית משני הכיוונים, אנו מחשבים את ההסתברות לקבל ערך סטטיסטי הקיצוני יותר בערכו המוחלט מהערך שחישבנו. לכן, השטח החד-צדדי מוכפל פי שניים בכדי לשקף את ההסתברות הכוללת."}
+        </p>
+      </div>
+      
+      <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 text-center pt-2 mt-4" style={{ letterSpacing: '0.02em', WebkitFontSmoothing: 'antialiased' }}>
+        <PenTool size={22} className="inline-block ml-2 opacity-60 text-indigo-400" /> {decisionData.pValue < alpha ? 'ההסתברות לקבל תוצאה זו מקרית הינה נמוכה ביותר, ולכן נדחה את השערת האפס.' : 'ההסתברות לקבל תוצאה זו אינה נמוכה מספיק, ולכן לא נוכל לדחות את השערת האפס.'}
       </p>
-      <ul className="list-disc list-inside space-y-2 text-slate-300 font-medium text-sm sm:text-base">
-        <li className={decisionData.pValue < alpha ? 'text-emerald-400 font-black' : ''}>
-          אם <InlineMath math="P\text{-Value} < \alpha" /> - נדחה את השערת האפס. {decisionData.pValue < alpha && <CheckCircle size={16} className="inline ml-1 mb-1" />}
-        </li>
-        <li className={decisionData.pValue >= alpha ? 'text-red-400 font-black' : ''}>
-          אם <InlineMath math="P\text{-Value} \ge \alpha" /> - לא נדחה את השערת האפס. {decisionData.pValue >= alpha && <CheckCircle size={16} className="inline ml-1 mb-1" />}
-        </li>
-      </ul>
+
+      <div className="mt-4 text-right">
+        <ul className="list-disc list-inside space-y-2 text-slate-300 font-medium text-sm sm:text-base">
+          <li className={decisionData.pValue < alpha ? 'text-emerald-400 font-black' : ''}>
+            אם <InlineMath math="P\text{-Value} < \alpha" /> - נדחה את השערת האפס. {decisionData.pValue < alpha && <CheckCircle size={16} className="inline ml-1 mb-1" />}
+          </li>
+          <li className={decisionData.pValue >= alpha ? 'text-red-400 font-black' : ''}>
+            אם <InlineMath math="P\text{-Value} \ge \alpha" /> - לא נדחה את השערת האפס. {decisionData.pValue >= alpha && <CheckCircle size={16} className="inline ml-1 mb-1" />}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -2199,7 +2209,7 @@ export default function HypothesisTestingCalculator() {
   <span className="font-mono text-indigo-300" dir="ltr"><InlineMath math={decisionData.isReject ? decisionData.zoneRejectionTeX : decisionData.zoneAcceptanceTeX} /></span>
   </div>
   <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
-  <span className="text-slate-400 font-extrabold flex items-center">הסתברות בהינתן <span className="font-mono ml-1 mt-0.5"><InlineMath math="H_0" /></span>:</span>
+  <span className="text-slate-400 font-extrabold flex items-center">הסתברות בהינתן <span className="font-mono ml-1 mt-0.5"><InlineMath math="H_0\ " /></span>:</span>
   <span className="font-mono text-indigo-300" dir="ltr"><InlineMath math={decisionData.isReject ? `P(\\bar{X} \\in C \\mid H_0) = \\alpha = ${alpha}` : `P(\\bar{X} \\in \\bar{C} \\mid H_0) = 1 - \\alpha = ${parseFloat((1 - alpha).toFixed(4))}`} /></span>
   </div>
   <div className="text-slate-300 font-semibold mt-1">
@@ -2238,20 +2248,6 @@ export default function HypothesisTestingCalculator() {
   <div className="text-right w-full min-w-0 order-2 lg:order-2">
     <DecisionMatrix isValid={isValid} stats={stats} alpha={alpha} calculatePower={calculatePower} />
   </div>
-
-  {/* Theoretical Help widget inside side panel */}
- <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 to-slate-900 border border-slate-800 text-white shadow-md relative overflow-hidden w-full min-w-0 order-4 lg:order-4" dir="rtl">
- <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full -mr-8 -mt-8 blur-xl" />
- <h4 className="text-sm font-black flex items-center gap-2 text-indigo-300 mb-2">
- <Info size={16} />
- הוראות הסבר מהירות:
- </h4>
- <ul className="text-xs space-y-2 text-slate-300 leading-relaxed pr-2 list-disc list-inside font-semibold font-sans">
- <li><strong>ממוצע H₀ המרכזי</strong> מבסס את קו התחלת הבסיס להשוואה (H₀ baseline).</li>
- <li><strong>אלטרנטיבה H₁</strong> מגדירה את המיקום השני המשוער בפועל.</li>
- <li>ככל שגודל המדגם (<InlineMath math="n" />) גדל, היכולת של המבחן להבחין אפילו באפקטים זעירים או שינויים קטנים בתוחלת משתפרת, מה שמאפשר לדחות את השערת האפס בקלות רבה יותר עבור אותה תוצאה מדגמית.</li>
- </ul>
- </div>
 
  </div>
 
