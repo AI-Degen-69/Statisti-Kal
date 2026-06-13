@@ -1681,7 +1681,7 @@ export default function HypothesisTestingCalculator() {
  <div className="mt-auto bg-slate-950/80 py-2 px-1 rounded-xl border border-blue-500/40 text-center text-lg sm:text-xl md:text-2xl text-blue-100 shadow-inner" dir="ltr">
  <BlockMath math={`H_0: \\mu = ${mu0}`} />
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
  ℹ️ במילים: ההנחה כרגע היא כי הפרמטר הנחקר <span className="font-bold">שווה</span> ל-{mu0}.
  </p>
  </div>
@@ -1704,7 +1704,7 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`H_1: \\mu \\neq ${mu0}`} />
  )}
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
  ℹ️ במילים: פרמטר האוכלוסיה הנחקר {' '}
  {tailType === 'right' ? (
  <span className="font-bold">גדול מ-{mu0} (מבחן חד-צדדי ימני).</span>
@@ -1740,9 +1740,12 @@ export default function HypothesisTestingCalculator() {
  </p>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
- <BlockMath math={`SE = ${varianceKnown ?'\\sigma' :'S'} = ${sigmaInput}`} />
- </div>
- </div>
+  <BlockMath math={`SE = ${varianceKnown ?'\\sigma' :'S'} = ${sigmaInput}`} />
+  </div>
+  </div>
+  <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 mt-5 text-center">
+  ℹ️ במילים: שגיאת התקן לתצפית בודדת שווה לסטיית התקן המקורית.
+  </p>
  </div>
  ) : testType ==='mean' ? (
  <div className="space-y-3">
@@ -1753,9 +1756,12 @@ export default function HypothesisTestingCalculator() {
  </p>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
- <BlockMath math={`SE = \\frac{${varianceKnown ?'\\sigma' :'S'}}{\\sqrt{n}} = \\frac{${sigmaInput}}{\\sqrt{${nInput}}} = ${stats.se.toFixed(4)}`} />
- </div>
- </div>
+  <BlockMath math={`SE = \\frac{${varianceKnown ?'\\sigma' :'S'}}{\\sqrt{n}} = \\frac{${sigmaInput}}{\\sqrt{${nInput}}} = ${stats.se.toFixed(4)}`} />
+  </div>
+  </div>
+  <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 mt-5 text-center">
+  ℹ️ במילים: שגיאת התקן שווה לסטיית התקן חלקי שורש גודל המדגם.
+  </p>
  </div>
  ) : (
  <div className="space-y-3">
@@ -1766,9 +1772,12 @@ export default function HypothesisTestingCalculator() {
  </p>
  <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
  <div className="bg-slate-900 p-4 sm:p-5 rounded-2xl border-2 border-slate-800 text-lg sm:text-xl md:text-2xl text-center shadow-inner font-extrabold min-w-[280px]">
- <BlockMath math={`SE = ${varianceKnown ?'\\sigma' :'S'} \\cdot \\sqrt{n} = ${sigmaInput} \\cdot \\sqrt{${nInput}} = ${stats.se.toFixed(4)}`} />
- </div>
- </div>
+  <BlockMath math={`SE = \\sqrt{n} \\cdot ${varianceKnown ?'\\sigma' :'S'} = \\sqrt{${nInput}} \\cdot ${sigmaInput} = ${stats.se.toFixed(4)}`} />
+  </div>
+  </div>
+  <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 mt-5 text-center">
+  ℹ️ במילים: שגיאת התקן לסכום שווה לסטיית התקן כפול שורש גודל המדגם.
+  </p>
  <div className="text-sm sm:text-base font-bold text-slate-200 mt-2 p-4 bg-slate-800 border border-slate-700 rounded-xl">
  ממוצעי ההתפלגות החדשים הופכים ל-
  <InlineMath math={`n \\cdot \\mu`} />:
@@ -1842,8 +1851,8 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
- ℹ️ במילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם גדולים או שווים לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+ ℹ️ במילים: אזור הדחייה - כל ערכי ה-{statName} בהינתן שהם גדולים או שווים ל-<InlineMath math={`${stats.c2.toFixed(3)}`} />.
  </p>
  </div>
 
@@ -1859,8 +1868,8 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
- ℹ️ במילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים מתחת לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+ ℹ️ במילים: אזור הקבלה - כל ערכי ה-{statName} בהינתן שהם קטנים מ-<InlineMath math={`${stats.c2.toFixed(3)}`} />.
  </p>
  </div>
  </div>
@@ -1907,8 +1916,8 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
- ℹ️ במילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם קטנים או שווים לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+ ℹ️ במילים: אזור הדחייה - כל ערכי ה-{statName} בהינתן שהם קטנים או שווים ל-<InlineMath math={`${stats.c2.toFixed(3)}`} />.
  </p>
  </div>
 
@@ -1924,8 +1933,8 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} > ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
- ℹ️ במילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים מעל לערך הקריטי שנקבע (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+ ℹ️ במילים: אזור הקבלה - כל ערכי ה-{statName} בהינתן שהם גדולים מ-<InlineMath math={`${stats.c2.toFixed(3)}`} />.
  </p>
  </div>
  </div>
@@ -1970,8 +1979,8 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c1.toFixed(3)} \\;\\cup\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
- ℹ️ במילים: אזור הדחייה מוגדר על ידי כל הערכים של {statName} שהם קטנים או שווים לערך הקריטי התחתון (<InlineMath math={`${stats.c1.toFixed(3)}`} />) או גדולים או שווים לערך הקריטי העליון (<InlineMath math={`${stats.c2.toFixed(3)}`} />).
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+ ℹ️ במילים: אזור הדחייה - ערכי ה-{statName} בהינתן שהם קטנים מ-<InlineMath math={`${stats.c1.toFixed(3)}`} /> או גדולים מ-<InlineMath math={`${stats.c2.toFixed(3)}`} />.
  </p>
  </div>
 
@@ -1987,8 +1996,8 @@ export default function HypothesisTestingCalculator() {
  <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${stats.c1.toFixed(3)} < ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
  </div>
  </div>
- <p className="text-sm sm:text-base text-slate-400 font-normal italic mt-3 text-center">
- ℹ️ במילים: אזור הקבלה מקיף את כל {statNamePlural} הנופלים בתחום התקין שבין שני הערכים הקריטיים שנקבעו.
+ <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+ ℹ️ במילים: אזור הקבלה - ערכי ה-{statName} בהינתן שהם נופלים בין שני הערכים הקריטיים שנקבעו.
  </p>
  </div>
  </div>
@@ -2158,11 +2167,23 @@ export default function HypothesisTestingCalculator() {
       {decisionData.verbalConclusion}
       </p>
     </div>
-    <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 text-sm text-slate-300 flex items-center justify-between shadow-inner">
-      <span className="font-extrabold text-slate-200">Exact P-Value:</span>
-      <span className={`font-mono text-xl tracking-wider font-black ${decisionData.pValue < alpha ? 'text-emerald-400' : 'text-red-400'}`}>
-        {decisionData.pValue < 0.0001 ? '< 0.0001' : decisionData.pValue.toFixed(4)}
-      </span>
+    <div className="bg-slate-900/40 p-5 rounded-2xl border border-slate-700 mt-6 shadow-lg flex flex-col gap-4 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-2 h-full bg-indigo-500/30"></div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <span className="font-black text-lg text-slate-200 flex items-center gap-2">
+          רמת המובהקות שהושגה בפועל (P-Value):
+        </span>
+        <div className={`px-5 py-2.5 rounded-xl border-2 font-mono text-2xl tracking-wider font-black shadow-inner flex items-center justify-center ${
+          decisionData.pValue < alpha 
+            ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' 
+            : 'bg-red-950/40 border-red-500/30 text-red-400'
+        }`}>
+          {decisionData.pValue < 0.0001 ? '< 0.0001' : decisionData.pValue.toFixed(4)}
+        </div>
+      </div>
+      <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 text-center border-t border-slate-800/60 pt-5 mt-2" style={{ letterSpacing: '0.02em', WebkitFontSmoothing: 'antialiased' }}>
+      ℹ️ במילים: ה-P-Value מייצג את ההסתברות לקבל תוצאה קיצונית כזו בהנחה שהשערת האפס נכונה.
+      </p>
     </div>
   </div>
  </div>
