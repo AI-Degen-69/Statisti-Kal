@@ -229,17 +229,15 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
     <div className="w-full rounded-2xl border border-slate-800 bg-slate-950/25 overflow-hidden">
       <table className="w-full text-base text-right border-collapse table-layout-fixed">
         <thead>
-          <tr className="bg-slate-800/70 text-sm text-slate-200 font-black border-b border-slate-800">
-            <th className="p-3 sm:p-4 border-l border-slate-800 text-center font-black text-slate-100 bg-slate-800/25 w-[20%] text-sm">
+          <tr className="bg-slate-800/70 text-xs text-slate-200 font-black border-b border-slate-800">
+            <th className="p-2 sm:p-3 border-l border-slate-800 text-center font-black text-slate-100 bg-slate-800/25 w-[20%]">
               החלטת המבחן
             </th>
-            <th className="p-3 sm:p-4 border-l border-slate-800 text-center font-black bg-blue-950/10 w-[40%] text-sm">
-              <span className="block mb-0.5"><InlineMath math="H_0" /> נכונה במציאות</span>
-              <span className="text-xs text-slate-300 font-normal">(אין אפקט)</span>
+            <th className="p-2 sm:p-3 border-l border-slate-800 text-center font-black bg-blue-950/10 w-[40%]">
+              <span><InlineMath math="H_0" /> נכונה במציאות</span>
             </th>
-            <th className={`p-3 sm:p-4 text-center font-black bg-amber-900/10 transition-all w-[40%] text-sm ${!calculatePower ? 'opacity-30' : ''}`}>
-              <span className="block mb-0.5"><InlineMath math="H_1" /> נכונה במציאות</span>
-              <span className="text-xs text-slate-300 font-normal">(קיים אפקט)</span>
+            <th className={`p-2 sm:p-3 text-center font-black bg-amber-900/10 transition-all w-[40%] ${!calculatePower ? 'opacity-30' : ''}`}>
+              <span><InlineMath math="H_1" /> נכונה במציאות</span>
             </th>
           </tr>
         </thead>
