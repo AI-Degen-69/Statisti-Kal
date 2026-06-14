@@ -1126,6 +1126,16 @@ export default function NormalDistributionCalculator() {
  const [inverseProbInput, setInverseProbInput] = useLocalStorageState<string>('ND_inverseProbInput', '0.95');
  const [inverseType, setInverseType] = useLocalStorageState<CalcType>('ND_inverseType', 'below');
 
+ // URL Routing for Direct Links
+ useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const urlMode = params.get('mode') || window.location.hash.replace('#', '');
+  const validModes = ['forward', 'inverse', 'table', 'hypothesis', 'formula-sheet'];
+  if (urlMode && validModes.includes(urlMode)) {
+   setMode(urlMode as CalcMode);
+  }
+ }, []);
+
  // Validations
  const errors = useMemo(() => {
   const errs: { [key: string]: string } = {};

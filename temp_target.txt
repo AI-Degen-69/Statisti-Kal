@@ -1,0 +1,137 @@
+                        <p className="text-base sm:text-lg text-slate-200 leading-relaxed pr-9 font-semibold mt-6">
+                          {varianceKnown ? (
+                            <span>
+                              כעת, עבור רמת מובהקות <InlineMath math={`\\alpha = ${alpha}`} />, נגדיר את אזור הדחייה (<InlineMath math="C" />) ואת אזור הקבלה (<InlineMath math="\bar{C}" />).
+                            </span>
+                          ) : (
+                            <span>
+                              כעת, עבור רמת מובהקות <InlineMath math={`\\alpha = ${alpha}`} /> ודרגות חופש <InlineMath math={`df = ${stats.df}`} />, נגדיר את אזורי ההחלטה תחת התפלגות <InlineMath math="t" />.
+                            </span>
+                          )}
+                        </p>
+
+                        <div className="pr-9 py-3 space-y-5 text-xl md:text-2xl">
+                          {/* General formula template */}
+                          <FormulaBlock>
+                            {tailType === 'right' ? (
+                              <>
+                                <BlockMath math={`${varianceKnown ? 'Z' : 't'}_{crit} = ${varianceKnown ? '\\Phi^{-1}(1 - \\alpha)' : 'F_{t,df}^{-1}(1 - \\alpha)'}`} />
+                                <BlockMath math={`C = \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{crit} \\cdot SE`} />
+                                <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\ge \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{1-\\alpha} \\cdot SE \\right\\}`} />
+                                <BlockMath math={`\\bar{C} = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} < \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{1-\\alpha} \\cdot SE \\right\\}`} />
+                              </>
+                            ) : tailType === 'left' ? (
+                              <>
+                                <BlockMath math={`${varianceKnown ? 'Z' : 't'}_{crit} = ${varianceKnown ? '\\Phi^{-1}(\\alpha)' : 'F_{t,df}^{-1}(\\alpha)'}`} />
+                                <BlockMath math={`C = \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{crit} \\cdot SE`} />
+                                <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{\\alpha} \\cdot SE \\right\\}`} />
+                                <BlockMath math={`\\bar{C} = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} > \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{\\alpha} \\cdot SE \\right\\}`} />
+                              </>
+                            ) : (
+                              <>
+                                <BlockMath math={`${varianceKnown ? 'Z' : 't'}_{crit} = ${varianceKnown ? '\\Phi^{-1}(1 - \\alpha/2)' : 'F_{t,df}^{-1}(1 - \\alpha/2)'}`} />
+                                <BlockMath math={`C_1 = \\mu_0 - ${varianceKnown ? 'Z' : 't'}_{crit} \\cdot SE \\quad,\\quad C_2 = \\mu_0 + ${varianceKnown ? 'Z' : 't'}_{crit} \\cdot SE`} />
+                                <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le C_1 \\;\\cup\\; ${statSymbol} \\ge C_2 \\right\\}`} />
+                                <BlockMath math={`\\bar{C} = \\left\\{ ${statSymbol} \\;\\middle|\\; C_1 < ${statSymbol} < C_2 \\right\\}`} />
+                              </>
+                            )}
+                          </FormulaBlock>
+
+                          {/* Calculation with actual values */}
+                          <CalcBlock>
+                            {tailType === 'right' ? (
+                              varianceKnown ? (
+                                <>
+                                  <BlockMath math={`Z_{crit} = \\Phi^{-1}(1 - ${alpha}) = \\Phi^{-1}(${(1 - alpha).toFixed(4)}) = ${stats.zCrit.toFixed(4)}`} />
+                                  <BlockMath math={`C = ${stats.effectH0Mean} + (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c2.toFixed(4)}`} />
+                                </>
+                              ) : (
+                                <>
+                                  <BlockMath math={`t_{crit} = F_{t, ${stats.df}}^{-1}(1 - ${alpha}) = ${stats.zCrit.toFixed(4)}`} />
+                                  <BlockMath math={`C = ${stats.effectH0Mean} + (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c2.toFixed(4)}`} />
+                                </>
+                              )
+                            ) : tailType === 'left' ? (
+                              varianceKnown ? (
+                                <>
+                                  <BlockMath math={`Z_{crit} = \\Phi^{-1}(${alpha}) = ${stats.zCrit.toFixed(4)}`} />
+                                  <BlockMath math={`C = ${stats.effectH0Mean} + (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c2.toFixed(4)}`} />
+                                </>
+                              ) : (
+                                <>
+                                  <BlockMath math={`t_{crit} = F_{t, ${stats.df}}^{-1}(${alpha}) = ${stats.zCrit.toFixed(4)}`} />
+                                  <BlockMath math={`C = ${stats.effectH0Mean} + (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c2.toFixed(4)}`} />
+                                </>
+                              )
+                            ) : (
+                              varianceKnown ? (
+                                <>
+                                  <BlockMath math={`Z_{crit} = \\Phi^{-1}(1 - \\frac{${alpha}}{2}) = \\Phi^{-1}(${(1 - alpha / 2).toFixed(4)}) = ${stats.zCrit.toFixed(4)}`} />
+                                  <BlockMath math={`C_1 = ${stats.effectH0Mean} - (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c1.toFixed(4)}`} />
+                                  <BlockMath math={`C_2 = ${stats.effectH0Mean} + (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c2.toFixed(4)}`} />
+                                </>
+                              ) : (
+                                <>
+                                  <BlockMath math={`t_{crit} = F_{t, ${stats.df}}^{-1}(1 - \\frac{${alpha}}{2}) = ${stats.zCrit.toFixed(4)}`} />
+                                  <BlockMath math={`C_1 = ${stats.effectH0Mean} - (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c1.toFixed(4)}`} />
+                                  <BlockMath math={`C_2 = ${stats.effectH0Mean} + (${stats.zCrit.toFixed(4)}) \\cdot ${stats.se.toFixed(4)} = ${stats.c2.toFixed(4)}`} />
+                                </>
+                              )
+                            )}
+                          </CalcBlock>
+
+                          {/* C and C̄ zone sets */}
+                          <div className="mt-4 space-y-4 text-right" dir="rtl">
+                            <p className="text-sm sm:text-base text-slate-100 font-extrabold mb-2 leading-relaxed">
+                              כלל ההחלטה המוגדר (עבור {statName} <InlineMath math={statSymbol} />):
+                            </p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-2">
+                              <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-emerald-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+                                  <p className="text-sm sm:text-base text-slate-200 font-extrabold leading-relaxed">
+                                    <strong className="text-emerald-400 font-black font-sans">אזור הדחייה (<InlineMath math="C" />):</strong> קבוצת הערכים שעבורם נדחה את <InlineMath math="H_0" />.
+                                  </p>
+                                </div>
+                                <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+                                  <div className="bg-emerald-950/20 p-4 sm:p-5 rounded-2xl border-2 border-emerald-500/30 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
+                                    {tailType === 'right' ? (
+                                      <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
+                                    ) : tailType === 'left' ? (
+                                      <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c2.toFixed(3)} \\right\\}`} />
+                                    ) : (
+                                      <BlockMath math={`C = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} \\le ${stats.c1.toFixed(3)} \\;\\cup\\; ${statSymbol} \\ge ${stats.c2.toFixed(3)} \\right\\}`} />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60 flex flex-col h-full">
+                                <div className="flex items-start gap-2">
+                                  <span className="text-red-400 font-extrabold text-sm sm:text-base shrink-0">●</span>
+                                  <p className="text-sm sm:text-base text-slate-200 font-extrabold leading-relaxed">
+                                    <strong className="text-red-400 font-black font-sans">אזור אי-הדחייה (<InlineMath math="C^c" />):</strong> קבוצת הערכים המשלימה שעבורם לא נדחה את <InlineMath math="H_0" />.
+                                  </p>
+                                </div>
+                                <div className="w-full overflow-x-auto py-2 scrollbar-thin mt-auto" dir="ltr">
+                                  <div className="bg-red-950/20 p-4 sm:p-5 rounded-2xl border-2 border-red-500/30 text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.1)] space-y-3 text-lg sm:text-xl md:text-2xl text-center font-extrabold min-w-[280px]">
+                                    {tailType === 'right' ? (
+                                      <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
+                                    ) : tailType === 'left' ? (
+                                      <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${statSymbol} > ${stats.c2.toFixed(3)} \\right\\}`} />
+                                    ) : (
+                                      <BlockMath math={`C^c = \\left\\{ ${statSymbol} \\;\\middle|\\; ${stats.c1.toFixed(3)} < ${statSymbol} < ${stats.c2.toFixed(3)} \\right\\}`} />
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Researcher's note */}
+                          <p className="text-xl sm:text-2xl font-handwriting font-normal text-slate-300 leading-relaxed mt-4 text-center">
+                            <PenTool size={22} className="inline-block ml-2 opacity-60 text-indigo-400" /> הגדרנו את אזורי ההחלטה: אם {statName} ייפול באזור <InlineMath math="C" /> — נדחה את <InlineMath math="H_0" />. אם ייפול באזור <InlineMath math="\bar{C}" /> — לא נדחה אותה.
+                          </p>
+                        </div>
+                      </div>
