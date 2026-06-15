@@ -2264,7 +2264,7 @@ export default function HypothesisTestingCalculator() {
                                                         </FormulaBlock>
                                                     </div>
 
-                                                    <p className="text-xl sm:text-2xl font-handwriting font-normal text-[var(--color-text-primary)] leading-relaxed text-center mt-6">
+                                                    <p className="text-xl sm:text-2xl font-handwriting font-normal text-[var(--color-text-primary)] leading-relaxed text-center mt-2 mb-8">
                                                         <PenTool size={22} className="inline-block ml-2 opacity-60 text-[var(--color-neutral-accent)]" />{' '}
                                                         בגישת סטטיסטי המבחן נדחה את <strong className="text-white">השערת האפס</strong> (<InlineMath math="H_0" />) אם סטטיסטי המבחן המחושב נופל באזור הדחייה, מעבר לערך הסף הקריטי.
                                                     </p>
@@ -2290,8 +2290,9 @@ export default function HypothesisTestingCalculator() {
                                                         const muSymbol = testType === 'sum' ? 'E(\\sum X)' : '\\mu_0';
                                                         return (
                                                             <>
-                                                                <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold mt-4">
-                                                                    לחלופין, נגדיר את אזור הדחייה (<InlineMath math="C" />) במונחי הערך המקורי ({testType === 'sum' ? 'סכום התצפיות' : testType === 'single' ? 'התצפית הבודדת' : 'ממוצע המדגם'}):
+                                                                <hr className="my-10 border-[var(--color-border)] opacity-30 w-1/2 mx-auto" />
+<p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
+לחלופין, נגדיר את אזור הדחייה (<InlineMath math="C" />) במונחי הערך המקורי ({testType === 'sum' ? 'סכום התצפיות' : testType === 'single' ? 'התצפית הבודדת' : 'ממוצע המדגם'}):
                                                                 </p>
 
                                                                 <div className="py-3 space-y-4 text-xl md:text-2xl">
@@ -2320,7 +2321,7 @@ export default function HypothesisTestingCalculator() {
 
 
 
-                                                                <p className="text-xl sm:text-2xl font-handwriting font-normal text-[var(--color-text-primary)] leading-relaxed text-center mt-6">
+                                                                <p className="text-xl sm:text-2xl font-handwriting font-normal text-[var(--color-text-primary)] leading-relaxed text-center mt-2 mb-8">
                                                                     <PenTool size={22} className="inline-block ml-2 opacity-60 text-[var(--color-neutral-accent)]" />{' '}
                                                                     בגישת אזור הדחייה (הערך המקורי) נדחה את <strong className="text-white">השערת האפס</strong> (<InlineMath math="H_0" />) אם הערך המקורי של המדגם שייך לקבוצת הדחייה (<InlineMath math="C" />).
                                                                 </p>
@@ -2363,7 +2364,7 @@ export default function HypothesisTestingCalculator() {
                                                         </FormulaBlock>
                                                     </div>
 
-                                                    <p className="text-xl sm:text-2xl font-handwriting font-normal text-[var(--color-text-primary)] leading-relaxed text-center mt-6">
+                                                    <p className="text-xl sm:text-2xl font-handwriting font-normal text-[var(--color-text-primary)] leading-relaxed text-center mt-2 mb-8">
                                                         <PenTool size={22} className="inline-block ml-2 opacity-60 text-[var(--color-neutral-accent)]" />{' '}
                                                         בגישת מובהקות התוצאה נדחה את <strong className="text-white">השערת האפס</strong> (<InlineMath math="H_0" />) אם ההסתברות לקבל תוצאת מדגם כזו או קיצונית ממנה קטנה או שווה לרמת המובהקות (<InlineMath math="\alpha" />).
                                                     </p>
