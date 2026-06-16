@@ -1045,7 +1045,7 @@ export default function HypothesisTestingCalculator() {
         if (active && payload && payload.length) {
             const dataPt = payload[0].payload;
             return (
-                <div className="p-3 border rounded-sm shadow-sm text-sm font-sans space-y-2 backdrop-blur-md bg-[var(--color-background)]/90 border-[var(--color-border)] text-[var(--color-text-primary)] min-w-[160px]" dir="rtl">
+                <div className="p-3 border rounded-sm shadow-sm text-sm font-sans space-y-2 backdrop-blur-md bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] min-w-[160px]" dir="rtl">
                     <div className="flex justify-between gap-6 border-b border-[var(--color-border)] pb-2 mb-2">
                         <span className="font-bold text-[var(--color-accent-cobalt)]">תצפית X:</span>
                         <span className="font-mono font-bold text-[var(--color-accent-cobalt)]" dir="ltr">{dataPt.x.toFixed(2)}</span>
@@ -1069,7 +1069,7 @@ export default function HypothesisTestingCalculator() {
         if (active && payload && payload.length) {
             const dataPt = payload[0].payload;
             return (
-                <div className="p-3 border rounded-sm shadow-sm text-sm font-sans space-y-2 backdrop-blur-md bg-[var(--color-background)]/90 border-[var(--color-border)] text-[var(--color-text-primary)] min-w-[160px]" dir="rtl">
+                <div className="p-3 border rounded-sm shadow-sm text-sm font-sans space-y-2 backdrop-blur-md bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] min-w-[160px]" dir="rtl">
                     <div className="flex justify-between gap-6 border-b border-[var(--color-border)] pb-2 mb-2">
                         <span className="font-bold text-[var(--color-accent-cobalt)]">תצפית X:</span>
                         <span className="font-mono font-bold text-[var(--color-accent-cobalt)]" dir="ltr">{dataPt.x.toFixed(2)}</span>
@@ -1094,7 +1094,7 @@ export default function HypothesisTestingCalculator() {
     return (
         <div className="space-y-8 bg-[var(--color-background)] min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
             {/* Parameters Input Card */}
-            <div className="rounded-lg p-5 md:p-6 border shadow-md transition-colors bg-[var(--color-background)] border-[var(--color-border)]">
+            <div className="rounded-lg p-5 md:p-6 border shadow-md transition-colors bg-[var(--color-surface)] border-[var(--color-border)]">
                 <div className="flex items-center gap-2 border-b border-[var(--color-border)] pb-4 mb-5">
                     <Sliders size={20} className="text-[var(--color-accent-cobalt)]" />
                     <h3 className="text-lg sm:text-xl font-black text-[var(--color-text-primary)]">
@@ -1105,7 +1105,7 @@ export default function HypothesisTestingCalculator() {
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_225px] gap-6">
                     <div className="flex-1 min-w-0">
                         {/* Custom Parameters Table Layout */}
-                        <div className="overflow-visible rounded-lg border border-[var(--color-border)] bg-[var(--color-background)]/10 transition-all mb-6" dir="rtl">
+                        <div className="overflow-visible rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] transition-all mb-6" dir="rtl">
                             <table className="w-full border-collapse border-spacing-0">
                                 <thead>
                                     <tr className="bg-[var(--color-surface)] border-b border-[var(--color-border)]">
@@ -1134,7 +1134,7 @@ export default function HypothesisTestingCalculator() {
                                 <tbody>
                                     {/* Row 1: mu0, n, and power toggle */}
                                     <tr className="border-b border-[var(--color-border)]">
-                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-background)]/40">
+                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-surface-raised)]">
                                             <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                                                 <InputTooltip content="תוחלת אוכלוסיית הבסיס (השערת האפס H₀)">
                                                     <span className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-bold shrink-0 cursor-help border-b border-dotted border-[var(--color-border)]">
@@ -1157,7 +1157,7 @@ export default function HypothesisTestingCalculator() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-background)]/40">
+                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-surface-raised)]">
                                             <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                                                 <InputTooltip content="מספר התצפיות במדגם (n)">
                                                     <span className={`text-xs sm:text-sm text-[var(--color-text-secondary)] font-bold shrink-0 cursor-help border-b border-dotted border-[var(--color-border)] ${testType === 'single' ? 'opacity-30' : ''}`}>
@@ -1181,7 +1181,7 @@ export default function HypothesisTestingCalculator() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-3 align-middle bg-[var(--color-background)]/40">
+                                        <td className="p-3 align-middle bg-[var(--color-surface-raised)]">
                                             <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                                                 <span className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-bold shrink-0">
                                                     חישוב עוצמה
@@ -1209,10 +1209,10 @@ export default function HypothesisTestingCalculator() {
 
                                     {/* Row 2: sigma, xBar(mu1), and muH1 */}
                                     <tr>
-                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-background)]/40">
+                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-surface-raised)]">
                                             {/* sigma input removed from here - now in Step 2 */}
                                         </td>
-                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-background)]/40">
+                                        <td className="p-3 align-middle border-l border-[var(--color-border)] bg-[var(--color-surface-raised)]">
                                             <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                                                 <InputTooltip content="ממוצע המדגם בפועל">
                                                     <span className="text-xs sm:text-sm text-[var(--color-text-secondary)] font-bold shrink-0 cursor-help border-b border-dotted border-[var(--color-border)]">
@@ -1235,7 +1235,7 @@ export default function HypothesisTestingCalculator() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className={`p-3 align-middle bg-[var(--color-background)]/40 transition-all ${!calculatePower ? 'opacity-30' : ''}`}>
+                                        <td className={`p-3 align-middle bg-[var(--color-surface-raised)] transition-all ${!calculatePower ? 'opacity-30' : ''}`}>
                                             <div className="flex items-center justify-between gap-2 ctrl-cell-wrapper w-full">
                                                 <InputTooltip content="התוחלת המשוערת תחת השערת המחקר האלטרנטיבית (H₁)">
                                                     <span className={`text-xs sm:text-sm font-bold shrink-0 cursor-help border-b border-dotted border-[var(--color-border)] ${!calculatePower ? 'text-[var(--color-text-primary)] opacity-50' : 'text-[var(--color-text-secondary)]'}`}>
@@ -1267,7 +1267,7 @@ export default function HypothesisTestingCalculator() {
 
                     </div>
                     {/* Main Test Statistic Type Selector */}
-                    <div className="flex flex-col gap-3 shrink-0 h-[229.583px] w-[201px] bg-[var(--color-background)]/20 border border-[var(--color-border)] p-4 rounded-lg">
+                    <div className="flex flex-col gap-3 shrink-0 h-[229.583px] w-[201px] bg-[var(--color-surface)] border border-[var(--color-border)] p-4 rounded-lg">
                         <span className="text-xs sm:text-sm font-black text-[var(--color-text-primary)] text-right w-full">סטטיסטי המבחן:</span>
                         <div className="flex flex-col gap-2 w-full">
                             {[
@@ -1281,7 +1281,7 @@ export default function HypothesisTestingCalculator() {
                                     onClick={() => setTestType(item.id as TestType)}
                                     className={`py-3 px-4 rounded-sm text-xs sm:text-sm font-black transition-all text-center border ${testType === item.id
                                         ? 'bg-[var(--color-accent-cobalt-bg-hover)] text-white border-[var(--color-accent-cobalt-line)] shadow-md scale-[1.02]'
-                                        : 'bg-[var(--color-background)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:bg-[var(--color-surface)]'
+                                        : 'bg-[var(--color-surface)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:bg-[var(--color-surface)]'
                                         }`}
                                 >
                                     {item.label}
@@ -1293,7 +1293,7 @@ export default function HypothesisTestingCalculator() {
             </div>
 
             {/* Popular Z & Phi Row for Hypothesis Testing */}
-            <div className="mb-6 bg-[var(--color-background)]/60 border border-[var(--color-border)] rounded-lg p-4 text-right space-y-3 shadow-sm">
+            <div className="mb-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-4 text-right space-y-3 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 text-[var(--color-text-primary)]">
                         <Sliders size={14} className="text-[var(--color-accent-cobalt)]" />
@@ -1334,7 +1334,7 @@ export default function HypothesisTestingCalculator() {
                                 }}
                                 className={`p-2 rounded-sm border text-center transition-all duration-300 relative overflow-hidden select-none cursor-pointer flex flex-col justify-between h-20 ${isMatched
                                     ? 'bg-[var(--color-accent-cobalt-bg-hover)]/20 border-[var(--color-border)] shadow-[0_0_15px_rgba(99,102,241,0.25)] ring-1 ring-[var(--color-accent-cobalt-line)]'
-                                    : 'bg-[var(--color-background)]/40 border-[var(--color-border)] hover:bg-[var(--color-background)]/60 opacity-40 hover:opacity-100'
+                                    : 'bg-[var(--color-surface-raised)] border-[var(--color-border)] hover:bg-[var(--color-surface)] opacity-40 hover:opacity-100'
                                     }`}
                             >
                                 {isMatched && (
@@ -1365,7 +1365,7 @@ export default function HypothesisTestingCalculator() {
                 <div className="contents">
 
                     {/* Overlapping Curves Chart */}
-                    <div className="rounded-lg p-4 md:p-5 border shadow-md transition-all bg-[var(--color-background)] border-[var(--color-border)] w-full min-w-0 order-1 lg:order-1">
+                    <div className="rounded-lg p-4 md:p-5 border shadow-md transition-all bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 order-1 lg:order-1">
                         <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-[var(--color-border)] pb-3 mb-3">
                             <div className="flex flex-wrap gap-4 text-xs sm:text-sm">
                                 <span className="flex items-center gap-1.5 font-black text-[var(--color-accent-brass)] select-none">
@@ -1603,7 +1603,7 @@ export default function HypothesisTestingCalculator() {
                     </div>
 
                     {/* Solutions Steps Accordion / Panel */}
-                    <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-background)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
+                    <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
                         <button
                             onClick={() => setShowSteps(!showSteps)}
                             className="w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
@@ -1693,7 +1693,7 @@ export default function HypothesisTestingCalculator() {
                                                             }
 
                                                             return (
-                                                                <div className="flex flex-col items-center justify-center p-6 bg-[var(--color-background)]/90 border border-[var(--color-border)] rounded-lg min-w-[280px] sm:min-w-[400px] text-center shadow-md relative group">
+                                                                <div className="flex flex-col items-center justify-center p-6 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg min-w-[280px] sm:min-w-[400px] text-center shadow-md relative group">
                                                                     <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[var(--color-text-primary)] font-mono tracking-wide flex items-center justify-center w-full z-10" dir="ltr">
                                                                         <InlineMath math={`H_0: ${parameterSymbol} ${h0Symbol} ${h0Val} \\quad \\text{Vs.} \\quad H_1: ${parameterSymbol}`} />
                                                                         <button
@@ -1808,7 +1808,7 @@ export default function HypothesisTestingCalculator() {
                                                                             exit={{ opacity: 0, height: 0 }}
                                                                             className="mt-6 w-[200px]"
                                                                         >
-                                                                            <div className="bg-[var(--color-background)]/80 p-3 rounded-lg border border-[var(--color-accent-cobalt-line)]/30 shadow-sm">
+                                                                            <div className="bg-[var(--color-surface)] p-3 rounded-lg border border-[var(--color-accent-cobalt-line)]/30 shadow-sm">
                                                                                 <label className="block text-xs font-bold text-[var(--color-text-secondary)] mb-2 text-center">
                                                                                     הזן סטיית תקן של האוכלוסייה (<InlineMath math="\sigma" />):
                                                                                 </label>
@@ -1856,7 +1856,7 @@ export default function HypothesisTestingCalculator() {
                                                                             exit={{ opacity: 0, height: 0 }}
                                                                             className="mt-6 w-[200px]"
                                                                         >
-                                                                            <div className="bg-[var(--color-background)]/80 p-3 rounded-lg border border-[var(--color-accent-teal)]/30 shadow-sm">
+                                                                            <div className="bg-[var(--color-surface)] p-3 rounded-lg border border-[var(--color-accent-teal)]/30 shadow-sm">
                                                                                 <label className="flex flex-col items-center justify-center text-xs font-bold text-[var(--color-text-secondary)] mb-2 text-center">
                                                                                     <div className="flex items-center gap-1">
                                                                                         <span>הזן סטיית תקן מדגמית (<InlineMath math="S" />):</span>
@@ -1918,7 +1918,7 @@ export default function HypothesisTestingCalculator() {
                                                         בחר רמת מובהקות (<InlineMath math="\alpha" />):
                                                     </span>
 
-                                                    <div className="flex gap-1.5 bg-[var(--color-background)]/40 p-1.5 rounded-lg border border-[var(--color-border)]">
+                                                    <div className="flex gap-1.5 bg-[var(--color-surface-raised)] p-1.5 rounded-lg border border-[var(--color-border)]">
                                                         {[0.10, 0.05, 0.01].map((pVal) => (
                                                             <button
                                                                 key={pVal}
@@ -1939,7 +1939,7 @@ export default function HypothesisTestingCalculator() {
                                                             type="text"
                                                             value={alphaInput}
                                                             onChange={(e) => handleAlphaChange(e.target.value)}
-                                                            className={`w-18 px-2.5 py-1.5 bg-[var(--color-background)] border rounded-sm text-center font-mono font-bold text-sm text-[var(--color-accent-cobalt)] focus:bg-[var(--color-surface)] outline-none ${errors.alpha ? 'border-[var(--color-border)] text-[var(--color-error)] ring-4 ring-[var(--color-accent-crimson)]/10' : 'border-[var(--color-border)] focus:ring-4 focus:ring-[var(--color-accent-cobalt-line)]/10'
+                                                            className={`w-18 px-2.5 py-1.5 bg-[var(--color-surface)] border rounded-sm text-center font-mono font-bold text-sm text-[var(--color-accent-cobalt)] focus:bg-[var(--color-surface)] outline-none ${errors.alpha ? 'border-[var(--color-border)] text-[var(--color-error)] ring-4 ring-[var(--color-accent-crimson)]/10' : 'border-[var(--color-border)] focus:ring-4 focus:ring-[var(--color-accent-cobalt-line)]/10'
                                                                 }`}
                                                             placeholder="0.05"
                                                             dir="ltr"
@@ -1995,9 +1995,9 @@ export default function HypothesisTestingCalculator() {
 
                                                     {/* Mini alpha chart */}
                                                     {stats && (
-                                                        <div className="relative w-full max-w-lg mx-auto mb-8 mt-2 pt-6 pb-2 px-2 sm:px-5 bg-[var(--color-background)]/60 rounded-lg border border-[var(--color-border)] shadow-inner" dir="ltr">
+                                                        <div className="relative w-full max-w-lg mx-auto mb-8 mt-2 pt-6 pb-2 px-2 sm:px-5 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] shadow-inner" dir="ltr">
                                                             {/* Compact Legend */}
-                                                            <div className="absolute top-4 right-6 flex items-center gap-1.5 text-xs text-[var(--color-text-primary)] font-bold bg-[var(--color-background)]/80 py-1.5 px-3 rounded-lg border border-[var(--color-border)]/50 z-10" dir="rtl">
+                                                            <div className="absolute top-4 right-6 flex items-center gap-1.5 text-xs text-[var(--color-text-primary)] font-bold bg-[var(--color-surface)] py-1.5 px-3 rounded-lg border border-[var(--color-border)]/50 z-10" dir="rtl">
                                                                 <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> <InlineMath math="\alpha" />
                                                             </div>
 
@@ -2444,7 +2444,7 @@ export default function HypothesisTestingCalculator() {
                                                                     <th className="p-4 font-bold border-b border-[var(--color-border)]/50 text-center">כלל ההחלטה (מבחן {tailType === 'right' ? 'ימני' : tailType === 'left' ? 'שמאלי' : 'דו-צדדי'})</th>
                                                                 </tr>
                                                             </thead>
-                                                            <tbody className="bg-[var(--color-background)]/40 text-[var(--color-text-primary)]">
+                                                            <tbody className="bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]">
                                                                 <tr className="border-b border-[var(--color-border)]">
                                                                     <td className="p-4 font-bold text-center">סטטיסטי המבחן</td>
                                                                     <td className="p-4 text-center" dir="ltr"><InlineMath math={`${varianceKnown ? 'Z' : 't'}_{stat} \\text{ Vs. } ${varianceKnown ? 'z' : 't'}_{${tailType === 'two-tailed' ? '\\alpha/2' : '\\alpha'}}`} /></td>
@@ -2481,7 +2481,7 @@ export default function HypothesisTestingCalculator() {
                                                         return (
                                                             <div className="space-y-4">
                                                                 {/* Accordion 1 */}
-                                                                <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-background)]/50 overflow-hidden" open>
+                                                                <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden" open>
                                                                     <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden">
                                                                         <div className="flex items-center gap-3">
                                                                             <span className="w-8 h-8 rounded-full bg-[var(--color-accent-cobalt-bg)]/20 text-[var(--color-accent-cobalt)] flex items-center justify-center font-mono">1</span>
@@ -2495,7 +2495,7 @@ export default function HypothesisTestingCalculator() {
                                                                         <div className="mb-4 text-[var(--color-text-primary)] leading-relaxed text-sm sm:text-base">
                                                                             <p className="mb-2">גישה זו מנרמלת את המדגם לציון תקן, המציין כמה סטיות תקן הוא מרוחק מתוחלת האפס.</p>
                                                                             <strong className="text-[var(--color-text-primary)]">דרך החישוב:</strong>
-                                                                            <div className="bg-[var(--color-background)]/30 p-3 rounded-lg border border-[var(--color-border)]/50 mt-2 mb-3 overflow-x-auto">
+                                                                            <div className="bg-[var(--color-surface-raised)] p-3 rounded-lg border border-[var(--color-border)]/50 mt-2 mb-3 overflow-x-auto">
                                                                                 <BlockMath math={`${statSymbol}_{stat} = \\frac{\\bar{X} - \\mu_0}{SE} = \\frac{${X_bar.toFixed(3)} - ${mu0}}{${stats.se.toFixed(3)}} = ${Z_stat.toFixed(3)}`} />
                                                                             </div>
                                                                             <div className="flex gap-3 items-start bg-[var(--color-surface)] border border-[var(--color-accent-cobalt-line)]/30 p-4 rounded-lg mt-4 ml-4">
@@ -2537,7 +2537,7 @@ export default function HypothesisTestingCalculator() {
                                                                 </details>
 
                                                                 {/* Accordion 2 */}
-                                                                <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-background)]/50 overflow-hidden">
+                                                                <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
                                                                     <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden">
                                                                         <div className="flex items-center gap-3">
                                                                             <span className="w-8 h-8 rounded-full bg-[var(--color-accent-cobalt-bg)]/20 text-[var(--color-accent-cobalt)] flex items-center justify-center font-mono">2</span>
@@ -2551,7 +2551,7 @@ export default function HypothesisTestingCalculator() {
                                                                         <div className="mb-4 text-[var(--color-text-primary)] leading-relaxed text-sm sm:text-base">
                                                                             <p className="mb-2">גישה זו מציגה את הסף ביחידות המקוריות של הבעיה, המאפשרת השוואה ישירה לממוצע המדגם.</p>
                                                                             <strong className="text-[var(--color-text-primary)]">דרך החישוב:</strong>
-                                                                            <div className="bg-[var(--color-background)]/30 p-3 rounded-lg border border-[var(--color-border)]/50 mt-2 mb-3 overflow-x-auto">
+                                                                            <div className="bg-[var(--color-surface-raised)] p-3 rounded-lg border border-[var(--color-border)]/50 mt-2 mb-3 overflow-x-auto">
                                                                                 <BlockMath math={`C = \\mu_0 ${tailType === 'left' ? '-' : tailType === 'right' ? '+' : '\\pm'} ${critSymbol}_{${alphaSymbol}} \\cdot SE`} />
                                                                                 <BlockMath math={`C = ${mu0} ${tailType === 'left' ? '-' : tailType === 'right' ? '+' : '\\pm'} ${Z_crit.toFixed(3)} \\cdot ${stats.se.toFixed(3)} ${tailType === 'two-tailed' ? `\\Rightarrow [${C_crit_1.toFixed(3)}, ${C_crit_2.toFixed(3)}]` : `= ${C_crit.toFixed(3)}`}`} />
                                                                             </div>
@@ -2594,7 +2594,7 @@ export default function HypothesisTestingCalculator() {
                                                                 </details>
 
                                                                 {/* Accordion 3 */}
-                                                                <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-background)]/50 overflow-hidden">
+                                                                <details className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
                                                                     <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden">
                                                                         <div className="flex items-center gap-3">
                                                                             <span className="w-8 h-8 rounded-full bg-[var(--color-accent-cobalt-bg)]/20 text-[var(--color-accent-cobalt)] flex items-center justify-center font-mono">3</span>
@@ -2608,7 +2608,7 @@ export default function HypothesisTestingCalculator() {
                                                                         <div className="mb-4 text-[var(--color-text-primary)] leading-relaxed text-sm sm:text-base">
                                                                             <p className="mb-2">גישה זו מודדת את הסבירות לקבלת התוצאה שנצפתה מהמדגם המקרי תחת התפלגות <InlineMath math="H_0" />, אל מול רמת המובהקות שנקבעה (<InlineMath math="\alpha" />).</p>
                                                                             <strong className="text-[var(--color-text-primary)]">דרך החישוב:</strong>
-                                                                            <div className="bg-[var(--color-background)]/30 p-3 rounded-lg border border-[var(--color-border)]/50 mt-2 mb-3 overflow-x-auto">
+                                                                            <div className="bg-[var(--color-surface-raised)] p-3 rounded-lg border border-[var(--color-border)]/50 mt-2 mb-3 overflow-x-auto">
                                                                                 <BlockMath math={tailType === 'right' ? `P\\text{-value} = P(${statSymbol} > ${statSymbol}_{stat})` : tailType === 'left' ? `P\\text{-value} = P(${statSymbol} < ${statSymbol}_{stat})` : `P\\text{-value} = 2 \\cdot P(${statSymbol} > |${statSymbol}_{stat}|)`} />
                                                                                 <BlockMath math={tailType === 'right' ? `P\\text{-value} = P(${statSymbol} > ${Z_stat.toFixed(3)}) = ${pVal.toFixed(4)}` : tailType === 'left' ? `P\\text{-value} = P(${statSymbol} < ${Z_stat.toFixed(3)}) = ${pVal.toFixed(4)}` : `P\\text{-value} = 2 \\cdot P(${statSymbol} > ${Math.abs(Z_stat).toFixed(3)}) = ${pVal.toFixed(4)}`} />
                                                                             </div>
@@ -2645,7 +2645,7 @@ export default function HypothesisTestingCalculator() {
                                                         );
                                                     })()}
 
-                                                    <div className="mt-8 bg-[var(--color-background)]/60 border border-[var(--color-border)]/80 rounded-lg overflow-hidden shadow-sm">
+                                                    <div className="mt-8 bg-[var(--color-surface)] border border-[var(--color-border)]/80 rounded-lg overflow-hidden shadow-sm">
                                                         <div className="bg-[var(--color-surface)] px-6 py-4 border-b border-[var(--color-border)]/80 flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
                                                                 <PenTool size={22} className="text-[var(--color-accent-cobalt)]" />
@@ -2717,7 +2717,7 @@ export default function HypothesisTestingCalculator() {
                             </div>
 
                             {/* Confidence Interval Accordion */}
-                            <details className="group border-2 border-[var(--color-border)] rounded-lg bg-[var(--color-background)]/40 overflow-hidden shadow-sm" open>
+                            <details className="group border-2 border-[var(--color-border)] rounded-lg bg-[var(--color-surface-raised)] overflow-hidden shadow-sm" open>
                                 <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 sm:p-6 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden border-b border-transparent group-open:border-[var(--color-border)] group-open:bg-[var(--color-surface)]">
                                     <div className="flex items-center gap-4">
                                         <div className="p-2.5 bg-[var(--color-accent-cobalt-bg)]/10 rounded-lg text-[var(--color-accent-cobalt)]">
@@ -2729,7 +2729,7 @@ export default function HypothesisTestingCalculator() {
                                         <ChevronDown size={22} className="text-[var(--color-text-secondary)]" />
                                     </span>
                                 </summary>
-                                <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-background)]/20 text-right">
+                                <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-surface)] text-right">
                                     <div className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed">
                                         <h3 className="font-bold underline mb-2 text-xl">רווח סמך</h3>
                                         <p>
@@ -2741,7 +2741,7 @@ export default function HypothesisTestingCalculator() {
                                     </div>
 
                                     {/* Known Variance */}
-                                    <div className={`p-6 rounded-lg border transition-all \${varianceKnown ? 'bg-[var(--color-surface)] border-[var(--color-accent-cobalt-line)]/50 shadow-sm' : 'bg-[var(--color-background)]/40 border-[var(--color-border)] opacity-70'}`}>
+                                    <div className={`p-6 rounded-lg border transition-all \${varianceKnown ? 'bg-[var(--color-surface)] border-[var(--color-accent-cobalt-line)]/50 shadow-sm' : 'bg-[var(--color-surface-raised)] border-[var(--color-border)] opacity-70'}`}>
                                         <h3 className="font-bold text-lg mb-4 underline">רווח סמך עבור תוחלת האוכלוסייה, כאשר שונותה ידועה</h3>
                                         <FormulaBlock>
                                             <BlockMath math={`\\text{רו"ס ברמת סמך } 1-\\alpha \\text{ עבור } \\mu : \\quad \\bar{X} \\pm z_{1-\\alpha/2} \\frac{\\sigma}{\\sqrt{n}}`} />
@@ -2758,7 +2758,7 @@ export default function HypothesisTestingCalculator() {
                                     </div>
 
                                     {/* Unknown Variance */}
-                                    <div className={`p-6 rounded-lg border transition-all \${!varianceKnown ? 'bg-[var(--color-surface)] border-[var(--color-accent-teal)]/50 shadow-sm' : 'bg-[var(--color-background)]/40 border-[var(--color-border)] opacity-70'}`}>
+                                    <div className={`p-6 rounded-lg border transition-all \${!varianceKnown ? 'bg-[var(--color-surface)] border-[var(--color-accent-teal)]/50 shadow-sm' : 'bg-[var(--color-surface-raised)] border-[var(--color-border)] opacity-70'}`}>
                                         <h3 className="font-bold text-lg mb-4 underline">רווח סמך עבור תוחלת האוכלוסייה, כאשר שונותה איננה ידועה</h3>
                                         <div className="text-base sm:text-lg mb-4 text-[var(--color-text-primary)]">
                                             נסמן את סטיית התקן המדגמית:
@@ -2782,7 +2782,7 @@ export default function HypothesisTestingCalculator() {
                             </details>
 
                             {/* Power Calc Accordion */}
-                            <details className="group border-2 border-[var(--color-border)] rounded-lg bg-[var(--color-background)]/40 overflow-hidden shadow-sm">
+                            <details className="group border-2 border-[var(--color-border)] rounded-lg bg-[var(--color-surface-raised)] overflow-hidden shadow-sm">
                                 <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 sm:p-6 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden border-b border-transparent group-open:border-[var(--color-border)] group-open:bg-[var(--color-surface)]">
                                     <div className="flex items-center gap-4">
                                         <div className="p-2.5 bg-[var(--color-accent-cobalt-bg)]/10 rounded-lg text-[var(--color-accent-cobalt)]">
@@ -2794,7 +2794,7 @@ export default function HypothesisTestingCalculator() {
                                         <ChevronDown size={22} className="text-[var(--color-text-secondary)]" />
                                     </span>
                                 </summary>
-                                <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-background)]/20 text-right">
+                                <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-surface)] text-right">
                                     <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
                                         טעות מסוג שני (<InlineMath math="\beta" />) היא ההסתברות לקבל החלטה שגויה של אי-דחיית השערת האפס, למרות שהיא שקרית במציאות. עוצמת המבחן (<InlineMath math="1-\beta" />) היא ההסתברות לדחות בצדק את השערת האפס (לזהות אפקט אמיתי). לצורך החישוב, יש להגדיר תוחלת ספציפית חלופית <InlineMath math="\mu_1" /> תחת <InlineMath math="H_1" />.
                                     </p>
@@ -2902,7 +2902,7 @@ export default function HypothesisTestingCalculator() {
                                             </CalcBlock>
                                         </div>
                                     ) : (
-                                        <div className="bg-[var(--color-background)]/60 p-5 rounded-lg border border-[var(--color-border)] text-center text-[var(--color-text-secondary)] space-y-2 max-w-xl mx-auto mt-4">
+                                        <div className="bg-[var(--color-surface)] p-5 rounded-lg border border-[var(--color-border)] text-center text-[var(--color-text-secondary)] space-y-2 max-w-xl mx-auto mt-4">
                                             <Info size={20} className="mx-auto text-[var(--color-accent-cobalt)]" />
                                             <h5 className="font-extrabold text-[var(--color-text-primary)] text-sm sm:text-base">חישוב עוצמת מבחן כבוי</h5>
                                             <p className="text-xs sm:text-sm font-medium leading-relaxed">

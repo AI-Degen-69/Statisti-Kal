@@ -28,6 +28,12 @@ export {
   Disclosure,
 } from './CustomComponents';
 
+export { PageLayout } from './PageLayout';
+export type { PageLayoutProps } from './PageLayout';
+
+export { Card, CardHeader, CardBody } from './Card';
+export type { CardProps, CardHeaderProps, CardBodyProps } from './Card';
+
 export type {
   // InputGroup
   InputGroupProps,
@@ -50,3 +56,4 @@ export type {
   // Disclosure
   DisclosureProps,
 } from './CustomComponents';
+
