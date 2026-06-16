@@ -580,9 +580,9 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
   const parts = text.split(/\[MATH\](.*?)\[\/MATH\]/g);
 
   return (
-    <div className={`text-sm md:text-base leading-relaxed w-full transition-all ${isResult
-        ? 'font-bold text-[var(--color-accent-brass)] bg-[var(--color-surface)] p-5 rounded-lg border border-[var(--color-accent-cobalt-line)] shadow-sm'
-        : 'text-[var(--color-text-primary)]'
+    <div className={`text-sm md:text-base leading-relaxed w-full transition-all p-4 sm:p-5 rounded-lg border shadow-sm ${isResult
+        ? 'font-bold text-[var(--color-accent-brass)] bg-[var(--color-surface)] border-[var(--color-accent-cobalt-line)]'
+        : 'text-[var(--color-text-primary)] bg-[var(--color-surface-raised)] border-[var(--color-border)]'
       }`}>
       {parts.map((part, i) => {
         if (i % 2 === 1) {
@@ -596,7 +596,7 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
             return (
               <div
                 key={i}
-                className="my-3 text-center py-3 px-2 rounded-lg border shadow-inner overflow-x-auto bg-[var(--color-surface)] border-[var(--color-border)]/60"
+                className="my-3 text-center py-3 px-2 rounded-lg border shadow-sm overflow-x-auto bg-[var(--color-surface-raised)] border-[var(--color-border)]"
                 dir="ltr"
               >
                 <BlockMath math={part} />

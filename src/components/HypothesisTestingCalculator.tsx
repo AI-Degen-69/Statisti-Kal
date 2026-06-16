@@ -216,9 +216,9 @@ type TailType = 'right' | 'left' | 'two-tailed';
 // FormulaBlock: Raw/general formula with symbolic variables
 function FormulaBlock({ children, className = '' }: { children: React.ReactNode; className?: string }) {
     return (
-        <div className={`w-full overflow-x-auto py-4 my-2 scrollbar-thin ${className}`} dir="ltr">
-            <div className="relative border-l-4 border-[var(--color-accent-brass)] pl-5 space-y-3 text-lg sm:text-xl md:text-2xl text-left w-full min-w-max [&_.katex-display]:!overflow-visible font-sans text-[var(--color-text-primary)]">
-                <span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none mb-1" dir="rtl">תבנית כללית</span>
+        <div className={`w-full overflow-x-auto py-3 my-2 scrollbar-thin ${className}`} dir="ltr">
+            <div className="relative border border-[var(--color-border)] border-l-4 border-l-[var(--color-accent-brass)] rounded-lg bg-[var(--color-surface-raised)] p-4 space-y-3 text-lg sm:text-xl md:text-2xl text-left w-full min-w-max [&_.katex-display]:!overflow-visible font-sans text-[var(--color-text-primary)]">
+                <div className="text-right w-full mb-1"><span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none" dir="rtl">תבנית כללית</span></div>
                 <div className="py-2">{children}</div>
             </div>
         </div>
@@ -228,9 +228,9 @@ function FormulaBlock({ children, className = '' }: { children: React.ReactNode;
 // CalcBlock: Calculation with actual substituted values
 function CalcBlock({ children, className = '' }: { children: React.ReactNode; className?: string }) {
     return (
-        <div className={`w-full overflow-x-auto py-4 my-2 scrollbar-thin ${className}`} dir="ltr">
-            <div className="relative border-l-4 border-[var(--color-accent-cobalt)] pl-5 space-y-3 text-lg sm:text-xl md:text-2xl text-left w-full min-w-max [&_.katex-display]:!overflow-visible font-sans text-[var(--color-text-primary)]">
-                <span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none mb-1" dir="rtl">יישום</span>
+        <div className={`w-full overflow-x-auto py-3 my-2 scrollbar-thin ${className}`} dir="ltr">
+            <div className="relative border border-[var(--color-border)] border-l-4 border-l-[var(--color-accent-cobalt)] rounded-lg bg-[var(--color-surface-raised)] p-4 space-y-3 text-lg sm:text-xl md:text-2xl text-left w-full min-w-max [&_.katex-display]:!overflow-visible font-sans text-[var(--color-text-primary)]">
+                <div className="text-right w-full mb-1"><span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none" dir="rtl">יישום</span></div>
                 <div className="py-2">{children}</div>
             </div>
         </div>
@@ -1646,14 +1646,22 @@ export default function HypothesisTestingCalculator() {
                                     className="px-8 py-6.5"
                                 >
                                     {isValid && stats ? (
-                                        <div className="text-base divide-y divide-slate-700/80">
+                                        <div className="text-base flex flex-col gap-4 py-4">
 
                                             {/* Step 1: Hypothesis Formulation */}
-                                            <div className="space-y-3 py-8">
-                                                <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-cobalt)]">
-                                                    <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-strong)]/50 text-base font-black flex items-center justify-center border border-[var(--color-accent-cobalt-line)]">1</span>
-                                                    <span className="text-xl sm:text-2xl font-black">ניסוח השערות המחקר</span>
-                                                </div>
+                                            <details className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden" open>
+                                                
+                <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-open:border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50">1</span>
+                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">ניסוח השערות המחקר</span>
+                    </div>
+                    <div className="text-[var(--color-text-secondary)] group-open:rotate-180 transition-transform duration-300">
+                        <ChevronDown size={24} />
+                    </div>
+                </summary>
+                <div className="p-5 sm:p-6 space-y-4">
+            
 
                                                 <div className="pr-5 py-1 space-y-4">
                                                     <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
@@ -1740,15 +1748,23 @@ export default function HypothesisTestingCalculator() {
                                                         )}
                                                     </p>
                                                 </div>
-                                            </div>
+                                            </div></details>
 
 
                                             {/* Step 2: Select an appropriate test */}
-                                            <div className="space-y-3 py-8">
-                                                <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-cobalt)]">
-                                                    <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-strong)]/50 text-base font-black flex items-center justify-center border border-[var(--color-accent-cobalt-line)]">2</span>
-                                                    <span className="text-xl sm:text-2xl font-black">בחירת מבחן סטטיסטי מתאים</span>
-                                                </div>
+                                            <details className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden" open>
+                                                
+                <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-open:border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50">2</span>
+                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">בחירת מבחן סטטיסטי מתאים</span>
+                    </div>
+                    <div className="text-[var(--color-text-secondary)] group-open:rotate-180 transition-transform duration-300">
+                        <ChevronDown size={24} />
+                    </div>
+                </summary>
+                <div className="p-5 sm:p-6 space-y-4">
+            
                                                 <div className="flex flex-col items-center w-full py-6 overflow-x-auto mb-6 mt-4">
                                                     <div className="flex flex-col items-center" dir="rtl">
                                                         {/* Q1 */}
@@ -1900,14 +1916,22 @@ export default function HypothesisTestingCalculator() {
                                                         <span>מכיוון שסטיית התקן (<InlineMath math="\sigma" />) <span className="font-bold underline">אינה ידועה</span>, המבחן הסטטיסטי המתאים הוא <span className="font-bold">מבחן <InlineMath math="t" /></span>.</span>
                                                     )}
                                                 </p>
-                                            </div>
+                                            </div></details>
 
                                             {/* Step 3: Specify the level of significance */}
-                                            <div className="space-y-3 py-8">
-                                                <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-cobalt)]">
-                                                    <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-strong)]/50 text-base font-black flex items-center justify-center border border-[var(--color-accent-cobalt-line)]">3</span>
-                                                    <span className="text-xl sm:text-2xl font-black">קביעת רמת המובהקות (<InlineMath math="\alpha" />)</span>
-                                                </div>
+                                            <details className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden" open>
+                                                
+                <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-open:border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50">3</span>
+                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קביעת רמת המובהקות (<InlineMath math="\alpha" />)</span>
+                    </div>
+                    <div className="text-[var(--color-text-secondary)] group-open:rotate-180 transition-transform duration-300">
+                        <ChevronDown size={24} />
+                    </div>
+                </summary>
+                <div className="p-5 sm:p-6 space-y-4">
+            
 
                                                 <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed pr-9 font-semibold">
                                                     רמת המובהקות (<InlineMath math="\alpha" />) מייצגת את ההסתברות המקסימלית שנסכים לקבל עבור שגיאה מסוג I, דחיית השערת האפס כשהיא למעשה נכונה <span className="text-[var(--color-error)] font-bold" dir="ltr"><InlineMath math="P(\text{Reject } H_0 \mid H_0 \text{ is True})" /></span>:
@@ -1966,15 +1990,23 @@ export default function HypothesisTestingCalculator() {
                                                     <PenTool size={22} className="inline-block ml-2 opacity-60 text-[var(--color-accent-cobalt)]" />{' '}
                                                     קבענו שרמת המובהקות של המבחן תהיה <InlineMath math={`\\alpha = ${alpha}`} />, הנגזרת מרמת ביטחון של <InlineMath math={`${((1 - alpha) * 100).toFixed(0)}\\%`} />.
                                                 </p>
-                                            </div>
+                                            </div></details>
 
 
                                             {/* Step 4: Critical Value derivation & SE */}
-                                            <div className="space-y-3 py-8">
-                                                <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-cobalt)]">
-                                                    <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-cobalt-strong)]/50 text-base font-black flex items-center justify-center border border-[var(--color-accent-cobalt-line)]">4</span>
-                                                    <span className="text-xl sm:text-2xl font-black">קביעת הערכים הקריטיים והגדרת כלל ההחלטה</span>
-                                                </div>
+                                            <details className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden" open>
+                                                
+                <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-open:border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50">4</span>
+                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קביעת הערכים הקריטיים והגדרת כלל ההחלטה</span>
+                    </div>
+                    <div className="text-[var(--color-text-secondary)] group-open:rotate-180 transition-transform duration-300">
+                        <ChevronDown size={24} />
+                    </div>
+                </summary>
+                <div className="p-5 sm:p-6 space-y-4">
+            
 
                                                 <div className="pr-9 space-y-4">
                                                     <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold mb-6">
@@ -2344,15 +2376,23 @@ export default function HypothesisTestingCalculator() {
                                                         בגישת מובהקות התוצאה נדחה את <strong className="text-white">השערת האפס</strong> (<InlineMath math="H_0" />) אם ההסתברות לקבל תוצאת מדגם כזו או קיצונית ממנה קטנה או שווה לרמת המובהקות (<InlineMath math="\alpha" />).
                                                     </p>
                                                 </div>
-                                            </div>
+                                            </div></details>
 
 
                                             {/* Step 5: P-Value Calculation */}
-                                            <div className="space-y-3 py-8 text-right">
-                                                <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-cobalt)]">
-                                                    <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-cobalt-strong)]/50 text-base font-black flex items-center justify-center border border-[var(--color-accent-cobalt-line)] shrink-0">5</span>
-                                                    <span className="text-xl sm:text-2xl font-black">חישוב סטטיסטי המבחן</span>
-                                                </div>
+                                            <details className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm text-right [&_summary::-webkit-details-marker]:hidden" open>
+                                                
+                <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-open:border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0">5</span>
+                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">חישוב סטטיסטי המבחן</span>
+                    </div>
+                    <div className="text-[var(--color-text-secondary)] group-open:rotate-180 transition-transform duration-300">
+                        <ChevronDown size={24} />
+                    </div>
+                </summary>
+                <div className="p-5 sm:p-6 space-y-4">
+            
 
                                                 <div className="pr-5 py-1 space-y-5">
                                                     <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
@@ -2418,17 +2458,25 @@ export default function HypothesisTestingCalculator() {
                                                         <PenTool size={22} className="inline-block ml-2 opacity-60 text-[var(--color-accent-cobalt)]" /> מצאנו כי סטטיסטי המבחן (מרחק התוצאה מתוחלת <InlineMath math="H_0" />) הוא <span dir="ltr"><InlineMath math={`${varianceKnown ? 'Z' : 't'} = ${decisionData.statObs.toFixed(4)}`} /></span>.
                                                     </p>
                                                 </div>
-                                            </div>
+                                            </div></details>
 
                                             {/* Step 6: P-Value Calculation and Final Decision */}
-                                            <div className="space-y-3 py-8 text-right">
-                                                <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-cobalt)]">
-                                                    <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-cobalt-strong)]/50 text-base font-black flex items-center justify-center border border-[var(--color-accent-cobalt-line)] shrink-0">6</span>
-                                                    <span className="text-xl sm:text-2xl font-black">קבלת החלטה / הסקת מסקנות</span>
+                                            <details className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm text-right [&_summary::-webkit-details-marker]:hidden" open>
+                                                
+                <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-open:border-[var(--color-border)]">
+                    <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
+                        <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0">6</span>
+                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קבלת החלטה / הסקת מסקנות</span>
                                                     <span className="text-xs font-bold text-[var(--color-text-primary)]0 mr-auto font-mono">
                                                         <InlineMath math="\alpha" /> = {alpha} | <InlineMath math="n" /> = {n}
                                                     </span>
-                                                </div>
+                    </div>
+                    <div className="text-[var(--color-text-secondary)] group-open:rotate-180 transition-transform duration-300">
+                        <ChevronDown size={24} />
+                    </div>
+                </summary>
+                <div className="p-5 sm:p-6 space-y-4">
+            
 
                                                 <div className="pr-5 py-1 space-y-5">
                                                     <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
@@ -2645,11 +2693,11 @@ export default function HypothesisTestingCalculator() {
                                                         );
                                                     })()}
 
-                                                    <div className="mt-8 bg-[var(--color-surface)] border border-[var(--color-border)]/80 rounded-lg overflow-hidden shadow-sm">
-                                                        <div className="bg-[var(--color-surface)] px-6 py-4 border-b border-[var(--color-border)]/80 flex items-center justify-between">
+                                                    <div className="mt-10 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg overflow-hidden shadow-md">
+                                                        <div className="bg-[var(--color-surface-raised)] px-6 py-5 border-b border-[var(--color-border)] flex items-center justify-between">
                                                             <div className="flex items-center gap-3">
-                                                                <PenTool size={22} className="text-[var(--color-accent-cobalt)]" />
-                                                                <h4 className="text-xl font-bold text-[var(--color-text-primary)] m-0">סיכום ומסקנה סופית</h4>
+                                                                <PenTool size={28} className="text-[var(--color-accent-brass)]" />
+                                                                <h3 className="text-2xl sm:text-3xl font-black text-[var(--color-text-primary)] m-0">סיכום ומסקנה סופית</h3>
                                                             </div>
                                                             <div className="mr-3 shrink-0">
                                                                 {decisionData.isReject ? (
@@ -2696,7 +2744,7 @@ export default function HypothesisTestingCalculator() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div></details>
 
 
                                         </div>

@@ -120,23 +120,23 @@
   --color-accent-brass: #D4A843;      /* H₀ reference, critical values */
   --color-accent-teal: #2EC4B6;       /* Power, acceptance regions */
   --color-accent-crimson: #E85D5D;    /* Type I error, rejection */
-  --color-accent-cobalt: #4A9EFF;     /* Z-scores, standard normal */
+  --color-accent-cobalt: #6366F1;     /* Z-scores, standard normal, primary interactive elements (Indigo 500) */
 
   /* === Accent variants for backgrounds, borders, and active states ===
      These provide translucent and darker shades for use in composite
      components (badges, active tabs, hover surfaces) without falling back
      to generic Tailwind colors like indigo-/slate-/. */
-  --color-accent-cobalt-bg: rgba(74, 158, 255, 0.15);          /* Soft cobalt surface (badges) */
-  --color-accent-cobalt-bg-hover: rgba(74, 158, 255, 0.30);    /* Stronger cobalt surface (tooltips, hover) */
-  --color-accent-cobalt-line: rgba(74, 158, 255, 0.40);        /* Cobalt border */
-  --color-accent-cobalt-strong: #2563EB;                       /* Active button background (Z-scores, active tabs) */
-  --color-accent-cobalt-dark: #1E40AF;                         /* Active button border (darker cobalt) */
+  --color-accent-cobalt-bg: rgba(99, 102, 241, 0.15);          /* Soft indigo surface (badges) */
+  --color-accent-cobalt-bg-hover: rgba(99, 102, 241, 0.30);    /* Stronger indigo surface (tooltips, hover) */
+  --color-accent-cobalt-line: rgba(99, 102, 241, 0.40);        /* Indigo border */
+  --color-accent-cobalt-strong: #4F46E5;                       /* Active button background (Z-scores, active tabs) - Indigo 600 */
+  --color-accent-cobalt-dark: #4338CA;                         /* Active button border (darker indigo) - Indigo 700 */
 
   /* === Semantic aliases === */
   --color-success: #3BA98D;
   --color-error: #D95B5B;
   --color-warning: #F4A261;
-  --color-info: #4A9EFF;
+  --color-info: #6366F1;
 
   /* === Spacing scale (4px base unit) — var()-only consumption ===
      These are NOT in @theme because the design intent (per handoff) is direct
