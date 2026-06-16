@@ -58,12 +58,12 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative w-full max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-4xl rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-indigo-50/50 to-blue-50/20 dark:from-slate-800/60 dark:to-slate-900 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-xl bg-indigo-600/10 text-indigo-600 dark:text-indigo-400">
+            <div className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-600 dark:text-indigo-400">
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
@@ -88,7 +88,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
         <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30 p-1.5 gap-1 overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab('sigma-vs-s')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-black transition-all ${
               activeTab === 'sigma-vs-s'
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/15'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -100,7 +100,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
 
           <button
             onClick={() => setActiveTab('standard-error')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-black transition-all ${
               activeTab === 'standard-error'
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/15'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -112,7 +112,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
 
           <button
             onClick={() => setActiveTab('sqrt-intuition')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-black transition-all ${
               activeTab === 'sqrt-intuition'
                 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/15'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -130,7 +130,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
           {activeTab === 'sigma-vs-s' && (
             <div className="space-y-5 animate-fade-in text-right">
               {/* Intro Banner */}
-              <div className="p-4 rounded-xl bg-orange-50/15 dark:bg-orange-950/5 border border-orange-200/50 dark:border-orange-900/40 flex items-start gap-3">
+              <div className="p-4 rounded-lg bg-orange-50/15 dark:bg-orange-950/5 border border-orange-200/50 dark:border-orange-900/40 flex items-start gap-3">
                 <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 mt-0.5">
                   <Info className="w-4 h-4" />
                 </div>
@@ -147,7 +147,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               {/* Grid Box Comparison */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Population Side */}
-                <div className="p-4 rounded-xl border border-blue-100 dark:border-blue-900/40 bg-blue-50/10 dark:bg-blue-950/5 hover:border-blue-300 dark:hover:border-blue-800 transition-all shadow-sm">
+                <div className="p-4 rounded-lg border border-blue-100 dark:border-blue-900/40 bg-blue-50/10 dark:bg-blue-950/5 hover:border-blue-300 dark:hover:border-blue-800 transition-all shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[10px] sm:text-xs font-black">
                       אוכלוסייה (עולם תיאורטי)
@@ -169,7 +169,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                 </div>
 
                 {/* Sample Side */}
-                <div className="p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/10 dark:bg-emerald-950/5 hover:border-emerald-300 dark:hover:border-emerald-800 transition-all shadow-sm">
+                <div className="p-4 rounded-lg border border-emerald-100 dark:border-emerald-900/40 bg-emerald-50/10 dark:bg-emerald-950/5 hover:border-emerald-300 dark:hover:border-emerald-800 transition-all shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-[10px] sm:text-xs font-black">
                       מדגם (עולם מעשי - הנתונים שיש לנו)
@@ -192,7 +192,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               </div>
 
               {/* The n-1 Secret: Bessel's Correction */}
-              <div className="p-4 rounded-xl bg-indigo-50/10 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
+              <div className="p-4 rounded-lg bg-indigo-50/10 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
                 <h4 className="font-extrabold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2 font-sans">
                   למה מחלקים ב-<InlineMath math="n-1" /> במדגם ולא ב-<InlineMath math="n" />? (תיקון בסל - Bessel's Correction)
                 </h4>
@@ -215,7 +215,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
           {activeTab === 'standard-error' && (
             <div className="space-y-5 animate-fade-in text-right">
               {/* Core Math Concept banner */}
-              <div className="p-4.5 rounded-xl bg-indigo-600/5 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/30">
+              <div className="p-4.5 rounded-lg bg-indigo-600/5 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/30">
                 <h4 className="font-extrabold text-sm text-indigo-600 dark:text-indigo-400 mb-1.5 font-sans">
                   איך "שגיאת התקן" נולדת מתמטית ואיך השורש יורד למטה?
                 </h4>
@@ -229,7 +229,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               {/* Step by Step Expansion Cards */}
               <div className="space-y-3.5">
                 {/* Step 1 */}
-                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-150 dark:border-slate-800/80 flex gap-3.5">
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-150 dark:border-slate-800/80 flex gap-3.5">
                   <div className="flex-shrink-0 w-7 h-7 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-xs mt-0.5">
                     1
                   </div>
@@ -247,7 +247,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                 </div>
 
                 {/* Step 2 */}
-                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-150 dark:border-slate-800/80 flex gap-3.5">
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-150 dark:border-slate-800/80 flex gap-3.5">
                   <div className="flex-shrink-0 w-7 h-7 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-xs mt-0.5">
                     2
                   </div>
@@ -268,7 +268,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                 </div>
 
                 {/* Step 3 */}
-                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 rounded-xl border border-slate-150 dark:border-slate-800/80 flex gap-3.5">
+                <div className="p-3.5 bg-slate-50 dark:bg-slate-950/50 rounded-lg border border-slate-150 dark:border-slate-800/80 flex gap-3.5">
                   <div className="flex-shrink-0 w-7 h-7 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-xs mt-0.5">
                     3
                   </div>
@@ -294,7 +294,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
           {/* TAB 3: Interactive Visual Simulator */}
           {activeTab === 'sqrt-intuition' && (
             <div className="space-y-5 animate-fade-in text-right">
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
+              <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800">
                 <h4 className="font-extrabold text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 mb-2 font-sans">
                   איך גודל המדגם <InlineMath math="(n)" /> מכווץ את השגיאה?
                 </h4>
@@ -304,7 +304,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               </div>
 
               {/* Input Sliders */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl border border-indigo-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border border-indigo-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
                 {/* Population Sigma (StDev) */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs sm:text-sm">
@@ -356,7 +356,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               </div>
 
               {/* Real-time Math Output Box */}
-              <div className="p-3 bg-gradient-to-r from-indigo-600/5 to-blue-600/5 dark:from-slate-8 bg-slate-50 dark:bg-slate-950/40 rounded-xl border border-dashed border-indigo-200 dark:border-slate-800 text-center grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+              <div className="p-3 bg-gradient-to-r from-indigo-600/5 to-blue-600/5 dark:from-slate-8 bg-slate-50 dark:bg-slate-950/40 rounded-lg border border-dashed border-indigo-200 dark:border-slate-800 text-center grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
                 <div className="space-y-1">
                   <span className="block text-[10px] text-slate-400">סטיית תקן בריבוע (שונות האוכלוסייה):</span>
                   <span className="font-mono text-sm font-extrabold text-slate-800 dark:text-slate-200">
@@ -378,7 +378,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               </div>
 
               {/* Graph Area */}
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-3">
+              <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-3">
                 <div className="flex flex-wrap items-center justify-between text-xs gap-2">
                   <span className="font-extrabold text-slate-800 dark:text-slate-200">
                     השוואה גרפית חיה של פונקציות צפיפות ההסתברות
@@ -437,7 +437,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
           </p>
           <button
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 shadow shadow-indigo-600/10 hover:shadow-lg transition-all"
+            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white font-black rounded-lg hover:bg-indigo-700 shadow shadow-indigo-600/10 hover:shadow-lg transition-all"
           >
             אישור, הבנתי!
           </button>
