@@ -2,45 +2,218 @@
 @import "katex/dist/katex.min.css";
 @import "tailwindcss";
 
+/* ============================================================================
+ * DESIGN.md token bridge — @theme exposes tokens to Tailwind v4 utilities
+ * (e.g. --color-primary → bg-primary, text-primary, border-primary, etc.)
+ * Source of truth: DESIGN.md. Mirror values exactly; do not invent new ones.
+ * ============================================================================ */
 @theme {
+  /* === Font families === */
   --font-sans: "Assistant", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: ui-serif, Georgia, serif;
+  --font-display: "Space Grotesk", "Assistant", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-handwriting: "Gveret Levin", cursive;
+
+  /* === Display scale (Space Grotesk) === */
+  --text-display-hero: 3.5rem;
+  --text-display-hero--line-height: 1.1;
+  --text-display-hero--letter-spacing: -0.02em;
+  --text-display-hero--font-weight: 800;
+
+  --text-display-h1: 2.5rem;
+  --text-display-h1--line-height: 1.15;
+  --text-display-h1--letter-spacing: -0.015em;
+  --text-display-h1--font-weight: 700;
+
+  --text-display-h2: 1.875rem;
+  --text-display-h2--line-height: 1.2;
+  --text-display-h2--letter-spacing: -0.01em;
+  --text-display-h2--font-weight: 700;
+
+  --text-display-h3: 1.5rem;
+  --text-display-h3--line-height: 1.25;
+  --text-display-h3--letter-spacing: -0.005em;
+  --text-display-h3--font-weight: 600;
+
+  /* === Semantic heading scale (Assistant) === */
+  --text-heading-page: 1.5rem;
+  --text-heading-page--line-height: 1.3;
+  --text-heading-page--font-weight: 800;
+
+  --text-heading-section: 1.125rem;
+  --text-heading-section--line-height: 1.4;
+  --text-heading-section--font-weight: 700;
+
+  --text-heading-subsection: 1rem;
+  --text-heading-subsection--line-height: 1.5;
+  --text-heading-subsection--font-weight: 700;
+
+  --text-heading-label: 0.75rem;
+  --text-heading-label--line-height: 1.5;
+  --text-heading-label--letter-spacing: 0.05em;
+  --text-heading-label--font-weight: 800;
+
+  /* === Body scale (Assistant) === */
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.7;
+  --text-body-lg--letter-spacing: 0.01em;
+
+  --text-body-base: 1rem;
+  --text-body-base--line-height: 1.625;
+  --text-body-base--letter-spacing: 0.015em;
+
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.6;
+  --text-body-sm--letter-spacing: 0.01em;
+
+  --text-body-xs: 0.75rem;
+  --text-body-xs--line-height: 1.5;
+  --text-body-xs--letter-spacing: 0.01em;
+
+  /* === Mono scale (JetBrains Mono) === */
+  --text-mono-display: 2rem;
+  --text-mono-display--line-height: 1.2;
+  --text-mono-display--font-weight: 600;
+
+  --text-mono-lg: 1.125rem;
+  --text-mono-lg--line-height: 1.5;
+  --text-mono-lg--font-weight: 500;
+
+  --text-mono-base: 1rem;
+  --text-mono-base--line-height: 1.5;
+  --text-mono-base--font-weight: 500;
+
+  --text-mono-sm: 0.875rem;
+  --text-mono-sm--line-height: 1.5;
+  --text-mono-sm--font-weight: 500;
+
+  --text-mono-xs: 0.75rem;
+  --text-mono-xs--line-height: 1.5;
+  --text-mono-xs--font-weight: 500;
+
+  /* === Caption === */
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: 0.08em;
+  --text-caption--font-weight: 700;
 }
 
+/* ============================================================================
+ * :root — DESIGN.md raw token values
+ * Consumed via var(--color-*), var(--spacing-*), var(--rounded-*) in className
+ * ============================================================================ */
 :root {
-  /* Academic Precision Dark Theme */
-  --color-bg: #12141A;               /* Deep charcoal/midnight, less blue than slate */
-  --color-surface: #1A1D24;          /* Slightly elevated surface */
-  --color-surface-raised: #242831;   /* Raised surface for interactive elements */
-  --color-border: #2E3340;           /* Structural lines */
-  
-  --color-text-primary: #F0F1F5;     /* High contrast off-white for body/numbers */
-  --color-text-secondary: #8A93A6;   /* Muted gray for reference lines/labels */
-  
-  /* Core Semantic Colors (User requested to keep red/green logic intact) */
-  --color-success: #3BA98D;          /* Professional muted emerald green for success metrics/intervals */
-  --color-error: #D95B5B;            /* Professional muted brick red for alpha/rejection controls */
-  --color-accent: #CBA461;           /* Academic Brass/Gold for primary mathematical highlights / H0 reference */
-  --color-neutral-accent: #5C8ECA;   /* Muted academic blue for neutral/secondary elements */
+  /* === Base layer === */
+  --color-background: #0D0F14;        /* Deep void */
+  --color-surface: #14171F;           /* Elevated panel surface */
+  --color-surface-raised: #1A1D24;    /* Interactive / hover elevation */
+  --color-border: #2A2F3E;            /* Structural lines */
 
-  /* Dedicated Recharts visual aesthetics */
-  --chart-4: #E2A03F;                /* Golden/brass orange for H1 reference */
-  --chart-grid: #2E3340;             /* Subtle grid overlay line matching borders */
-  --chart-axis-label: #8A93A6;       /* Axis ticks */
-  --chart-rejection: rgba(217, 91, 91, 0.45);   /* alpha shaded region (Type I Error) */
-  --chart-acceptance: rgba(59, 169, 141, 0.45);  /* power shaded region (1 - Beta) */
+  /* === Text layer === */
+  --color-text-primary: #F0F1F5;      /* High-contrast off-white */
+  --color-text-secondary: #8A93A6;    /* Muted gray */
+
+  /* === Primary === */
+  --color-primary: #D4A843;           /* Hero brass */
+
+  /* === Accent layer (semantic) === */
+  --color-accent-brass: #D4A843;      /* H₀ reference, critical values */
+  --color-accent-teal: #2EC4B6;       /* Power, acceptance regions */
+  --color-accent-crimson: #E85D5D;    /* Type I error, rejection */
+  --color-accent-cobalt: #4A9EFF;     /* Z-scores, standard normal */
+
+  /* === Accent variants for backgrounds, borders, and active states ===
+     These provide translucent and darker shades for use in composite
+     components (badges, active tabs, hover surfaces) without falling back
+     to generic Tailwind colors like indigo-/slate-/. */
+  --color-accent-cobalt-bg: rgba(74, 158, 255, 0.15);          /* Soft cobalt surface (badges) */
+  --color-accent-cobalt-bg-hover: rgba(74, 158, 255, 0.30);    /* Stronger cobalt surface (tooltips, hover) */
+  --color-accent-cobalt-line: rgba(74, 158, 255, 0.40);        /* Cobalt border */
+  --color-accent-cobalt-strong: #2563EB;                       /* Active button background (Z-scores, active tabs) */
+  --color-accent-cobalt-dark: #1E40AF;                         /* Active button border (darker cobalt) */
+
+  /* === Semantic aliases === */
+  --color-success: #3BA98D;
+  --color-error: #D95B5B;
+  --color-warning: #F4A261;
+  --color-info: #4A9EFF;
+
+  /* === Spacing scale (4px base unit) — var()-only consumption ===
+     These are NOT in @theme because the design intent (per handoff) is direct
+     var() consumption in className/style: e.g. `padding: var(--spacing-4)`.
+     Tailwind v4 utility generation for `p-1`/`m-2` etc. is NOT provided here;
+     use the spacing helpers from Step 2 composite components instead. */
+  --spacing-0_5: 2px;
+  --spacing-1: 4px;
+  --spacing-1_5: 6px;
+  --spacing-2: 8px;
+  --spacing-2_5: 10px;
+  --spacing-3: 12px;
+  --spacing-3_5: 14px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+
+  /* === Rounded (border radius) — var()-only consumption ===
+     Same rationale as spacing: not in @theme. Use
+     `border-radius: var(--rounded-lg)` or composite components (Step 2)
+     for the design-correct radius. If utility classes like `rounded-md`
+     are needed, mirror this scale into @theme with `--radius-*` names. */
+  --rounded-none: 0px;
+  --rounded-xs: 2px;
+  --rounded-sm: 4px;
+  --rounded-md: 8px;
+  --rounded-lg: 12px;
+  --rounded-xl: 16px;
+  --rounded-2xl: 24px;
+  --rounded-full: 9999px;
+
+  /* === Recharts visual tokens (not in DESIGN.md; preserved for chart parity) === */
+  --chart-4: var(--color-accent-teal);                        /* H1 reference curve (teal — distinct from H0 brass, per DESIGN.md "power/acceptance" semantic) */
+  --chart-grid: #2A2F3E;                                       /* Grid line, matches border */
+  --chart-axis-label: #8A93A6;                                 /* Axis ticks */
+  --chart-rejection: rgba(217, 91, 91, 0.45);                  /* Type I error shaded region */
+  --chart-acceptance: rgba(59, 169, 141, 0.45);                /* Power (1-β) shaded region */
+
 }
 
+/* ============================================================================
+ * Light mode — intentional inversion (per DESIGN.md)
+ * Accents stay identical; only base/text/border invert.
+ * ============================================================================ */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-background: #F7F5F2;
+    --color-surface: #FFFFFF;
+    --color-surface-raised: #F0EEEB;
+    --color-border: #D4D0CB;
+    --color-text-primary: #1A1C1E;
+    --color-text-secondary: #5C636A;
+  }
+}
+
+/* ============================================================================
+ * Base body styles
+ * ============================================================================ */
 body {
-  background-color: var(--color-bg);
+  background-color: var(--color-background);
   color: var(--color-text-primary);
   font-size: 16.5px;
   letter-spacing: 0.015em;
 }
 
-/* Ensure KaTeX math renders from left to right (LTR) even in RTL pages without breaking layout */
+/* ============================================================================
+ * KaTeX RTL isolation — DO NOT MODIFY
+ * Task 1 hard constraint. Math rendering is critical; KaTeX forces ltr inside
+ * the RTL page. Any change here must be tested against all formula types.
+ * ============================================================================ */
 .katex {
   direction: ltr !important;
   display: inline-block !important;
@@ -73,52 +246,22 @@ body {
   white-space: nowrap !important;
 }
 
-/* Global premium font scaling for enhanced Hebrew legibility as requested */
-body {
-  font-size: 16.5px;
-  letter-spacing: 0.015em;
-}
-
+/* ============================================================================
+ * Premium font scaling for enhanced Hebrew legibility
+ * (Task 7 will review these utility overrides for removal; keep for now to
+ * preserve visual parity during token migration.)
+ * ============================================================================ */
 p, li, span, h1, h2, h3, h4, h5, h6, select, input, button, select option {
   line-height: 1.625 !important;
 }
 
-/* Step up Tailwind's standard and arbitrary size classes safely */
-.text-xs {
-  font-size: 0.85rem !important; /* Boost from 12px to ~13.6px */
-}
+.text-xs { font-size: 0.85rem !important; }
+.text-sm { font-size: 0.95rem !important; }
+.text-base { font-size: 1.05rem !important; }
+.text-lg { font-size: 1.2rem !important; }
+.text-xl { font-size: 1.35rem !important; }
 
-.text-sm {
-  font-size: 0.95rem !important; /* Boost from 14px to ~15.2px */
-}
-
-.text-base {
-  font-size: 1.05rem !important; /* Boost from 16px to ~16.8px */
-}
-
-.text-lg {
-  font-size: 1.2rem !important; /* Boost from 18px to ~19.2px */
-}
-
-.text-xl {
-  font-size: 1.35rem !important; /* Boost from 20px to ~21.6px */
-}
-
-/* Target arbitrary tailwind square-bracket font utility sizes commonly used in lists and labels */
-.text-\[9px\] {
-  font-size: 11px !important;
-}
-
-.text-\[10px\] {
-  font-size: 12.5px !important;
-}
-
-.text-\[11px\] {
-  font-size: 13.5px !important;
-}
-
-.text-\[12px\] {
-  font-size: 14.5px !important;
-}
-
-
+.text-\[9px\] { font-size: 11px !important; }
+.text-\[10px\] { font-size: 12.5px !important; }
+.text-\[11px\] { font-size: 13.5px !important; }
+.text-\[12px\] { font-size: 14.5px !important; }

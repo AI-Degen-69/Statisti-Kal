@@ -317,7 +317,7 @@ const NormalChart: React.FC<{
 
  if (stdDev <= 0) {
  return (
- <div className="flex h-64 items-center justify-center rounded-sm bg-[var(--color-surface)] text-[var(--color-error)] font-bold border border-red-900/30">
+ <div className="flex h-64 items-center justify-center rounded-lg bg-[var(--color-surface)] text-[var(--color-error)] font-bold border border-red-900/30">
  נא להזין סטיית תקן גדולה מ-0 להצגת גרף.
  </div>
  );
@@ -340,8 +340,8 @@ const NormalChart: React.FC<{
  const dataPt = payload[0].payload;
  const zVal = (dataPt.x - mean) / stdDev;
  return (
- <div className="p-3 border rounded-sm shadow-sm text-xs font-sans text-right space-y-1 backdrop-blur-md bg-[var(--color-bg)]/90 border-[var(--color-border)] text-[var(--color-text-primary)]">
- <p className="font-bold text-sm text-[var(--color-accent)]">נקודה על העקומה</p>
+ <div className="p-3 border rounded-sm shadow-sm text-xs font-sans text-right space-y-1 backdrop-blur-md bg-[var(--color-background)]/90 border-[var(--color-border)] text-[var(--color-text-primary)]">
+ <p className="font-bold text-sm text-[var(--color-accent-brass)]">נקודה על העקומה</p>
  <p className="flex justify-between gap-4"><span>ערך X:</span> <span className="font-mono font-bold">{dataPt.x.toFixed(2)}</span></p>
  <p className="flex justify-between gap-4"><span>ציון תקן Z:</span> <span className="font-mono font-bold">{zVal.toFixed(2)}</span></p>
  <p className="flex justify-between gap-4"><span>צפיפות PDF:</span> <span className="font-mono font-bold">{dataPt.pdf.toFixed(4)}</span></p>
@@ -352,12 +352,12 @@ const NormalChart: React.FC<{
  };
 
  return (
- <div className="w-full rounded-sm p-4 border transition-colors bg-[var(--color-bg)] border-[var(--color-border)]">
+ <div className="w-full rounded-lg p-4 border transition-colors bg-[var(--color-background)] border-[var(--color-border)]">
  <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b pb-4 border-[var(--color-border)]">
  <h3 className="text-base font-bold text-[var(--color-text-primary)]">
  {type === 'conditional' ? 'גרף התפלגות מותנית P(A|B)' : 'עקומת פעמון ושטחים מחושבים'}
  </h3>
- <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide shrink-0 bg-blue-900/30 text-[var(--color-accent)]">
+ <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide shrink-0 bg-blue-900/30 text-[var(--color-accent-brass)]">
  {type === 'conditional' ? `P(A|B) = ${probability.toFixed(4)}` : `שטח מחושב: ${(probability * 100).toFixed(2)}%`}
  </span>
  </div>
@@ -525,12 +525,12 @@ const NormalChart: React.FC<{
  ) : mode === 'inverse' ? (
  <ReferenceLine 
  x={x1} 
- stroke="var(--color-accent)" 
+ stroke="var(--color-accent-brass)" 
  strokeWidth={1.5} 
  label={{
  value: `X = ${x1.toFixed(2)}`,
  position: 'top',
- fill: 'var(--color-accent)',
+ fill: 'var(--color-accent-brass)',
  fontSize: 11,
  fontWeight: 'bold'
  }}
@@ -579,7 +579,7 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
  return (
  <div className={`text-sm md:text-base leading-relaxed w-full transition-all ${
  isResult 
- ? 'font-bold text-[var(--color-accent)] bg-[var(--color-surface)] p-5 rounded-sm border border-blue-900 shadow-sm'
+ ? 'font-bold text-[var(--color-accent-brass)] bg-[var(--color-surface)] p-5 rounded-lg border border-blue-900 shadow-sm'
  : 'text-[var(--color-text-primary)]'
  }`}>
  {parts.map((part, i) => {
@@ -594,7 +594,7 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
  return (
  <div 
  key={i} 
- className="my-3 text-center py-3 px-2 rounded-sm border shadow-inner overflow-x-auto bg-[var(--color-surface)] border-[var(--color-border)]/60" 
+ className="my-3 text-center py-3 px-2 rounded-lg border shadow-inner overflow-x-auto bg-[var(--color-surface)] border-[var(--color-border)]/60" 
  dir="ltr"
  >
  <BlockMath math={part} />
@@ -714,11 +714,11 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  }, [tDf, tAlpha, tSide]);
 
  const renderTableSection = (tableRows: number[]) => (
- <div ref={containerRef} dir="ltr" className="overflow-auto rounded-sm border border-[var(--color-border)] max-h-[480px]">
+ <div ref={containerRef} dir="ltr" className="overflow-auto rounded-lg border border-[var(--color-border)] max-h-[480px]">
  <table className="w-full text-xs sm:text-sm border-collapse">
  <thead>
  <tr className="bg-[var(--color-surface)]">
- <th className="sticky top-0 left-0 p-2.5 border border-[var(--color-border)] text-[var(--color-accent)] font-extrabold text-center text-sm w-14 bg-[var(--color-surface)] z-30">Z</th>
+ <th className="sticky top-0 left-0 p-2.5 border border-[var(--color-border)] text-[var(--color-accent-brass)] font-extrabold text-center text-sm w-14 bg-[var(--color-surface)] z-30">Z</th>
  {cols.map(c => {
  const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
  return (
@@ -748,7 +748,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  <td className={`sticky left-0 p-2.5 border border-[var(--color-border)] font-black text-center text-sm transition-colors duration-300 z-10 ${
  isRowActive 
  ? 'bg-blue-600 text-white bg-blue-500' 
- : 'text-[var(--color-text-primary)] bg-[var(--color-bg)]'
+ : 'text-[var(--color-text-primary)] bg-[var(--color-background)]'
  }`}>
  {r.toFixed(1)}
  </td>
@@ -764,11 +764,11 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  ref={isActive ? activeCellRef : undefined}
  className={`p-2.5 border border-[var(--color-border)] text-center transition-all duration-300 tabular-nums ${
  isActive 
- ? 'bg-blue-600 text-white bg-blue-500 font-extrabold scale-102 shadow-sm z-10 relative rounded-md' 
+ ? 'bg-blue-600 text-white bg-blue-500 font-extrabold scale-102 shadow-sm z-10 relative rounded-lg' 
  : isRowActive
- ? 'bg-blue-100/40 text-blue-900 bg-blue-900/20 text-[var(--color-accent)] font-semibold'
+ ? 'bg-blue-100/40 text-blue-900 bg-blue-900/20 text-[var(--color-accent-brass)] font-semibold'
  : isColActive
- ? 'bg-indigo-100/40 text-indigo-900 bg-indigo-900/20 text-[var(--color-neutral-accent)] font-semibold'
+ ? 'bg-indigo-100/40 text-indigo-900 bg-indigo-900/20 text-[var(--color-accent-cobalt)] font-semibold'
  : 'text-slate-350 hover:bg-[var(--color-surface)] font-medium'
  }`}
  >
@@ -785,11 +785,11 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  );
 
  const renderTTableSection = () => (
- <div className="overflow-auto rounded-sm border border-[var(--color-border)] max-h-[480px]">
+ <div className="overflow-auto rounded-lg border border-[var(--color-border)] max-h-[480px]">
  <table className="w-full text-xs sm:text-sm border-collapse">
  <thead>
  <tr className="bg-[var(--color-surface)] text-[var(--color-text-secondary)]">
- <th rowSpan={2} className="sticky top-0 right-0 p-3 border border-[var(--color-border)] text-[var(--color-neutral-accent)] font-black text-center text-xs sm:text-sm w-16 bg-[var(--color-surface)] z-30">
+ <th rowSpan={2} className="sticky top-0 right-0 p-3 border border-[var(--color-border)] text-[var(--color-accent-cobalt)] font-black text-center text-xs sm:text-sm w-16 bg-[var(--color-surface)] z-30">
  דרגות חופש <br/> (df)
  </th>
  <th colSpan={6} className="sticky top-0 p-1.5 border-b border-[var(--color-border)] font-extrabold text-center text-xs bg-[var(--color-surface)] z-20">
@@ -827,7 +827,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  <td className={`sticky right-0 p-2.5 border border-[var(--color-border)] font-black text-center text-xs sm:text-sm transition-colors duration-300 z-10 ${
  isRowActive 
  ? 'bg-indigo-600 text-white bg-indigo-500' 
- : 'text-[var(--color-text-primary)] bg-[var(--color-bg)]'
+ : 'text-[var(--color-text-primary)] bg-[var(--color-background)]'
  }`}>
  {df === 500 ? '∞ (Z)' : df}
  </td>
@@ -840,11 +840,11 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  key={colIdx} 
  className={`p-2.5 border border-[var(--color-border)] text-center transition-all duration-300 tabular-nums text-[13px] sm:text-[15px] ${
  isActive 
- ? 'bg-indigo-600 text-white bg-indigo-500 font-extrabold scale-102 shadow-sm z-10 relative rounded-md' 
+ ? 'bg-indigo-600 text-white bg-indigo-500 font-extrabold scale-102 shadow-sm z-10 relative rounded-lg' 
  : isRowActive
- ? 'bg-indigo-100/40 text-indigo-900 bg-indigo-900/20 text-[var(--color-neutral-accent)] font-bold'
+ ? 'bg-indigo-100/40 text-indigo-900 bg-indigo-900/20 text-[var(--color-accent-cobalt)] font-bold'
  : isActiveCol
- ? 'bg-indigo-100/40 text-indigo-900 bg-indigo-900/20 text-[var(--color-neutral-accent)] font-bold'
+ ? 'bg-indigo-100/40 text-indigo-900 bg-indigo-900/20 text-[var(--color-accent-cobalt)] font-bold'
  : 'text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] font-medium'
  }`}
  >
@@ -861,7 +861,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  );
 
  return (
- <div className="bg-[var(--color-bg)]/25 border border-[var(--color-border)] rounded-sm p-5 space-y-6 text-right" dir="rtl">
+ <div className="bg-[var(--color-background)]/25 border border-[var(--color-border)] rounded-lg p-5 space-y-6 text-right" dir="rtl">
  <div className="border-b border-[var(--color-border)] pb-4">
  <h3 className="text-lg font-bold text-[var(--color-text-primary)]">טבלאות התפלגות סטטיסטיות</h3>
  <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-sans">איתור ערכים קריטיים וחיפוש מדויק בהתפלגות נורמלית ובהתפלגות t של Student</p>
@@ -871,7 +871,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  <div>
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
  <div className="flex items-center gap-3">
- <h4 className="text-sm font-black text-[var(--color-neutral-accent)] font-sans flex items-center gap-1.5">
+ <h4 className="text-sm font-black text-[var(--color-accent-cobalt)] font-sans flex items-center gap-1.5">
    <span>1. טבלת התפלגות נורמלית סטנדרטית</span>
    <InlineMath math="\Phi(Z)" />
  </h4>
@@ -893,7 +893,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  exit={{ opacity: 0, height: 0 }}
  className="overflow-hidden mb-4"
  >
- <div className="p-4 bg-[var(--color-bg)]/60 border border-[var(--color-border)] rounded-sm text-xs text-[var(--color-text-primary)] leading-relaxed space-y-1 text-right">
+ <div className="p-4 bg-[var(--color-background)]/60 border border-[var(--color-border)] rounded-lg text-xs text-[var(--color-text-primary)] leading-relaxed space-y-1 text-right">
  <p>● <strong>השורה הראשונה (Z):</strong> מציגה את ערך ה-Z בדיוק של ספרה אחת לאחר הנקודה (למשל: 1.2).</p>
  <p>● <strong>העמודות (0.00 עד 0.09):</strong> מציגות את מאיות ציון התקן (למשל: עמודה 0.06 משלימה ל-1.26).</p>
  <p>● <strong>התא שבמפגש:</strong> מייצג את ההסתברות המצטברת P(Z ≤ z), השטח המעוגל משמאל לנקודת הציון.</p>
@@ -903,17 +903,17 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  </AnimatePresence>
 
  <div className="flex flex-col gap-4 mb-8">
-   <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 bg-[var(--color-bg)]/40 p-4 rounded-sm border border-[var(--color-border)]">
-     <div className="flex flex-col bg-[var(--color-surface)] rounded-md border border-[var(--color-border)]/50 p-1 shadow-sm w-full md:w-auto shrink-0">
+   <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 bg-[var(--color-background)]/40 p-4 rounded-lg border border-[var(--color-border)]">
+     <div className="flex flex-col bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]/50 p-1 shadow-sm w-full md:w-auto shrink-0">
        <button
          onClick={() => setSearchType('z')}
-         className={`px-4 py-2 rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1 ${searchType === 'z' ? 'bg-[var(--color-bg)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+         className={`px-4 py-2 rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1 ${searchType === 'z' ? 'bg-[var(--color-background)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
        >
          חיפוש לפי ציון תקן <InlineMath math="Z" />
        </button>
        <button
          onClick={() => setSearchType('phi')}
-         className={`px-4 py-2 rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1 ${searchType === 'phi' ? 'bg-[var(--color-bg)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+         className={`px-4 py-2 rounded-sm text-xs font-bold transition-all flex items-center justify-center gap-1 ${searchType === 'phi' ? 'bg-[var(--color-background)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
        >
          חיפוש לפי הסתברות <InlineMath math="\Phi" />
        </button>
@@ -928,14 +928,14 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
          value={searchType === 'z' ? searchVal : phiSearchVal}
          onChange={e => searchType === 'z' ? setSearchVal(e.target.value) : setPhiSearchVal(e.target.value)}
          placeholder={searchType === 'z' ? 'לדוגמה: 1.96' : 'לדוגמה: 0.95'}
-         className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-3 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none transition-colors text-center"
+         className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-3 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none transition-colors text-center"
          dir="ltr"
        />
      </div>
 
      <div className="w-full flex-1 flex items-center justify-center min-h-[50px]">
        {actualZ !== null ? (
-         <div className="w-full font-bold text-[var(--color-neutral-accent)] text-center bg-[var(--color-bg)] border border-[var(--color-border)] p-3 rounded-sm shadow-sm flex items-center justify-center">
+         <div className="w-full font-bold text-[var(--color-accent-cobalt)] text-center bg-[var(--color-background)] border border-[var(--color-border)] p-3 rounded-sm shadow-sm flex items-center justify-center">
            <span dir="ltr">
              {searchType === 'z' 
                ? <InlineMath math={`\\Phi(${actualZ.toFixed(2)}) = \\int_{-\\infty}^{${actualZ.toFixed(2)}} f_Z dz = ${normalCDF(actualZ, 0, 1).toFixed(4)}`} />
@@ -951,15 +951,15 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
 
    <div className="w-full flex flex-col items-center justify-center min-h-[40px]">
      {actualZ !== null && (
-       <div className="text-center text-xs sm:text-sm text-[var(--color-text-primary)] leading-normal font-medium bg-[var(--color-bg)]/40 p-3 rounded-sm border border-[var(--color-border)]/50 w-full">
+       <div className="text-center text-xs sm:text-sm text-[var(--color-text-primary)] leading-normal font-medium bg-[var(--color-background)]/40 p-3 rounded-lg border border-[var(--color-border)]/50 w-full">
          {searchType === 'z' ? (
            <>
              עבור ציון תקן <span dir="ltr"><InlineMath math={`Z = ${actualZ.toFixed(2)}`} /></span>:<br/>
-             השטח המצטבר <span dir="ltr"><InlineMath math={`\\Phi(Z) = ${normalCDF(actualZ, 0, 1).toFixed(4)}`} /></span> (<span className="font-mono text-[var(--color-neutral-accent)] font-bold"><InlineMath math={`${(normalCDF(actualZ, 0, 1) * 100).toFixed(2)}\\%`} /></span>).
+             השטח המצטבר <span dir="ltr"><InlineMath math={`\\Phi(Z) = ${normalCDF(actualZ, 0, 1).toFixed(4)}`} /></span> (<span className="font-mono text-[var(--color-accent-cobalt)] font-bold"><InlineMath math={`${(normalCDF(actualZ, 0, 1) * 100).toFixed(2)}\\%`} /></span>).
            </>
          ) : (
            <>
-             ההסתברות היא <span className="font-mono text-[var(--color-neutral-accent)] font-bold"><InlineMath math={`${(parseFloat(phiSearchVal) * 100).toFixed(1)}\\%`} /></span>:<br/>
+             ההסתברות היא <span className="font-mono text-[var(--color-accent-cobalt)] font-bold"><InlineMath math={`${(parseFloat(phiSearchVal) * 100).toFixed(1)}\\%`} /></span>:<br/>
              ציון תקן <span dir="ltr"><InlineMath math={`Z \\approx ${actualZ.toFixed(2)}`} /></span>.
            </>
          )}
@@ -970,11 +970,11 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
 
   {renderTableSection(rows)}
 
-  <div className="mt-4 bg-[var(--color-bg)]/60 border border-[var(--color-border)] rounded-sm p-4 text-right space-y-3">
+  <div className="mt-4 bg-[var(--color-background)]/60 border border-[var(--color-border)] rounded-lg p-4 text-right space-y-3">
    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
     <div className="flex items-center gap-1.5 text-[var(--color-text-primary)]">
-     <Sliders size={14} className="text-[var(--color-neutral-accent)]" />
-     <span className="text-xs font-black font-sans text-[var(--color-neutral-accent)]">ערכים וציוני תקן פופולריים למבחני השערות:</span>
+     <Sliders size={14} className="text-[var(--color-accent-cobalt)]" />
+     <span className="text-xs font-black font-sans text-[var(--color-accent-cobalt)]">ערכים וציוני תקן פופולריים למבחני השערות:</span>
     </div>
     <span className="text-[10px] text-slate-450 text-[var(--color-text-secondary)]">מודגש אוטומטית בהתאם לקלט פעיל. לחצו למילוי מהיר:</span>
    </div>
@@ -1004,19 +1004,19 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
        className={`p-2.5 rounded-sm border text-center transition-all duration-300 relative overflow-hidden select-none cursor-pointer flex flex-col justify-between h-24 ${
         isMatched
          ? 'bg-indigo-600/20 border-[var(--color-border)] shadow-[0_0_15px_rgba(99,102,241,0.25)] ring-1 ring-indigo-500'
-         : 'bg-[var(--color-bg)]/40 border-[var(--color-border)] hover:bg-[var(--color-bg)]/60'
+         : 'bg-[var(--color-background)]/40 border-[var(--color-border)] hover:bg-[var(--color-background)]/60'
        }`}
       >
        {isMatched && (
         <div className="absolute top-0 right-0 left-0 h-0.5 bg-gradient-to-l from-indigo-500 to-blue-500" />
        )}
        <div>
-        <div className="text-[10px] font-black text-[var(--color-neutral-accent)]/90 leading-tight">{item.label}</div>
+        <div className="text-[10px] font-black text-[var(--color-accent-cobalt)]/90 leading-tight">{item.label}</div>
         <div className="text-[13px] font-black text-[var(--color-text-primary)] mt-1">רמת ביטחון {item.confidence}</div>
        </div>
        <div className="flex items-baseline justify-between mt-1 pt-1 border-t border-[var(--color-border)]">
         <span className="text-[9px] text-[var(--color-text-secondary)] font-mono">Z_crit:</span>
-        <span className="text-xs font-black font-mono text-[var(--color-neutral-accent)]">{item.z.toFixed(3)}</span>
+        <span className="text-xs font-black font-mono text-[var(--color-accent-cobalt)]">{item.z.toFixed(3)}</span>
         <span className="text-[9px] text-[var(--color-text-secondary)] font-mono">Φ: {item.phi.toFixed(4)}</span>
        </div>
       </button>
@@ -1028,7 +1028,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
 
  <div>
  <div className="flex items-center justify-between mb-3 pt-4 border-t border-[var(--color-border)]">
- <h4 className="text-sm font-black text-[var(--color-neutral-accent)] font-sans">2. טבלת התפלגות Student's T (ערכים קריטיים)</h4>
+ <h4 className="text-sm font-black text-[var(--color-accent-cobalt)] font-sans">2. טבלת התפלגות Student's T (ערכים קריטיים)</h4>
  <button
  onClick={() => setIsTGuideOpen(!isTGuideOpen)}
  className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 font-sans cursor-pointer"
@@ -1046,7 +1046,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  exit={{ opacity: 0, height: 0 }}
  className="overflow-hidden mb-3"
  >
- <div className="p-4 bg-[var(--color-bg)]/60 border border-[var(--color-border)] rounded-sm text-xs text-[var(--color-text-primary)] leading-relaxed space-y-1 text-right">
+ <div className="p-4 bg-[var(--color-background)]/60 border border-[var(--color-border)] rounded-lg text-xs text-[var(--color-text-primary)] leading-relaxed space-y-1 text-right">
  <p>● הטבלה מציגה דרגות חופש (df) בשורות ורמות מובהקות (אלפא) בעמודות.</p>
  <p>● ערכי התאים הם הערך הקריטי t_crit שעבורו השטח מימין (למבחן חד-צדדי) או משני הצדדים (לדו-צדדי) שווה לאלפא.</p>
  <p>● עבור דרגת חופש אינסופית (∞), התפלגות t מתכנסת בדיוק להתפלגות נורמלית סטנדרטית Z.</p>
@@ -1055,7 +1055,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  )}
  </AnimatePresence>
 
- <div className="mb-4 bg-[var(--color-bg)]/40 p-4 rounded-sm border border-[var(--color-border)]">
+ <div className="mb-4 bg-[var(--color-background)]/40 p-4 rounded-lg border border-[var(--color-border)]">
    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
      <div className="md:col-span-2 flex flex-col justify-end">
        <label className="block text-xs font-black text-[var(--color-text-primary)] mb-2 font-sans">דרגות חופש (df):</label>
@@ -1063,30 +1063,30 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
        type="number"
        value={tDf}
        onChange={e => setTDf(Math.max(1, parseInt(e.target.value) || 1))}
-       className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none transition-colors"
+       className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none transition-colors"
        />
      </div>
      <div className="md:col-span-4 lg:col-span-3 flex flex-col justify-end">
        <label className="block text-xs font-black text-[var(--color-text-primary)] mb-2 font-sans">סוג המבחן:</label>
-       <div className="flex bg-[var(--color-surface)] rounded-md border border-[var(--color-border)]/50 p-1 shadow-sm w-full">
+       <div className="flex bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]/50 p-1 shadow-sm w-full">
          <button
            onClick={() => setTSide('two')}
-           className={`flex-1 py-1.5 rounded-sm text-xs font-bold transition-all ${tSide === 'two' ? 'bg-[var(--color-bg)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+           className={`flex-1 py-1.5 rounded-sm text-xs font-bold transition-all ${tSide === 'two' ? 'bg-[var(--color-background)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
          >דו-צדדי</button>
          <button
            onClick={() => setTSide('one')}
-           className={`flex-1 py-1.5 rounded-sm text-xs font-bold transition-all ${tSide === 'one' ? 'bg-[var(--color-bg)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+           className={`flex-1 py-1.5 rounded-sm text-xs font-bold transition-all ${tSide === 'one' ? 'bg-[var(--color-background)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
          >חד-צדדי</button>
        </div>
      </div>
      <div className="md:col-span-6 lg:col-span-7 flex flex-col justify-end">
        <label className="block text-xs font-black text-[var(--color-text-primary)] mb-2 font-sans">אלפא (מובהקות):</label>
-       <div className="flex flex-wrap sm:flex-nowrap bg-[var(--color-surface)] rounded-md border border-[var(--color-border)]/50 p-1 shadow-sm w-full gap-1">
+       <div className="flex flex-wrap sm:flex-nowrap bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)]/50 p-1 shadow-sm w-full gap-1">
          {[0.20, 0.10, 0.05, 0.02, 0.01, 0.001].map(a => (
            <button
              key={a}
              onClick={() => setTAlpha(a)}
-             className={`flex-1 min-w-[40px] py-1.5 rounded-sm text-xs font-bold font-mono transition-all ${tAlpha === a ? 'bg-[var(--color-bg)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+             className={`flex-1 min-w-[40px] py-1.5 rounded-sm text-xs font-bold font-mono transition-all ${tAlpha === a ? 'bg-[var(--color-background)] text-[var(--color-text-primary)] shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
            >
              {a}
            </button>
@@ -1099,7 +1099,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
  {computedTCritical !== null && (
  <div className="mb-4 text-sm font-black text-[var(--color-text-primary)]">
  עבור df = {tDf === 500 ? '∞ (Z)' : tDf}, אלפא = {tAlpha}, מבחן {tSide === 'two' ? 'דו-צדדי' : 'חד-צדדי'}: 
- ערך קריטי t_crit = <span className="text-[var(--color-neutral-accent)] font-mono text-base ml-1">{computedTCritical.toFixed(4)}</span>
+ ערך קריטי t_crit = <span className="text-[var(--color-accent-cobalt)] font-mono text-base ml-1">{computedTCritical.toFixed(4)}</span>
  </div>
  )}
 
@@ -1448,12 +1448,12 @@ export default function NormalDistributionCalculator() {
  }, [calculation]);
 
  return (
- <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] font-sans p-3 sm:p-6 flex flex-col items-center">
+ <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-primary)] font-sans p-3 sm:p-6 flex flex-col items-center">
   {/* Modern Clean Header */}
   <header className="w-full max-w-[1800px] mx-auto mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-850 pb-5">
    <div className="text-right w-full sm:w-auto" dir="rtl">
     <div className="flex items-center gap-3">
-     <div className="p-2.5 bg-indigo-600/25 rounded-sm border border-[var(--color-border)] text-[var(--color-neutral-accent)]">
+     <div className="p-2.5 bg-indigo-600/25 rounded-sm border border-[var(--color-border)] text-[var(--color-accent-cobalt)]">
       <Calculator className="w-6 h-6 sm:w-7 sm:h-7" />
      </div>
      <div>
@@ -1478,7 +1478,7 @@ export default function NormalDistributionCalculator() {
       className={`px-3.5 py-2.5 sm:py-2 rounded-sm text-xs font-black tracking-wide flex items-center gap-1.5 border transition cursor-pointer select-none ${
        mode === tab.id 
         ? 'bg-indigo-600 text-white border-[var(--color-border)] shadow-md shadow-indigo-600/10' 
-        : 'bg-[var(--color-bg)] border-slate-850 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]'
+        : 'bg-[var(--color-background)] border-slate-850 text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]'
       }`}
      >
       {tab.icon}
@@ -1531,11 +1531,11 @@ export default function NormalDistributionCalculator() {
       className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
      >
       {/* Sidebar Inputs Form */}
-      <div className="lg:col-span-4 bg-[var(--color-bg)]/60 border border-[var(--color-border)] p-5 rounded-3xl space-y-5 text-right relative overflow-hidden shadow-sm">
+      <div className="lg:col-span-4 bg-[var(--color-background)]/60 border border-[var(--color-border)] p-5 rounded-lg space-y-5 text-right relative overflow-hidden shadow-sm">
        <div className="absolute top-0 right-0 w-full h-1 bg-indigo-600" />
        
        <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2 border-b border-slate-850 pb-2">
-        <Sliders className="text-[var(--color-neutral-accent)] w-5 h-5" />
+        <Sliders className="text-[var(--color-accent-cobalt)] w-5 h-5" />
         הגדרות ופרמטרי ההתפלגות
        </h2>
 
@@ -1548,7 +1548,7 @@ export default function NormalDistributionCalculator() {
            type="text"
            value={meanInput}
            onChange={e => handleMeanChange(e.target.value)}
-           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
+           className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
           />
           {errors.mean && <p className="text-[var(--color-error)] text-[10px] font-bold mt-1">{errors.mean}</p>}
          </div>
@@ -1561,7 +1561,7 @@ export default function NormalDistributionCalculator() {
            type="text"
            value={stdDevInput}
            onChange={e => handleStdDevChange(e.target.value)}
-           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
+           className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
           />
           {errors.stdDev && <p className="text-[var(--color-error)] text-[10px] font-bold mt-1">{errors.stdDev}</p>}
          </div>
@@ -1576,7 +1576,7 @@ export default function NormalDistributionCalculator() {
           <select
            value={forwardType}
            onChange={e => setForwardType(e.target.value as any)}
-           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-bold focus:border-indigo-600 focus:outline-none"
+           className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-bold focus:border-indigo-600 focus:outline-none"
           >
            <option value="below">מתחת לערך (הסתברות מצטברת משמאל)</option>
            <option value="above">מעל לערך (הסתברות מצטברת מימין)</option>
@@ -1587,14 +1587,14 @@ export default function NormalDistributionCalculator() {
          </div>
 
          {forwardType === 'conditional' ? (
-          <div className="space-y-4 bg-[var(--color-bg)]/40 p-3.5 rounded-sm border border-slate-850">
-           <span className="text-[11px] font-black leading-relaxed block text-[var(--color-neutral-accent)] border-b border-indigo-950 pb-1.5">הגדרת מאורע B ברקע (התנאי):</span>
+          <div className="space-y-4 bg-[var(--color-background)]/40 p-3.5 rounded-lg border border-slate-850">
+           <span className="text-[11px] font-black leading-relaxed block text-[var(--color-accent-cobalt)] border-b border-indigo-950 pb-1.5">הגדרת מאורע B ברקע (התנאי):</span>
            <div>
             <label className="block text-[10px] font-bold text-[var(--color-text-secondary)] mb-1">סוג המאורע B:</label>
             <select
              value={condType}
              onChange={e => setCondType(e.target.value as any)}
-             className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)]"
+             className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)]"
             >
              <option value="below">X ≤ b₁</option>
              <option value="above">X ≥ b₁</option>
@@ -1609,7 +1609,7 @@ export default function NormalDistributionCalculator() {
               type="text"
               value={condX1Input}
               onChange={e => handleCondX1Change(e.target.value)}
-              className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)] font-mono"
+              className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)] font-mono"
              />
              {errors.condX1 && <p className="text-[var(--color-error)] text-[9px] mt-0.5">{errors.condX1}</p>}
             </div>
@@ -1620,7 +1620,7 @@ export default function NormalDistributionCalculator() {
                type="text"
                value={condX2Input}
                onChange={e => handleCondX2Change(e.target.value)}
-               className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)] font-mono"
+               className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)] font-mono"
               />
               {errors.condX2 && <p className="text-[var(--color-error)] text-[9px] mt-0.5">{errors.condX2}</p>}
              </div>
@@ -1633,7 +1633,7 @@ export default function NormalDistributionCalculator() {
             <select
              value={condTypeA}
              onChange={e => setCondTypeA(e.target.value as any)}
-             className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)]"
+             className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-2.5 py-1.5 text-xs text-[var(--color-text-primary)]"
             >
              <option value="below">X ≤ a₁</option>
              <option value="above">X ≥ a₁</option>
@@ -1652,7 +1652,7 @@ export default function NormalDistributionCalculator() {
             type="text"
             value={x1Input}
             onChange={e => handleX1Change(e.target.value)}
-            className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
+            className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
            />
            {errors.x1 && <p className="text-[var(--color-error)] text-[10px] font-bold mt-1">{errors.x1}</p>}
           </div>
@@ -1666,7 +1666,7 @@ export default function NormalDistributionCalculator() {
              type="text"
              value={x2Input}
              onChange={e => handleX2Change(e.target.value)}
-             className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
+             className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
             />
             {errors.x2 && <p className="text-[var(--color-error)] text-[10px] font-bold mt-1">{errors.x2}</p>}
            </div>
@@ -1682,7 +1682,7 @@ export default function NormalDistributionCalculator() {
            value={inverseProbInput}
            onChange={e => handleInverseProbChange(e.target.value)}
            placeholder="לדוגמה: 0.95"
-           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
+           className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-mono focus:border-indigo-600 focus:outline-none"
           />
           {errors.inverseProb && <p className="text-[var(--color-error)] text-[10px] font-bold mt-1">{errors.inverseProb}</p>}
          </div>
@@ -1692,7 +1692,7 @@ export default function NormalDistributionCalculator() {
           <select
            value={inverseType}
            onChange={e => setInverseType(e.target.value as any)}
-           className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-bold focus:border-indigo-600 focus:outline-none"
+           className="w-full bg-[var(--color-background)] border border-[var(--color-border)] rounded-sm px-3 py-2 text-sm text-[var(--color-text-primary)] font-bold focus:border-indigo-600 focus:outline-none"
           >
            <option value="below">שטח מצטבר משמאל (גבול עליון X)</option>
            <option value="above">שטח מצטבר מימין (גבול תחתון X)</option>
@@ -1718,7 +1718,7 @@ export default function NormalDistributionCalculator() {
           setInverseProb(0.95);
           setInverseProbInput('0.95');
          }}
-         className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-[var(--color-border)] rounded-sm text-xs font-black bg-[var(--color-bg)]/30 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] hover:text-white transition select-none cursor-pointer"
+         className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-[var(--color-border)] rounded-sm text-xs font-black bg-[var(--color-background)]/30 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] hover:text-white transition select-none cursor-pointer"
         >
          <RefreshCw size={13} />
          אפס ערכים ל-IQ הסטנדרטי
@@ -1744,7 +1744,7 @@ export default function NormalDistributionCalculator() {
          mode={mode}
         />
        ) : (
-        <div className="flex h-56 items-center justify-center rounded-sm border border-dashed border-red-900 bg-[var(--color-surface)] text-[var(--color-error)] font-bold px-4 text-center">
+        <div className="flex h-56 items-center justify-center rounded-lg border border-dashed border-red-900 bg-[var(--color-surface)] text-[var(--color-error)] font-bold px-4 text-center">
          <div className="flex flex-col items-center gap-2">
           <AlertCircle className="w-8 h-8" />
           <p className="font-extrabold text-sm sm:text-base">הזן פרמטרים תקינים כדי לצייר מחדש את עקומת הפעמון של גאוס.</p>
@@ -1753,9 +1753,9 @@ export default function NormalDistributionCalculator() {
        )}
 
        {/* Step by Step calculations panel */}
-       <div className="bg-[var(--color-bg)]/60 border border-[var(--color-border)] rounded-3xl p-5 sm:p-6 text-right space-y-4">
+       <div className="bg-[var(--color-background)]/60 border border-[var(--color-border)] rounded-lg p-5 sm:p-6 text-right space-y-4">
         <h3 className="text-sm sm:text-base font-black text-[var(--color-text-primary)] flex items-center gap-2 border-b border-slate-850 pb-2">
-         <Info size={16} className="text-[var(--color-accent)]" />
+         <Info size={16} className="text-[var(--color-accent-brass)]" />
          דרך נוסחתית ואופן פתרון הדרגתי (Academic Path)
         </h3>
 
