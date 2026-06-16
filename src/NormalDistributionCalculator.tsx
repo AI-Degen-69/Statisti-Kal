@@ -34,6 +34,7 @@ import {
 } from 'recharts';
 
 import HypothesisTestingCalculator from './components/HypothesisTestingCalculator';
+import FormulaSheet from './components/FormulaSheet';
 
 // --- Math Utilities ---
 
@@ -179,7 +180,8 @@ function studentTInverseCDF(p: number, df: number): number {
 // --- Types ---
 
 type CalcMode = 'forward' | 'inverse';
-type CalcType = 'below' | 'above' | 'between' | 'outside';
+type CalcType = 'below' | 'above' | 'between' | 'outside' | 'conditional';
+type CondType = 'below' | 'above' | 'between';
 
 interface CalculationResult {
   probability: number;
@@ -608,13 +610,17 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
     </div>
   );
 };
-
 const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ activeZ = null, showSearch = false }) => {
   const [searchType, setSearchType] = useLocalStorageState<'z' | 'phi'>('ND_searchType', 'z');
   const [searchVal, setSearchVal] = useLocalStorageState<string>('ND_searchVal', activeZ?.toFixed(2) || '');
   const [phiSearchVal, setPhiSearchVal] = useLocalStorageState<string>('ND_phiSearchVal', '');
   const [isZGuideOpen, setIsZGuideOpen] = useState<boolean>(false);
   const [isTGuideOpen, setIsTGuideOpen] = useState<boolean>(false);
+
+  // Accordion states
+  const [isZTableOpen, setIsZTableOpen] = useState<boolean>(true);
+  const [isPopularOpen, setIsPopularOpen] = useState<boolean>(true);
+  const [isTTableOpen, setIsTTableOpen] = useState<boolean>(true);
 
   // Student's T-distribution states
   const [tDf, setTDf] = useLocalStorageState<number>('ND_tDf', 10);
@@ -715,16 +721,16 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   const renderTableSection = (tableRows: number[]) => (
     <div ref={containerRef} dir="ltr" className="overflow-auto rounded-lg border border-[var(--color-border)] max-h-[480px]">
       <table className="w-full text-xs sm:text-sm border-collapse">
-        <thead>
+        <thead className="sticky top-0 z-30 shadow-sm">
           <tr className="bg-[var(--color-surface)]">
-            <th className="sticky top-0 left-0 p-2.5 border border-[var(--color-border)] text-[var(--color-accent-brass)] font-extrabold text-center text-sm w-14 bg-[var(--color-surface)] z-30">Z</th>
+            <th className="sticky left-0 p-2.5 border border-[var(--color-border)] text-[var(--color-accent-brass)] font-extrabold text-center text-sm w-14 bg-[var(--color-surface)] z-40">Z</th>
             {cols.map(c => {
               const isColActive = lookupZ !== null && Math.abs(c - colVal!) < 0.001;
               return (
                 <th
                   key={c}
-                  className={`sticky top-0 p-2.5 border border-[var(--color-border)] transition-colors duration-300 font-extrabold text-center min-w-[58px] z-20 ${isColActive
-                      ? 'bg-[var(--color-accent-cobalt-bg-hover)] text-white bg-[var(--color-accent-cobalt-bg)]0'
+                  className={`p-2.5 border border-[var(--color-border)] transition-colors duration-300 font-extrabold text-center min-w-[58px] ${isColActive
+                      ? 'bg-[var(--color-accent-cobalt-strong)] text-white'
                       : 'text-[var(--color-text-secondary)] bg-[var(--color-surface)]'
                     }`}
                 >
@@ -739,12 +745,12 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
             const isRowActive = lookupZ !== null && Math.abs(r - rowVal!) < 0.01;
             return (
               <tr key={r} className={`transition-colors duration-200 ${isRowActive
-                  ? 'bg-[var(--color-surface)]'
+                  ? 'bg-[var(--color-surface-raised)]'
                   : 'hover:bg-[var(--color-surface)]'
                 }`}>
-                <td className={`sticky left-0 p-2.5 border border-[var(--color-border)] font-black text-center text-sm transition-colors duration-300 z-10 ${isRowActive
-                    ? 'bg-[var(--color-accent-cobalt-bg-hover)] text-white bg-[var(--color-accent-cobalt-bg)]0'
-                    : 'text-[var(--color-text-primary)] bg-[var(--color-background)]'
+                <td className={`sticky left-0 p-2.5 border border-[var(--color-border)] font-black text-center text-sm transition-colors duration-300 z-20 ${isRowActive
+                    ? 'bg-[var(--color-accent-cobalt-strong)] text-white'
+                    : 'text-[var(--color-text-primary)] bg-[var(--color-surface)]'
                   }`}>
                   {r.toFixed(1)}
                 </td>
@@ -782,12 +788,12 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   const renderTTableSection = () => (
     <div className="overflow-auto rounded-lg border border-[var(--color-border)] max-h-[480px]">
       <table className="w-full text-xs sm:text-sm border-collapse">
-        <thead>
+        <thead className="sticky top-0 z-30 shadow-sm">
           <tr className="bg-[var(--color-surface)] text-[var(--color-text-secondary)]">
-            <th rowSpan={2} className="sticky top-0 right-0 p-3 border border-[var(--color-border)] text-[var(--color-accent-cobalt)] font-black text-center text-xs sm:text-sm w-16 bg-[var(--color-surface)] z-30">
+            <th rowSpan={2} className="sticky right-0 p-3 border border-[var(--color-border)] text-[var(--color-accent-cobalt)] font-black text-center text-xs sm:text-sm w-16 bg-[var(--color-surface)] z-40">
               דרגות חופש <br /> (df)
             </th>
-            <th colSpan={6} className="sticky top-0 p-1.5 border-b border-[var(--color-border)] font-extrabold text-center text-xs bg-[var(--color-surface)] z-20">
+            <th colSpan={6} className="p-1.5 border-b border-[var(--color-border)] font-extrabold text-center text-xs bg-[var(--color-surface)]">
               רמת מובהקות עבור התפלגות T
             </th>
           </tr>
@@ -797,8 +803,8 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
               return (
                 <th
                   key={idx}
-                  className={`sticky top-0 p-2.5 border border-[var(--color-border)] font-bold text-center transition-colors min-w-[70px] z-20 ${isActiveCol
-                      ? 'bg-[var(--color-accent-cobalt-bg-hover)] text-white bg-[var(--color-accent-cobalt-bg-hover)]'
+                  className={`p-2.5 border border-[var(--color-border)] font-bold text-center transition-colors min-w-[70px] ${isActiveCol
+                      ? 'bg-[var(--color-accent-cobalt-strong)] text-white'
                       : 'bg-[var(--color-surface)]'
                     }`}
                 >
@@ -814,12 +820,12 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
             const isRowActive = df === tDf;
             return (
               <tr key={df} className={`transition-colors duration-200 ${isRowActive
-                  ? 'bg-[var(--color-surface)]'
+                  ? 'bg-[var(--color-surface-raised)]'
                   : 'hover:bg-[var(--color-surface)]'
                 }`}>
-                <td className={`sticky right-0 p-2.5 border border-[var(--color-border)] font-black text-center text-xs sm:text-sm transition-colors duration-300 z-10 ${isRowActive
-                    ? 'bg-[var(--color-accent-cobalt-bg-hover)] text-white bg-[var(--color-accent-cobalt-bg)]0'
-                    : 'text-[var(--color-text-primary)] bg-[var(--color-background)]'
+                <td className={`sticky right-0 p-2.5 border border-[var(--color-border)] font-black text-center text-xs sm:text-sm transition-colors duration-300 z-20 ${isRowActive
+                    ? 'bg-[var(--color-accent-cobalt-strong)] text-white'
+                    : 'text-[var(--color-text-primary)] bg-[var(--color-surface)]'
                   }`}>
                   {df === 500 ? '∞ (Z)' : df}
                 </td>
@@ -852,20 +858,38 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   );
 
   return (
-    <div className="bg-[var(--color-background)]/25 border border-[var(--color-border)] rounded-lg p-5 space-y-6 text-right" dir="rtl">
+    <div className="space-y-6 text-right" dir="rtl">
       <div className="border-b border-[var(--color-border)] pb-4">
         <h3 className="text-lg font-bold text-[var(--color-text-primary)]">טבלאות התפלגות סטטיסטיות</h3>
         <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-sans">איתור ערכים קריטיים וחיפוש מדויק בהתפלגות נורמלית ובהתפלגות t של Student</p>
       </div>
 
-      <div className="space-y-6">
-        <div>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3">
-              <h4 className="text-sm font-black text-[var(--color-accent-cobalt)] font-sans flex items-center gap-1.5">
-                <span>1. טבלת התפלגות נורמלית סטנדרטית</span>
-                <InlineMath math="\Phi(Z)" />
-              </h4>
+      {/* Z-Table Accordion */}
+      <div className="bg-[var(--color-background)]/25 border border-[var(--color-border)] rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setIsZTableOpen(!isZTableOpen)}
+          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
+        >
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+            <span className="text-[var(--color-accent-cobalt)]">1.</span>
+            טבלת התפלגות נורמלית סטנדרטית (Z)
+            <InlineMath math="\Phi(Z)" />
+          </h3>
+          {isZTableOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
+        </button>
+
+        <AnimatePresence>
+          {isZTableOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-5 space-y-6">
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsZGuideOpen(!isZGuideOpen)}
                 className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 font-sans cursor-pointer"
@@ -960,13 +984,36 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
           </div>
 
           {renderTableSection(rows)}
-
-          <div className="mt-4 bg-[var(--color-background)]/60 border border-[var(--color-border)] rounded-lg p-4 text-right space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[var(--color-text-primary)]">
-                <Sliders size={14} className="text-[var(--color-accent-cobalt)]" />
-                <span className="text-xs font-black font-sans text-[var(--color-accent-cobalt)]">ערכים וציוני תקן פופולריים למבחני השערות:</span>
+                </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Popular Z-Scores Accordion */}
+      <div className="bg-[var(--color-background)]/25 border border-[var(--color-border)] rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setIsPopularOpen(!isPopularOpen)}
+          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
+        >
+          <div className="flex items-center gap-2">
+            <Sliders size={18} className="text-[var(--color-accent-cobalt)]" />
+            <h3 className="text-base font-bold text-[var(--color-text-primary)]">ערכים וציוני תקן פופולריים למבחני השערות</h3>
+          </div>
+          {isPopularOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
+        </button>
+
+        <AnimatePresence>
+          {isPopularOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-5 bg-[var(--color-background)]/60 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="text-[10px] text-[var(--color-text-secondary)] text-[var(--color-text-secondary)]">מודגש אוטומטית בהתאם לקלט פעיל. לחצו למילוי מהיר:</span>
             </div>
 
@@ -1013,12 +1060,37 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
                 );
               })}
             </div>
-          </div>
-        </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-3 pt-4 border-t border-[var(--color-border)]">
-            <h4 className="text-sm font-black text-[var(--color-accent-cobalt)] font-sans">2. טבלת התפלגות Student's T (ערכים קריטיים)</h4>
+      {/* T-Table Accordion */}
+      <div className="bg-[var(--color-background)]/25 border border-[var(--color-border)] rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setIsTTableOpen(!isTTableOpen)}
+          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
+        >
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+            <span className="text-[var(--color-accent-cobalt)]">2.</span>
+            טבלת התפלגות Student's T (ערכים קריטיים)
+          </h3>
+          {isTTableOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
+        </button>
+
+        <AnimatePresence>
+          {isTTableOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="p-5 space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div></div>
             <button
               onClick={() => setIsTGuideOpen(!isTGuideOpen)}
               className="text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] flex items-center gap-1 font-sans cursor-pointer"
@@ -1094,7 +1166,11 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
           )}
 
           {renderTTableSection()}
-        </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
