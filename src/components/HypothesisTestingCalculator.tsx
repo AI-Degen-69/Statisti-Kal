@@ -218,7 +218,7 @@ function FormulaBlock({ children, className = '' }: { children: React.ReactNode;
     return (
         <div className={`w-full overflow-x-auto py-3 my-2 scrollbar-thin ${className}`} dir="ltr">
             <div className="relative border border-[var(--color-border)] border-l-4 border-l-[var(--color-accent-brass)] rounded-lg bg-[var(--color-surface-raised)] p-4 space-y-3 text-lg sm:text-xl md:text-2xl text-left w-full min-w-max [&_.katex-display]:!overflow-visible font-sans text-[var(--color-text-primary)]">
-                <div className="text-right w-full mb-1"><span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none" dir="rtl">תבנית כללית</span></div>
+                <div className="text-right w-full mb-1"><span className="text-caption font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none" dir="rtl">תבנית כללית</span></div>
                 <div className="py-2">{children}</div>
             </div>
         </div>
@@ -230,7 +230,7 @@ function CalcBlock({ children, className = '' }: { children: React.ReactNode; cl
     return (
         <div className={`w-full overflow-x-auto py-3 my-2 scrollbar-thin ${className}`} dir="ltr">
             <div className="relative border border-[var(--color-border)] border-l-4 border-l-[var(--color-accent-cobalt)] rounded-lg bg-[var(--color-surface-raised)] p-4 space-y-3 text-lg sm:text-xl md:text-2xl text-left w-full min-w-max [&_.katex-display]:!overflow-visible font-sans text-[var(--color-text-primary)]">
-                <div className="text-right w-full mb-1"><span className="text-[11px] font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none" dir="rtl">יישום</span></div>
+                <div className="text-right w-full mb-1"><span className="text-caption font-bold text-[var(--color-text-secondary)] tracking-wider uppercase select-none" dir="rtl">יישום</span></div>
                 <div className="py-2">{children}</div>
             </div>
         </div>
@@ -277,7 +277,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                         <span className="text-sm block text-[var(--color-text-primary)]">
                             אי-דחייה של <InlineMath math="H_0" />
                         </span>
-                        <span className="block text-[11px] font-mono text-[var(--color-text-secondary)] mt-1" dir="ltr">
+                        <span className="block text-mono-xs font-mono text-[var(--color-text-secondary)] mt-1" dir="ltr">
                             <InlineMath math="\text{Fail to Reject } H_0" />
                         </span>
                     </td>
@@ -299,8 +299,8 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                             </span>
                             <span className="text-xs font-bold text-[var(--color-text-secondary)]">רמת סמך</span>
                         </div>
-                        <div className="text-[11px] text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
-                            <div className="mb-1 font-mono text-[10px]" dir="ltr">
+                        <div className="text-body-sm text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
+                            <div className="mb-1 font-mono text-mono-xs" dir="ltr">
                                 <InlineMath math="P(\text{Fail to Reject } H_0 \mid H_0 \text{ is true})" />
                             </div>
                             ההסתברות לא לדחות את השערת האפס כאשר היא אכן נכונה.
@@ -326,8 +326,8 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                                     </span>
                                     <span className="text-xs font-bold text-[var(--color-text-secondary)]">החמצה</span>
                                 </div>
-                                <div className="text-[11px] text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
-                                    <div className="mb-1 font-mono text-[10px]" dir="ltr">
+                                <div className="text-body-sm text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
+                                    <div className="mb-1 font-mono text-mono-xs" dir="ltr">
                                         <InlineMath math="P(\text{Fail to Reject } H_0 \mid H_1 \text{ is true})" />
                                     </div>
                                     הסיכוי לא לדחות את השערת האפס למרות שהיא שקרית וקיים אפקט אמיתי.
@@ -336,7 +336,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                         ) : (
                             <div className="flex flex-col items-center justify-center py-4 text-center text-[var(--color-text-secondary)] h-full">
                                 <Info size={14} className="mb-1.5 opacity-50" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider">לא פעיל</span>
+                                <span className="text-caption font-bold uppercase tracking-wider">לא פעיל</span>
                             </div>
                         )}
                     </td>
@@ -348,7 +348,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                         <span className="text-sm block text-[var(--color-text-primary)]">
                             דחיית <InlineMath math="H_0" />
                         </span>
-                        <span className="block text-[11px] font-mono text-[var(--color-text-secondary)] mt-1" dir="ltr">
+                        <span className="block text-mono-xs font-mono text-[var(--color-text-secondary)] mt-1" dir="ltr">
                             <InlineMath math="\text{Reject } H_0" />
                         </span>
                     </td>
@@ -370,8 +370,8 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                             </span>
                             <span className="text-xs font-bold text-[var(--color-text-secondary)]">רמת מובהקות</span>
                         </div>
-                        <div className="text-[11px] text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
-                            <div className="mb-1 font-mono text-[10px]" dir="ltr">
+                        <div className="text-body-sm text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
+                            <div className="mb-1 font-mono text-mono-xs" dir="ltr">
                                 <InlineMath math="P(\text{Reject } H_0 \mid H_0 \text{ is true})" />
                             </div>
                             הסיכוי לדחות בטעות את השערת האפס כשהיא נכונה במציאות (גילוי שווא).
@@ -397,8 +397,8 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                                     </span>
                                     <span className="text-xs font-bold text-[var(--color-text-secondary)]">עוצמת המבחן</span>
                                 </div>
-                                <div className="text-[11px] text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
-                                    <div className="mb-1 font-mono text-[10px]" dir="ltr">
+                                <div className="text-body-sm text-[var(--color-text-secondary)] leading-snug mt-2 border-t border-[var(--color-border)] pt-2 border-dashed">
+                                    <div className="mb-1 font-mono text-mono-xs" dir="ltr">
                                         <InlineMath math="P(\text{Reject } H_0 \mid H_1 \text{ is true})" />
                                     </div>
                                     ההסתברות לזהות ולדחות השערת אפס שקרית בצדק (גילוי אפקט אמיתי).
@@ -407,7 +407,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                         ) : (
                             <div className="flex flex-col items-center justify-center py-4 text-center text-[var(--color-text-secondary)] h-full">
                                 <Info size={14} className="mb-1.5 opacity-50" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider">לא פעיל</span>
+                                <span className="text-caption font-bold uppercase tracking-wider">לא פעיל</span>
                             </div>
                         )}
                     </td>
@@ -452,7 +452,7 @@ const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, classNam
                         className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2.5 text-xs rounded-sm shadow-sm pointer-events-none text-center leading-normal font-medium bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-sans"
                     >
                         {content}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-slate-800" />
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-[var(--color-surface)]" />
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -1113,7 +1113,7 @@ export default function HypothesisTestingCalculator() {
                                             <div className="flex flex-col xl:flex-row items-center justify-between gap-2">
                                                 <div className="flex items-center gap-1.5 justify-center">
                                                     <span>אוכלוסייה</span>
-                                                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-[var(--color-accent-cobalt-bg)]/20 border border-[var(--color-border)] text-[var(--color-accent-cobalt)] font-bold shrink-0">H₀</span>
+                                                    <span className="text-caption font-mono px-1.5 py-0.5 rounded-none bg-[var(--color-accent-cobalt-bg)]/20 border border-[var(--color-border)] text-[var(--color-accent-cobalt)] font-bold shrink-0">H₀</span>
                                                 </div>
                                                 {/* varianceKnown toggle removed from here */}
                                             </div>
@@ -1125,7 +1125,7 @@ export default function HypothesisTestingCalculator() {
                                             <InputTooltip content="תחת הנחת סטיית תקן זהה, אם ידועה">
                                                 <div className="flex items-center gap-1.5 justify-center cursor-help">
                                                     <span>השערת המחקר</span>
-                                                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-none bg-[var(--color-accent-teal)]/20 border border-[var(--color-border)] text-[var(--color-accent-teal)] font-bold shrink-0">H₁</span>
+                                                    <span className="text-caption font-mono px-1.5 py-0.5 rounded-none bg-[var(--color-accent-teal)]/20 border border-[var(--color-border)] text-[var(--color-accent-teal)] font-bold shrink-0">H₁</span>
                                                 </div>
                                             </InputTooltip>
                                         </th>
@@ -1152,7 +1152,7 @@ export default function HypothesisTestingCalculator() {
                                                         dir="ltr"
                                                     />
                                                     {errors.mu0 && (
-                                                        <div className="absolute top-full right-0 text-[11px] text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.mu0}</div>
+                                                        <div className="absolute top-full right-0 text-caption text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.mu0}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -1176,7 +1176,7 @@ export default function HypothesisTestingCalculator() {
                                                         dir="ltr"
                                                     />
                                                     {errors.n && testType !== 'single' && (
-                                                        <div className="absolute top-full right-0 text-[11px] text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.n}</div>
+                                                        <div className="absolute top-full right-0 text-caption text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.n}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -1230,7 +1230,7 @@ export default function HypothesisTestingCalculator() {
                                                         dir="ltr"
                                                     />
                                                     {errors.mu1 && (
-                                                        <div className="absolute top-full right-0 text-[11px] text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.mu1}</div>
+                                                        <div className="absolute top-full right-0 text-caption text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.mu1}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -1254,7 +1254,7 @@ export default function HypothesisTestingCalculator() {
                                                         dir="ltr"
                                                     />
                                                     {calculatePower && errors.muH1 && (
-                                                        <div className="absolute top-full right-0 text-[11px] text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.muH1}</div>
+                                                        <div className="absolute top-full right-0 text-caption text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full">{errors.muH1}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -1341,14 +1341,14 @@ export default function HypothesisTestingCalculator() {
                                     <div className="absolute top-0 right-0 left-0 h-0.5 bg-gradient-to-l from-[var(--color-accent-cobalt)] to-[var(--color-accent-cobalt)]" />
                                 )}
                                 <div>
-                                    <div className="text-[10px] font-black text-[var(--color-accent-cobalt)]/90 leading-tight">{item.label}</div>
-                                    <div className="text-[12px] font-black text-[var(--color-text-primary)] mt--0.5">רמת ביטחון: {item.confidence}</div>
+                                    <div className="text-caption font-black text-[var(--color-accent-cobalt)]/90 leading-tight">{item.label}</div>
+                                    <div className="text-body-xs font-black text-[var(--color-text-primary)] mt--0.5">רמת ביטחון: {item.confidence}</div>
                                 </div>
                                 <div className="flex items-center justify-between mt--0.5 pt-1 border-t border-[var(--color-border)] w-full" dir="ltr">
-                                    <div className="text-[12px] font-black text-[var(--color-error)]">
+                                    <div className="text-body-xs font-black text-[var(--color-error)]">
                                         <InlineMath math={`Z_{crit}=${item.z.toFixed(3)}`} />
                                     </div>
-                                    <div className="text-[12px] text-[var(--color-text-secondary)] opacity-70">
+                                    <div className="text-body-xs text-[var(--color-text-secondary)] opacity-70">
                                         <InlineMath math={`\\Phi=${item.phi.toFixed(3)}`} />
                                     </div>
                                 </div>
@@ -1838,7 +1838,7 @@ export default function HypothesisTestingCalculator() {
                                                                                         dir="ltr"
                                                                                     />
                                                                                     {errors.sigma && (
-                                                                                        <div className="absolute top-full left-0 right-0 text-[11px] text-[var(--color-error)] font-bold mt-1 text-center">
+                                                                                        <div className="absolute top-full left-0 right-0 text-caption text-[var(--color-error)] font-bold mt-1 text-center">
                                                                                             {errors.sigma}
                                                                                         </div>
                                                                                     )}
@@ -1877,7 +1877,7 @@ export default function HypothesisTestingCalculator() {
                                                                                     <div className="flex items-center gap-1">
                                                                                         <span>הזן סטיית תקן מדגמית (<InlineMath math="S" />):</span>
                                                                                     </div>
-                                                                                    <div className="mt-2 bg-[var(--color-surface)] px-2 py-1.5 rounded-lg border border-[var(--color-border)] shadow-sm text-[10px] opacity-80">
+                                                                                    <div className="mt-2 bg-[var(--color-surface)] px-2 py-1.5 rounded-lg border border-[var(--color-border)] shadow-sm text-body-xs opacity-80">
                                                                                         <InlineMath math="S = \sqrt{\frac{\sum (x_i - \bar{x})^2}{n - 1}}" />
                                                                                     </div>
                                                                                 </label>
@@ -1891,7 +1891,7 @@ export default function HypothesisTestingCalculator() {
                                                                                         dir="ltr"
                                                                                     />
                                                                                     {errors.sigma && (
-                                                                                        <div className="absolute top-full left-0 right-0 text-[11px] text-[var(--color-error)] font-bold mt-1 text-center">
+                                                                                        <div className="absolute top-full left-0 right-0 text-caption text-[var(--color-error)] font-bold mt-1 text-center">
                                                                                             {errors.sigma}
                                                                                         </div>
                                                                                     )}
@@ -1970,7 +1970,7 @@ export default function HypothesisTestingCalculator() {
                                                         />
                                                     </div>
                                                     {errors.alpha && (
-                                                        <p className="text-[11px] text-[var(--color-error)] font-bold mt-1 text-right">{errors.alpha}</p>
+                                                        <p className="text-caption text-[var(--color-error)] font-bold mt-1 text-right">{errors.alpha}</p>
                                                     )}
                                                 </div>
 
