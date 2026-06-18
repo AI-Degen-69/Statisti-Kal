@@ -488,6 +488,13 @@ export default function HypothesisTestingCalculator() {
     const [testType, setTestType] = useLocalStorageState<TestType>('HT_testType', 'mean');
     const [tailType, setTailType] = useLocalStorageState<TailType>('HT_tailType', 'right');
 
+    const [ciTailType, setCiTailType] = useLocalStorageState<TailType>('HT_ciTailType', 'two-tailed');
+    const [ciAlpha, setCiAlpha] = useLocalStorageState<number>('HT_ciAlpha', 0.05);
+
+    const applyCiAlphaPreset = (preset: number) => {
+        setCiAlpha(preset);
+    };
+
     const statSymbol = testType === 'single' ? 'X' : testType === 'sum' ? '\\sum X' : '\\bar{X}';
     const statName = testType === 'single' ? 'הערך הבודד' : testType === 'sum' ? 'סכום המדגם' : 'ממוצע המדגם';
     const statNamePlural = testType === 'single' ? 'ערכים בודדים' : testType === 'sum' ? 'סכומי מדגם' : 'ממוצעי מדגם';
@@ -596,6 +603,8 @@ export default function HypothesisTestingCalculator() {
         setAlphaInput('0.05');
         setTestType('mean');
         setTailType('right');
+        setCiTailType('two-tailed');
+        setCiAlpha(0.05);
     };
 
     // --- Core Calculations Engine ---
