@@ -305,6 +305,25 @@ body {
   }
 }
 
+/* .pulse-success & .pulse-error — Breathing glows for conclusion panels */
+.pulse-success {
+  animation: pulse-success 3s ease-in-out infinite;
+}
+
+@keyframes pulse-success {
+  0%, 100% { box-shadow: 0 0 0 rgba(46, 196, 182, 0); border-color: var(--color-border); }
+  50% { box-shadow: 0 0 16px rgba(46, 196, 182, 0.4), 0 0 32px rgba(46, 196, 182, 0.2); border-color: rgba(46, 196, 182, 0.5); }
+}
+
+.pulse-error {
+  animation: pulse-error 3s ease-in-out infinite;
+}
+
+@keyframes pulse-error {
+  0%, 100% { box-shadow: 0 0 0 rgba(232, 93, 93, 0); border-color: var(--color-border); }
+  50% { box-shadow: 0 0 16px rgba(232, 93, 93, 0.4), 0 0 32px rgba(232, 93, 93, 0.2); border-color: rgba(232, 93, 93, 0.5); }
+}
+
 /* Respect prefers-reduced-motion — disable all signature animations */
 @media (prefers-reduced-motion: reduce) {
   .stagger-in > * {
@@ -312,7 +331,7 @@ body {
     opacity: 1;
     transform: none;
   }
-  .pulse-brass {
+  .pulse-brass, .pulse-success, .pulse-error {
     animation: none !important;
   }
   .curve-glow {

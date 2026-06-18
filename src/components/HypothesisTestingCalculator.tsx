@@ -526,7 +526,9 @@ export default function HypothesisTestingCalculator() {
 
 
     // Accordion state
-    const [showSteps, setShowSteps] = useState<boolean>(true);
+    const [showHypothesisTesting, setShowHypothesisTesting] = useState<boolean>(true);
+    const [showCI, setShowCI] = useState<boolean>(false);
+    const [showPower, setShowPower] = useState<boolean>(false);
     const [conclusionMethod, setConclusionMethod] = useLocalStorageState<'test_statistic' | 'rejection_region' | 'p_value'>('HT_conclusionMethod', 'test_statistic');
 
     // Error validations
@@ -1733,20 +1735,40 @@ export default function HypothesisTestingCalculator() {
                     {/* Solutions Steps Accordion / Panel */}
                     <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
                         <button
-                            onClick={() => setShowSteps(!showSteps)}
-                            className="w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                            onClick={() => setShowHypothesisTesting(!showHypothesisTesting)}
+                            className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
                         >
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-right">
+                            <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" dir="ltr">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-crimson)]">
+                                    <InlineMath math="H_0" />
+                                </div>
+                                <div className="absolute left-1/4 top-1/2 -translate-y-1/2 rotate-6 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-cobalt)]">
+                                    <InlineMath math="H_1" />
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -rotate-6 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-teal)]">
+                                    <InlineMath math="\\bar{X}" />
+                                </div>
+                                <div className="absolute right-1/4 top-1/2 -translate-y-1/2 rotate-12 opacity-10 text-5xl sm:text-6xl font-mono text-[var(--color-accent-violet)]">
+                                    <InlineMath math="P" />
+                                </div>
+                            </div>
+                            
+                            <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 text-right">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Calculator size={24} /></div>
-                                    <span className="text-xl sm:text-2xl font-black">שלבי פתרון מתמטיים וגזירת הערכים</span>
+                                    <span className="text-xl sm:text-2xl font-black flex items-center flex-wrap gap-2">
+                                        בדיקת השערות
+                                        <span className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
+                                            <InlineMath math="\\text{Hypothesis Testing}" />
+                                        </span>
+                                    </span>
                                 </div>
                                 {isValid && decisionData && (
                                     <div className="mr-0 sm:mr-3 flex items-center shrink-0">
                                         {decisionData.isReject ? (
                                             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-md font-black bg-[var(--color-accent-teal)]/15 text-[var(--color-success)] border border-[var(--color-border)] shadow-sm leading-none">
                                                 <CheckCircle size={18} className="text-[var(--color-success)] shrink-0" />
-                                                <span>החלטה: דוחים את </span>
+                                                <span>החלטה: יש לדחות את </span>
                                                 <span dir="ltr" className="inline-block"><InlineMath math="H_0" /></span>
                                             </div>
                                         ) : (
@@ -1759,13 +1781,15 @@ export default function HypothesisTestingCalculator() {
                                     </div>
                                 )}
                             </div>
-                            <div className="flex items-center self-end sm:self-auto text-[var(--color-text-secondary)]">
-                                {showSteps ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                            <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
+                                <div className="text-[var(--color-text-secondary)]">
+                                    {showHypothesisTesting ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                </div>
                             </div>
                         </button>
 
                         <AnimatePresence>
-                            {showSteps && (
+                            {showHypothesisTesting && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
@@ -3052,28 +3076,57 @@ export default function HypothesisTestingCalculator() {
                         </AnimatePresence>
                     </div>
 
-                    {/* Supplementary Calculations Section */}
+                    {/* Confidence Interval Section */}
                     {isValid && stats && (
-                        <div className="w-full min-w-0 lg:col-span-2 order-4 space-y-6 text-right">
-
-                            <div className="text-center mb-8">
-                                <span className="inline-block text-sm font-black text-[var(--color-accent-cobalt)] tracking-widest uppercase bg-[var(--color-surface)] border border-[var(--color-border)] px-6 py-2 rounded-sm shadow-[0_0_15px_rgba(99,102,241,0.2)]">חישובים משלימים (Supplementary)</span>
-                            </div>
-
-                            {/* Confidence Interval Accordion */}
-                            <AnimatedDetails className="group border-2 border-[var(--color-border)] rounded-lg bg-[var(--color-surface-raised)] overflow-hidden shadow-sm" defaultOpen>
-                                <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 sm:p-6 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden border-b border-transparent group-[.is-open]:border-[var(--color-border)] group-[.is-open]:bg-[var(--color-surface)]">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2.5 bg-[var(--color-accent-cobalt-bg)]/10 rounded-lg text-[var(--color-accent-cobalt)]">
-                                            <Target size={26} />
-                                        </div>
-                                        <span className="text-xl sm:text-2xl font-black">חסם / רווח סמך (CL = Confidence Interval)</span>
+                        <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-4 lg:order-4 text-right mt-6">
+                            <button
+                                onClick={() => setShowCI(!showCI)}
+                                className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                            >
+                                <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" dir="ltr">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-teal)]">
+                                        <InlineMath math="1-\alpha" />
                                     </div>
-                                    <span className="transition-transform duration-300 group-[.is-open]:rotate-180 bg-[var(--color-surface)] p-2 rounded-full">
-                                        <ChevronDown size={22} className="text-[var(--color-text-secondary)]" />
-                                    </span>
-                                </summary>
-                                <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-surface)] text-right">
+                                    <div className="absolute left-1/4 top-1/2 -translate-y-1/2 rotate-6 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-crimson)]">
+                                        <InlineMath math="1-\beta" />
+                                    </div>
+                                    <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -rotate-6 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-cobalt)]">
+                                        <InlineMath math="\text{CI}" />
+                                    </div>
+                                    <div className="absolute right-1/4 top-1/2 -translate-y-1/2 rotate-12 opacity-10 text-5xl sm:text-6xl font-mono text-[var(--color-accent-violet)]">
+                                        <InlineMath math="\beta" />
+                                    </div>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-sage)]">
+                                        <InlineMath math="\text{Power}" />
+                                    </div>
+                                </div>
+                                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 text-right">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Target size={24} /></div>
+                                        <span className="text-xl sm:text-2xl font-black flex items-center flex-wrap gap-2">
+                                            רווח סמך לתוחלת
+                                            <span className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
+                                                <InlineMath math="\text{Confidence Interval}" />
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
+                                    <div className="text-[var(--color-text-secondary)]">
+                                        {showCI ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                    </div>
+                                </div>
+                            </button>
+
+                            <AnimatePresence>
+                                {showCI && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                    >
+                                        <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-surface)] text-right">
                                     <div className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed">
                                         <h3 className="font-bold underline mb-2 text-xl">רווח סמך</h3>
                                         <p>
@@ -3205,22 +3258,63 @@ export default function HypothesisTestingCalculator() {
                                     </div>
 
                                 </div>
-                            </AnimatedDetails>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
 
-                            {/* Power Calc Accordion */}
-                            <AnimatedDetails className="group border-2 border-[var(--color-border)] rounded-lg bg-[var(--color-surface-raised)] overflow-hidden shadow-sm">
-                                <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 sm:p-6 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden border-b border-transparent group-[.is-open]:border-[var(--color-border)] group-[.is-open]:bg-[var(--color-surface)]">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2.5 bg-[var(--color-accent-cobalt-bg)]/10 rounded-lg text-[var(--color-accent-cobalt)]">
-                                            <Activity size={26} />
-                                        </div>
-                                        <span className="text-xl sm:text-2xl font-black">חישוב עוצמת המבחן (Power & Type II Error)</span>
+                    {/* Power Section */}
+                    {isValid && stats && (
+                        <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-5 lg:order-5 text-right mt-6">
+                            <button
+                                onClick={() => setShowPower(!showPower)}
+                                className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                            >
+                                <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" dir="ltr">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-teal)]">
+                                        <InlineMath math="1-\alpha" />
                                     </div>
-                                    <span className="transition-transform duration-300 group-[.is-open]:rotate-180 bg-[var(--color-surface)] p-2 rounded-full">
-                                        <ChevronDown size={22} className="text-[var(--color-text-secondary)]" />
-                                    </span>
-                                </summary>
-                                <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-surface)] text-right">
+                                    <div className="absolute left-1/4 top-1/2 -translate-y-1/2 rotate-6 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-crimson)]">
+                                        <InlineMath math="1-\beta" />
+                                    </div>
+                                    <div className="absolute left-1/2 top-1/2 -translate-y-1/2 -rotate-6 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-cobalt)]">
+                                        <InlineMath math="\text{CI}" />
+                                    </div>
+                                    <div className="absolute right-1/4 top-1/2 -translate-y-1/2 rotate-12 opacity-10 text-5xl sm:text-6xl font-mono text-[var(--color-accent-violet)]">
+                                        <InlineMath math="\beta" />
+                                    </div>
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-sage)]">
+                                        <InlineMath math="\text{Power}" />
+                                    </div>
+                                </div>
+                                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 text-right">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Activity size={24} /></div>
+                                        <span className="text-xl sm:text-2xl font-black flex items-center flex-wrap gap-2">
+                                            עוצמת מבחן
+                                            <span className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
+                                                <InlineMath math="\text{Statistical Power}" />
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
+                                    <div className="text-[var(--color-text-secondary)]">
+                                        {showPower ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                    </div>
+                                </div>
+                            </button>
+
+                            <AnimatePresence>
+                                {showPower && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                    >
+                                        <div className="p-5 sm:p-8 space-y-8 bg-[var(--color-surface)] text-right">
                                     <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
                                         טעות מסוג שני (<InlineMath math="\beta" />) היא ההסתברות לקבל החלטה שגויה של אי-דחיית השערת האפס, למרות שהיא שקרית במציאות. עוצמת המבחן (<InlineMath math="1-\beta" />) היא ההסתברות לדחות בצדק את השערת האפס (לזהות אפקט אמיתי). לצורך החישוב, יש להגדיר תוחלת ספציפית חלופית <InlineMath math="\mu_1" /> תחת <InlineMath math="H_1" />.
                                     </p>
@@ -3340,8 +3434,9 @@ export default function HypothesisTestingCalculator() {
                                         </div>
                                     )}
                                 </div>
-                            </AnimatedDetails>
-
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     )}
 
