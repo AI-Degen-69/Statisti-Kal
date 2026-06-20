@@ -1,0 +1,101 @@
+import type { ReactElement, ReactNode } from 'react';
+import { Award, BookOpen, Calculator, Sliders, TrendingUp } from 'lucide-react';
+
+export type SitePage = 'landing' | 'hypothesis' | 'forward' | 'inverse' | 'table' | 'formula-sheet';
+
+interface SiteHeaderProps {
+  activePage: SitePage;
+  onNavigate: (page: SitePage) => void;
+}
+
+interface NavigationItem {
+  id: SitePage;
+  label: string;
+  icon: ReactNode;
+  accent: 'brass' | 'cobalt' | 'teal' | 'neutral';
+}
+
+const navigationItems: NavigationItem[] = [
+  { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="h-4 w-4" />, accent: 'brass' },
+  { id: 'forward', label: 'חישובי הסתברויות (Z)', icon: <Calculator className="h-4 w-4" />, accent: 'cobalt' },
+  { id: 'inverse', label: 'חישוב אחוזונים (Quantile)', icon: <Sliders className="h-4 w-4" />, accent: 'cobalt' },
+  { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="h-4 w-4" />, accent: 'teal' },
+  { id: 'formula-sheet', label: 'נוסחאות', icon: <TrendingUp className="h-4 w-4" />, accent: 'neutral' },
+];
+
+export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps): ReactElement {
+  return (
+    <>
+      <div className="w-full text-right sm:w-auto">
+        <button
+          type="button"
+          onClick={() => onNavigate('landing')}
+          className="flex items-center gap-3 text-right"
+          aria-label="חזרה לדף הבית"
+        >
+          <div className="rounded-sm border border-[var(--color-border)] bg-[var(--color-accent-cobalt-bg-hover)]/25 p-2.5 text-[var(--color-accent-cobalt)]">
+            <Calculator className="h-6 w-6 sm:h-7 sm:w-7" />
+          </div>
+          <div>
+            <h1 className="select-none text-xl font-black tracking-tight text-[var(--color-text-primary)] sm:text-2xl">
+              מחשבון התפלגות נורמלית
+            </h1>
+            <p className="mt-0.5 text-xs font-medium text-[var(--color-text-secondary)] sm:text-sm">
+              חקירה מקיפה, חישובים מתקדמים ובדיקת השערות לתואר אקדמי
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <nav className="flex w-full flex-wrap justify-center gap-1.5 md:w-auto md:justify-end" aria-label="ניווט ראשי">
+        {navigationItems.map((item) => {
+          const isActive = item.id === activePage;
+          const activeClass = getActiveClass(item.accent);
+          const inactiveClass = getInactiveClass(item.accent);
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onNavigate(item.id)}
+              className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3.5 py-2.5 text-xs font-black tracking-wide transition sm:py-2 ${
+                isActive ? activeClass : inactiveClass
+              }`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </>
+  );
+}
+
+function getActiveClass(accent: NavigationItem['accent']): string {
+  if (accent === 'brass') {
+    return 'bg-[var(--color-accent-brass)] text-[var(--color-background)] border-[var(--color-accent-brass)] shadow-md shadow-[var(--color-accent-brass)]/20';
+  }
+
+  if (accent === 'teal') {
+    return 'bg-[var(--color-accent-teal)] text-[var(--color-background)] border-[var(--color-accent-teal)] shadow-md shadow-[var(--color-accent-teal)]/15';
+  }
+
+  if (accent === 'neutral') {
+    return 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] border-[var(--color-text-secondary)]';
+  }
+
+  return 'bg-[var(--color-accent-cobalt)] text-white border-[var(--color-accent-cobalt)] shadow-md shadow-[var(--color-accent-cobalt-line)]/10';
+}
+
+function getInactiveClass(accent: NavigationItem['accent']): string {
+  if (accent === 'brass') {
+    return 'bg-[var(--color-surface)] border-[var(--color-accent-brass)]/45 text-[var(--color-accent-brass)] hover:bg-[var(--color-accent-brass)]/10';
+  }
+
+  if (accent === 'neutral') {
+    return 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]';
+  }
+
+  return 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]';
+}

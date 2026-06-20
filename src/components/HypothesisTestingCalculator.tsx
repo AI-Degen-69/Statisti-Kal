@@ -401,7 +401,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                             <div className="mb-1 font-mono text-mono-xs" dir="ltr">
                                 <InlineMath math="P(\text{Reject } H_0 \mid H_0 \text{ is true})" />
                             </div>
-                            הסיכוי לדחות בטעות את השערת האפס כשהיא נכונה במציאות (גילוasdasdי שווא).
+                            הסיכוי לדחות בטעות את השערת האפס כשהיא נכונה במציאות (גילוי שווא).
                         </div>
                     </td>
 
@@ -1694,20 +1694,38 @@ export default function HypothesisTestingCalculator() {
                     
                     <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
                         
-                        <button
+                        <div
+                            role="button"
+                            tabIndex={0}
                             onClick={() => setShowHypothesisTesting(!showHypothesisTesting)}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    setShowHypothesisTesting(!showHypothesisTesting);
+                                }
+                            }}
                             className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
                         > 
                                         <div className="flex justify-end gap-3 lg:col-span-2 order-2 lg:order-2 mb-2">
                         <button 
-                            onClick={() => { setShowHypothesisTesting(true); setShowCI(true); setShowPower(true); }}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setShowHypothesisTesting(true);
+                                setShowCI(true);
+                                setShowPower(true);
+                            }}
                             className="px-4 py-2 text-sm font-bold bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md hover:bg-[var(--color-surface)] transition-colors shadow-sm flex items-center gap-2"
                         >
                             <ChevronDown size={16} />
                             הרחב הכל
                         </button>
                         <button 
-                            onClick={() => { setShowHypothesisTesting(false); setShowCI(false); setShowPower(false); }}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setShowHypothesisTesting(false);
+                                setShowCI(false);
+                                setShowPower(false);
+                            }}
                             className="px-4 py-2 text-sm font-bold bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md hover:bg-[var(--color-surface)] transition-colors shadow-sm flex items-center gap-2"
                         >
                             <ChevronUp size={16} />
@@ -1770,7 +1788,7 @@ export default function HypothesisTestingCalculator() {
                             </div>
                           
                             
-                        </button>
+                        </div>
                         
 
                         <AnimatePresence initial={false}>

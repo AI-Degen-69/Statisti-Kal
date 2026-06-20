@@ -35,6 +35,7 @@ import {
 
 import HypothesisTestingCalculator from './components/HypothesisTestingCalculator';
 import FormulaSheet from './components/FormulaSheet';
+import SiteHeader, { type SitePage } from './components/SiteHeader';
 import { PageLayout } from './components/ui';
 
 // --- Math Utilities ---
@@ -180,9 +181,10 @@ function studentTInverseCDF(p: number, df: number): number {
 
 // --- Types ---
 
-type CalcMode = 'forward' | 'inverse' | 'table' | 'hypothesis' | 'formula-sheet';
+export type CalcMode = 'forward' | 'inverse' | 'table' | 'hypothesis' | 'formula-sheet';
 type CalcType = 'below' | 'above' | 'between' | 'outside' | 'conditional';
 type CondType = 'below' | 'above' | 'between';
+type NavAccent = 'brass' | 'cobalt' | 'teal' | 'neutral';
 
 interface CalculationResult {
   probability: number;
@@ -190,6 +192,13 @@ interface CalculationResult {
   z2?: number;
   steps: string[];
   calculatedX?: number;
+}
+
+interface NavigationTab {
+  id: CalcMode;
+  label: string;
+  icon: React.ReactNode;
+  accent: NavAccent;
 }
 
 // --- Components ---
@@ -326,13 +335,15 @@ const NormalChart: React.FC<{
     );
   }
 
-  // Define line colors based on the theme
-  const curveColor = '#60a5fa';
-  const mainGridColor = '#334155';
-  const axisLabelColor = '#94a3b8';
-  const shadedColor = 'rgba(96, 165, 250, 0.4)';
-  const bShadedColor = 'rgba(16, 185, 129, 0.2)';
-  const intersectShadedColor = 'rgba(59, 130, 246, 0.65)';
+  const curveColor = 'var(--color-accent-brass)';
+  const secondaryCurveColor = 'var(--color-accent-teal)';
+  const zLineColor = 'var(--color-accent-cobalt)';
+  const boundaryLineColor = 'var(--color-accent-crimson)';
+  const mainGridColor = 'var(--chart-grid)';
+  const axisLabelColor = 'var(--chart-axis-label)';
+  const shadedColor = 'var(--color-accent-cobalt)';
+  const bShadedColor = 'var(--color-accent-teal)';
+  const intersectShadedColor = 'var(--color-accent-cobalt)';
 
   const minStandardX = Math.min(x1, x2);
   const maxStandardX = Math.max(x1, x2);
@@ -355,23 +366,39 @@ const NormalChart: React.FC<{
   };
 
   return (
-    <div className="w-full rounded-lg p-4 border transition-colors bg-[var(--color-surface)] border-[var(--color-border)]">
+    <div className="w-full rounded-lg p-5 border transition-colors bg-[var(--color-surface)] border-[var(--color-border)] shadow-md curve-glow">
       <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-b pb-4 border-[var(--color-border)]">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-black" dir="ltr">
+          <span className="flex items-center gap-1.5 text-[var(--color-accent-cobalt)] select-none">
+            <span className="w-3 h-3 rounded-none bg-[var(--color-accent-cobalt)]/40 border border-[var(--color-accent-cobalt)] inline-block" />
+            Z
+          </span>
+          <span className="flex items-center gap-1.5 text-[var(--color-accent-brass)] select-none">
+            <span className="w-0.5 h-3 bg-[var(--color-accent-brass)] inline-block" />
+            μ
+          </span>
+          {type === 'conditional' && (
+            <span className="flex items-center gap-1.5 text-[var(--color-accent-teal)] select-none">
+              <span className="w-3 h-3 rounded-none bg-[var(--color-accent-teal)]/30 border border-[var(--color-accent-teal)] inline-block" />
+              B
+            </span>
+          )}
+        </div>
         <h3 className="text-base font-bold text-[var(--color-text-primary)]">
           {type === 'conditional' ? 'גרף התפלגות מותנית P(A|B)' : 'עקומת פעמון ושטחים מחושבים'}
         </h3>
-        <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide shrink-0 bg-[var(--color-accent-cobalt-strong)]/30 text-[var(--color-accent-brass)]">
+        <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide shrink-0 bg-[var(--color-accent-brass)] text-[var(--color-background)]">
           {type === 'conditional' ? `P(A|B) = ${probability.toFixed(4)}` : `שטח מחושב: ${(probability * 100).toFixed(2)}%`}
         </span>
       </div>
 
       <div className="h-[350px] w-full" dir="ltr">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 5 }}>
+          <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 25 }}>
             <defs>
               <linearGradient id="mainColor" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={curveColor} stopOpacity={0.1} />
-                <stop offset="95%" stopColor={curveColor} stopOpacity={0.01} />
+                <stop offset="95%" stopColor={curveColor} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={mainGridColor} />
@@ -380,11 +407,17 @@ const NormalChart: React.FC<{
               dataKey="x"
               type="number"
               domain={[mean - 4.2 * stdDev, mean + 4.2 * stdDev]}
-              tick={{ fill: axisLabelColor, fontSize: 11 }}
+              tick={{ fill: axisLabelColor, fontSize: 15, fontWeight: 'bold' }}
               axisLine={{ stroke: mainGridColor }}
-              tickLine={false}
+              tickLine={true}
             />
-            <YAxis hide={true} />
+            <YAxis
+              tickFormatter={(val) => val.toFixed(2)}
+              tick={{ fill: axisLabelColor, fontSize: 12, fontWeight: 'bold' }}
+              axisLine={{ stroke: mainGridColor }}
+              tickLine={true}
+              width={45}
+            />
             <RechartsTooltip content={<CustomTooltipInner />} />
 
             {/* Always render standard curve path */}
@@ -406,6 +439,7 @@ const NormalChart: React.FC<{
                   dataKey="condBShadedY"
                   stroke="none"
                   fill={bShadedColor}
+                  fillOpacity={0.22}
                   dot={false}
                   isAnimationActive={false}
                 />
@@ -414,6 +448,7 @@ const NormalChart: React.FC<{
                   dataKey="intersectShadedY"
                   stroke="none"
                   fill={intersectShadedColor}
+                  fillOpacity={0.48}
                   dot={false}
                   isAnimationActive={false}
                 />
@@ -425,6 +460,7 @@ const NormalChart: React.FC<{
                   dataKey="shadedYBelow"
                   stroke="none"
                   fill={shadedColor}
+                  fillOpacity={0.35}
                   dot={false}
                   isAnimationActive={false}
                 />
@@ -433,6 +469,7 @@ const NormalChart: React.FC<{
                   dataKey="shadedYAbove"
                   stroke="none"
                   fill={shadedColor}
+                  fillOpacity={0.35}
                   dot={false}
                   isAnimationActive={false}
                 />
@@ -443,6 +480,7 @@ const NormalChart: React.FC<{
                 dataKey="shadedY"
                 stroke="none"
                 fill={shadedColor}
+                fillOpacity={0.35}
                 dot={false}
                 isAnimationActive={false}
               />
@@ -451,14 +489,14 @@ const NormalChart: React.FC<{
             {/* Reference Line for Mean */}
             <ReferenceLine
               x={mean}
-              stroke={'var(--color-text-secondary)'}
+              stroke={curveColor}
               strokeWidth={1.5}
-              strokeDasharray="4 4"
+              strokeDasharray="10 4"
               label={{
-                value: `μ=${mean}`,
+                value: `μ: ${mean.toFixed(2)}`,
                 position: 'top',
-                fill: 'var(--color-text-primary)',
-                fontSize: 11,
+                fill: curveColor,
+                fontSize: 14,
                 fontWeight: 'bold'
               }}
             />
@@ -469,14 +507,14 @@ const NormalChart: React.FC<{
                 {condX1 !== undefined && (condType === 'below' || condType === 'above' || condType === 'between') && (
                   <ReferenceLine
                     x={condX1}
-                    stroke="var(--color-success)"
+                    stroke={secondaryCurveColor}
                     strokeWidth={1.5}
-                    strokeDasharray="3 3"
+                    strokeDasharray="10 4"
                     label={{
                       value: condType === 'between' ? 'B: x1' : 'B',
                       position: 'top',
-                      fill: 'var(--color-success)',
-                      fontSize: 10,
+                      fill: secondaryCurveColor,
+                      fontSize: 13,
                       fontWeight: 'bold'
                     }}
                   />
@@ -484,14 +522,14 @@ const NormalChart: React.FC<{
                 {condX2 !== undefined && condType === 'between' && (
                   <ReferenceLine
                     x={condX2}
-                    stroke="var(--color-success)"
+                    stroke={secondaryCurveColor}
                     strokeWidth={1.5}
-                    strokeDasharray="3 3"
+                    strokeDasharray="10 4"
                     label={{
                       value: 'B: x2',
                       position: 'top',
-                      fill: 'var(--color-success)',
-                      fontSize: 10,
+                      fill: secondaryCurveColor,
+                      fontSize: 13,
                       fontWeight: 'bold'
                     }}
                   />
@@ -499,13 +537,13 @@ const NormalChart: React.FC<{
                 {(condTypeA === 'below' || condTypeA === 'above' || condTypeA === 'between') && (
                   <ReferenceLine
                     x={x1}
-                    stroke="var(--color-error)"
-                    strokeWidth={1.5}
+                    stroke={boundaryLineColor}
+                    strokeWidth={2.5}
                     label={{
                       value: condTypeA === 'between' ? 'A: x1' : 'A',
                       position: 'top',
-                      fill: 'var(--color-error)',
-                      fontSize: 10,
+                      fill: boundaryLineColor,
+                      fontSize: 13,
                       fontWeight: 'bold'
                     }}
                   />
@@ -513,13 +551,13 @@ const NormalChart: React.FC<{
                 {condTypeA === 'between' && (
                   <ReferenceLine
                     x={x2}
-                    stroke="var(--color-error)"
-                    strokeWidth={1.5}
+                    stroke={boundaryLineColor}
+                    strokeWidth={2.5}
                     label={{
                       value: 'A: x2',
                       position: 'top',
-                      fill: 'var(--color-error)',
-                      fontSize: 10,
+                      fill: boundaryLineColor,
+                      fontSize: 13,
                       fontWeight: 'bold'
                     }}
                   />
@@ -528,13 +566,13 @@ const NormalChart: React.FC<{
             ) : mode === 'inverse' ? (
               <ReferenceLine
                 x={x1}
-                stroke="var(--color-accent-brass)"
-                strokeWidth={1.5}
+                stroke={zLineColor}
+                strokeWidth={2.5}
                 label={{
-                  value: `X = ${x1.toFixed(2)}`,
+                  value: `Zx: ${x1.toFixed(2)}`,
                   position: 'top',
-                  fill: 'var(--color-accent-brass)',
-                  fontSize: 11,
+                  fill: zLineColor,
+                  fontSize: 14,
                   fontWeight: 'bold'
                 }}
               />
@@ -542,26 +580,26 @@ const NormalChart: React.FC<{
               <>
                 <ReferenceLine
                   x={x1}
-                  stroke="var(--color-error)"
-                  strokeWidth={1.5}
+                  stroke={zLineColor}
+                  strokeWidth={2.5}
                   label={{
                     value: type === 'between' || type === 'outside' ? 'X₁' : 'X',
                     position: 'top',
-                    fill: 'var(--color-error)',
-                    fontSize: 11,
+                    fill: zLineColor,
+                    fontSize: 14,
                     fontWeight: 'bold'
                   }}
                 />
                 {(type === 'between' || type === 'outside') && (
                   <ReferenceLine
                     x={x2}
-                    stroke="var(--color-success)"
-                    strokeWidth={1.5}
+                    stroke={secondaryCurveColor}
+                    strokeWidth={2.5}
                     label={{
                       value: 'X₂',
                       position: 'top',
-                      fill: 'var(--color-success)',
-                      fontSize: 11,
+                      fill: secondaryCurveColor,
+                      fontSize: 14,
                       fontWeight: 'bold'
                     }}
                   />
@@ -1177,9 +1215,20 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   );
 };
 
-export default function NormalDistributionCalculator() {
+interface NormalDistributionCalculatorProps {
+  initialMode?: CalcMode;
+  onNavigate?: (page: SitePage) => void;
+}
+
+export default function NormalDistributionCalculator({ initialMode, onNavigate }: NormalDistributionCalculatorProps = {}) {
   // Main persistent states
-  const [mode, setMode] = useLocalStorageState<CalcMode>('ND_mode', 'forward');
+  const [mode, setMode] = useLocalStorageState<CalcMode>('ND_mode', 'hypothesis');
+
+  useEffect(() => {
+    if (initialMode && initialMode !== mode) {
+      setMode(initialMode);
+    }
+  }, [initialMode, mode, setMode]);
 
   // Normal parameters
   const [mean, setMean] = useLocalStorageState<number>('ND_mean', 100);
@@ -1556,6 +1605,9 @@ export default function NormalDistributionCalculator() {
   return (
     <PageLayout
       header={
+        onNavigate ? (
+          <SiteHeader activePage={mode} onNavigate={onNavigate} />
+        ) : (
         <>
           <div className="text-right w-full sm:w-auto">
             <div className="flex items-center gap-3">
@@ -1571,27 +1623,41 @@ export default function NormalDistributionCalculator() {
 
           {/* Navigation Tabs */}
           <div className="w-full md:w-auto flex flex-wrap justify-center md:justify-end gap-1.5">
-            {[
-              { id: 'forward', label: 'חישוב הסתברות (Z)', icon: <Calculator className="w-4 h-4" /> },
-              { id: 'inverse', label: 'חישוב הפוך (Quantile)', icon: <Sliders className="w-4 h-4" /> },
-              { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="w-4 h-4" /> },
-              { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="w-4 h-4" /> },
-              { id: 'formula-sheet', label: 'דף נוסחאות', icon: <TrendingUp className="w-4 h-4" /> }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setMode(tab.id as any)}
-                className={`px-3.5 py-2.5 sm:py-2 rounded-sm text-xs font-black tracking-wide flex items-center gap-1.5 border transition cursor-pointer select-none ${mode === tab.id
-                    ? 'bg-[var(--color-accent-cobalt-bg-hover)] text-white border-[var(--color-border)] shadow-md shadow-[var(--color-accent-cobalt-line)]/10'
-                    : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]'
-                  }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {([
+              { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="w-4 h-4" />, accent: 'brass' },
+              { id: 'forward', label: 'חישובי הסתברויות (Z)', icon: <Calculator className="w-4 h-4" />, accent: 'cobalt' },
+              { id: 'inverse', label: 'חישוב אחוזונים (Zₓ)', icon: <Sliders className="w-4 h-4" />, accent: 'cobalt' },
+              { id: 'table', label: 'טבלת התפלגות', icon: <BookOpen className="w-4 h-4" />, accent: 'teal' },
+              { id: 'formula-sheet', label: 'נוסחאות', icon: <TrendingUp className="w-4 h-4" />, accent: 'neutral' }
+            ] satisfies NavigationTab[]).map(tab => {
+              const isActive = mode === tab.id;
+              const activeClass = tab.accent === 'brass'
+                ? 'bg-[var(--color-accent-brass)] text-[var(--color-background)] border-[var(--color-accent-brass)] shadow-md shadow-[var(--color-accent-brass)]/20'
+                : tab.accent === 'teal'
+                  ? 'bg-[var(--color-accent-teal)] text-[var(--color-background)] border-[var(--color-accent-teal)] shadow-md shadow-[var(--color-accent-teal)]/15'
+                  : tab.accent === 'neutral'
+                    ? 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] border-[var(--color-text-secondary)]'
+                    : 'bg-[var(--color-accent-cobalt)] text-white border-[var(--color-accent-cobalt)] shadow-md shadow-[var(--color-accent-cobalt-line)]/10';
+              const inactiveClass = tab.accent === 'brass'
+                ? 'bg-[var(--color-surface)] border-[var(--color-accent-brass)]/45 text-[var(--color-accent-brass)] hover:bg-[var(--color-accent-brass)]/10'
+                : tab.accent === 'neutral'
+                  ? 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-raised)]'
+                  : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]';
+
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setMode(tab.id)}
+                  className={`px-3.5 py-2.5 sm:py-2 rounded-sm text-xs font-black tracking-wide flex items-center gap-1.5 border transition cursor-pointer select-none ${isActive ? activeClass : inactiveClass}`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
         </>
+        )
       }
     >
       <AnimatePresence mode="wait">
