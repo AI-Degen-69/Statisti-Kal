@@ -540,17 +540,17 @@ export default function HypothesisTestingCalculator() {
     const [mu0, setMu0] = useLocalStorageState<number>('HT_mu0', 100);
     const [mu0Input, setMu0Input] = useLocalStorageState<string>('HT_mu0Input', '100');
 
-    const [mu1, setMu1] = useLocalStorageState<number>('HT_mu1', 108);
-    const [mu1Input, setMu1Input] = useLocalStorageState<string>('HT_mu1Input', '108');
+    const [mu1, setMu1] = useLocalStorageState<number>('HT_mu1', 105);
+    const [mu1Input, setMu1Input] = useLocalStorageState<string>('HT_mu1Input', '105');
 
-    const [muH1, setMuH1] = useLocalStorageState<number>('HT_muH1', 108);
-    const [muH1Input, setMuH1Input] = useLocalStorageState<string>('HT_muH1Input', '108');
+    const [muH1, setMuH1] = useLocalStorageState<number>('HT_muH1', 105);
+    const [muH1Input, setMuH1Input] = useLocalStorageState<string>('HT_muH1Input', '105');
 
     const [sigma, setSigma] = useLocalStorageState<number>('HT_sigma', 15);
     const [sigmaInput, setSigmaInput] = useLocalStorageState<string>('HT_sigmaInput', '15');
 
-    const [n, setN] = useLocalStorageState<number>('HT_n', 36);
-    const [nInput, setNInput] = useLocalStorageState<string>('HT_nInput', '36');
+    const [n, setN] = useLocalStorageState<number>('HT_n', 1212714);
+    const [nInput, setNInput] = useLocalStorageState<string>('HT_nInput', '1212714');
 
     const [alpha, setAlpha] = useLocalStorageState<number>('HT_alpha', 0.05);
     const [alphaInput, setAlphaInput] = useLocalStorageState<string>('HT_alphaInput', '0.05');
@@ -669,14 +669,14 @@ export default function HypothesisTestingCalculator() {
         setCalculatePower(true);
         setMu0(100);
         setMu0Input('100');
-        setMu1(108);
-        setMu1Input('108');
-        setMuH1(108);
-        setMuH1Input('108');
+        setMu1(105);
+        setMu1Input('105');
+        setMuH1(105);
+        setMuH1Input('105');
         setSigma(15);
         setSigmaInput('15');
-        setN(36);
-        setNInput('36');
+        setN(1212714);
+        setNInput('1212714');
         setAlpha(0.05);
         setAlphaInput('0.05');
         setTestType('mean');
@@ -1232,6 +1232,21 @@ export default function HypothesisTestingCalculator() {
                 }}
                 locale={{ back: 'חזור', close: 'סגור', last: 'סיום', next: 'הבא', skip: 'דלג' }}
             />
+
+            {/* IQ Dataset Info Box */}
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg p-4 sm:p-6 mb-8 shadow-sm border-r-4 border-r-[var(--color-accent-cobalt)]">
+                <div className="flex flex-col gap-2">
+                    <div className="font-bold text-[var(--color-text-primary)] text-lg">נתוני מדגם ה-IQ מ-2025</div>
+                    <div className="text-[var(--color-text-secondary)] text-sm space-y-1">
+                        <div><span className="font-bold">פורסם על־ידי:</span> International IQ Test</div>
+                        <div><span className="font-bold">עודכן לאחרונה:</span> 1 בינואר 2026</div>
+                        <div>
+                            <span className="font-bold">מדגם:</span> 1,212,714 נבדקים שביצעו באתר זה בשנת 2025 את אותו מבחן IQ (ממוצע IQ: 100; סטיית תקן: 15).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Parameters Input Card */}
             <div className="tour-step-inputs rounded-lg p-5 md:p-6 border shadow-md transition-colors bg-[var(--color-surface)] border-[var(--color-border)]">
                 <div className="flex items-center gap-2 border-b border-[var(--color-border)] pb-4 mb-5">
