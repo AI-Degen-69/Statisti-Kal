@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Award, BookOpen, Calculator, Sliders, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Calculator, Home, Sliders, TrendingUp } from 'lucide-react';
 
 export type SitePage = 'landing' | 'hypothesis' | 'forward' | 'inverse' | 'table' | 'formula-sheet';
 
@@ -67,6 +67,18 @@ export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps):
             </button>
           );
         })}
+
+        <button
+          type="button"
+          onClick={() => onNavigate('landing')}
+          className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3.5 py-2.5 transition sm:py-2 ${
+            activePage === 'landing' ? getActiveClass('neutral') : getInactiveClass('neutral')
+          }`}
+          aria-label="דף הבית"
+          title="דף הבית"
+        >
+          <Home className="h-4 w-4" />
+        </button>
       </nav>
     </>
   );
