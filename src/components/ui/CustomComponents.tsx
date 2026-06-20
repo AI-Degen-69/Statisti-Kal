@@ -127,7 +127,7 @@ export const InputGroup = forwardRef<HTMLInputElement, InputGroupProps>(function
           <div
             id={`${inputId}-error`}
             role="alert"
-            className={`absolute top-full right-0 text-[11px] text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full`}
+            className={`absolute top-full right-0 text-xs text-[var(--color-error)] font-bold leading-tight mt-1 text-center w-full`}
           >
             {error}
           </div>

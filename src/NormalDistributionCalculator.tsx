@@ -619,9 +619,9 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   const [isTGuideOpen, setIsTGuideOpen] = useState<boolean>(false);
 
   // Accordion states
-  const [isZTableOpen, setIsZTableOpen] = useState<boolean>(true);
-  const [isPopularOpen, setIsPopularOpen] = useState<boolean>(true);
-  const [isTTableOpen, setIsTTableOpen] = useState<boolean>(true);
+  const [isZTableOpen, setIsZTableOpen] = useState<boolean>(false);
+  const [isPopularOpen, setIsPopularOpen] = useState<boolean>(false);
+  const [isTTableOpen, setIsTTableOpen] = useState<boolean>(false);
 
   // Student's T-distribution states
   const [tDf, setTDf] = useLocalStorageState<number>('ND_tDf', 10);
