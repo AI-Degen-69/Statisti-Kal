@@ -10,13 +10,15 @@ export interface PageLayoutProps {
   children: React.ReactNode;
   /** Add a specific dir attribute to the layout. Often 'rtl' for Hebrew. */
   dir?: 'ltr' | 'rtl';
+  /** Force the "scroll to top" button to be visible (used by the interactive guide). */
+  forceShowScrollTop?: boolean;
 }
 
 /**
  * A standardized layout container that implements the Layered Dark Mode 
  * aesthetics and global grid alignment across all calculator pages.
  */
-export const PageLayout: React.FC<PageLayoutProps> = ({ header, footer, children, dir = 'rtl' }) => {
+export const PageLayout: React.FC<PageLayoutProps> = ({ header, footer, children, dir = 'rtl', forceShowScrollTop = false }) => {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
@@ -52,10 +54,10 @@ export const PageLayout: React.FC<PageLayoutProps> = ({ header, footer, children
         </footer>
       )}
 
-      {showScrollTop && (
+      {(showScrollTop || forceShowScrollTop) && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 left-6 z-50 p-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-accent-cobalt)] hover:text-white hover:bg-[var(--color-accent-cobalt)] rounded-lg shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+          className="guide-scroll-top fixed bottom-6 left-6 z-50 p-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-accent-cobalt)] hover:text-white hover:bg-[var(--color-accent-cobalt)] rounded-lg shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
           title="חזרה לראש העמוד"
         >
           <ArrowUp size={24} />

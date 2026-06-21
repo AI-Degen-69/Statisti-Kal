@@ -329,7 +329,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                 <tr className="border-b border-[var(--color-border)]">
                     <td className="p-4 font-bold border-l border-[var(--color-border)] bg-[var(--color-error)]/10">
                         <span className="text-sm block text-[var(--color-text-primary)]">
-                            אי-דחייה של <InlineMath math="H_0" />
+                            אי-��חייה של <InlineMath math="H_0" />
                         </span>
                         <span className="block text-mono-xs font-mono text-[var(--color-text-secondary)] mt-1" dir="ltr">
                             <InlineMath math="\text{Fail to Reject } H_0" />
@@ -384,7 +384,7 @@ function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatri
                                     <div className="mb-1 font-mono text-mono-xs" dir="ltr">
                                         <InlineMath math="P(\text{Fail to Reject } H_0 \mid H_1 \text{ is true})" />
                                     </div>
-                                    הסיכוי לא לדחות את השערת האפס למרות שהיא שקרית וקיים אפקט אמיתי.
+                                    הסיכוי לא לדחות את השערת האפס למ��ות שהיא שקרית וקיים אפקט אמיתי.
                                 </div>
                             </>
                         ) : (
@@ -1345,7 +1345,7 @@ export default function HypothesisTestingCalculator() {
                                 event.preventDefault();
                                 handleReset();
                             }}
-                            className="px-4 py-1.5 bg-[var(--color-accent-brass)]/10 text-[var(--color-accent-brass)] border border-[var(--color-accent-brass)]/50 rounded-md text-sm font-bold shadow-sm hover:bg-[var(--color-accent-brass)]/20 transition-colors flex items-center gap-2"
+                            className="guide-load-default px-4 py-1.5 bg-[var(--color-accent-brass)]/10 text-[var(--color-accent-brass)] border border-[var(--color-accent-brass)]/50 rounded-md text-sm font-bold shadow-sm hover:bg-[var(--color-accent-brass)]/20 transition-colors flex items-center gap-2"
                         >
                             <RefreshCw size={16} />
                             <span>טען נתוני ברירת מחדל</span>
@@ -2018,7 +2018,7 @@ export default function HypothesisTestingCalculator() {
                                     setShowHypothesisTesting(!showHypothesisTesting);
                                 }
                             }}
-                            className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                            className="guide-accordion-ht relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
                         > 
                                         <div className="flex justify-end gap-3 lg:col-span-2 order-2 lg:order-2 mb-2">
                         <button 
@@ -2983,7 +2983,7 @@ export default function HypothesisTestingCalculator() {
                                                             </div>
 
                                                             <p className="text-base sm:text-lg text-[var(--color-text-primary)] leading-relaxed font-semibold">
-                                                                נחשב את סטטיסטי המבחן (מרחק התוצאה מ-<InlineMath math="\mu_0" /> במונחי שגיאות תקן):
+                                                                נחשב את סטטיסט�� המבחן (מרחק התוצאה מ-<InlineMath math="\mu_0" /> במונחי שגיאות תקן):
                                                             </p>
 
                                                             {/* Raw formula template */}
