@@ -17,7 +17,7 @@ interface NavigationItem {
 
 const navigationItems: NavigationItem[] = [
   { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="h-4 w-4" />, accent: 'brass' },
-  { id: 'forward', label: 'חישובי הסתברויות (Z)', icon: <Calculator className="h-4 w-4" />, accent: 'cobalt' },
+  { id: 'forward', label: 'חישובי הסתברויות (Z)', icon: <TrendingUp className="h-4 w-4" />, accent: 'cobalt' },
   { id: 'inverse', label: 'חישוב אחוזונים (Quantile)', icon: <Sliders className="h-4 w-4" />, accent: 'cobalt' },
   { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="h-4 w-4" />, accent: 'teal' },
   { id: 'formula-sheet', label: 'נוסחאות', icon: <TrendingUp className="h-4 w-4" />, accent: 'neutral' },
@@ -65,7 +65,7 @@ export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps):
           className="flex items-center gap-3 text-right"
           aria-label="חזרה לדף הבית"
         >
-          <div className="rounded-sm border border-[var(--color-border)] bg-[var(--color-accent-cobalt-bg-hover)]/25 p-2.5 text-[var(--color-accent-cobalt)]">
+          <div className="flex items-center justify-center rounded-sm border border-[var(--color-border)] bg-[var(--color-accent-cobalt-bg-hover)]/25 p-2.5 text-[var(--color-accent-cobalt)]">
             <Home className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
           <div>
