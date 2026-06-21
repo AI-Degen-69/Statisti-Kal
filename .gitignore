@@ -13,6 +13,16 @@ Agent-Skills
 AGENTS.md
 CONTEXT.md
 STRATEGY.md
-remove_calcblock_props.cjs
-update-icons.cjs
-update.cjs
+# Temporary AI/Agent workspace files
+/*.cjs
+/*.mjs
+*.patch
+.superpowers/
+.scratch/
+
+# Private AI and Project Management folders
+.agents/
+docs/
+plans/
+templates/
+scripts/
