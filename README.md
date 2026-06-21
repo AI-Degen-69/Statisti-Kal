@@ -1,20 +1,32 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+  <h1>📊 Statisti-Kal</h1>
+  <p><b>Hebrew-First Academic Statistics Instrument</b></p>
 </div>
 
-# Run and deploy your AI Studio app
+## אודות הפרויקט
+Statisti-Kal היא מערכת אקדמית בעברית (RTL) המיועדת לסטודנטים וללומדי סטטיסטיקה. 
+המערכת מספקת כלים וירטואליים חכמים, עם דגש על פשטות, בהירות אקדמית, והמחשה חזותית של קבלת החלטות בסטטיסטיקה.
 
-This contains everything you need to run your app locally.
+## תכונות מרכזיות
+- **בדיקת השערות:** תהליך מונחה ומפורט (Step-by-Step) כולל ציור פעמון גרפי, הצגת אזורי קבלה ודחייה, וחישוב p-value.
+- **התפלגות נורמלית:** פתרון בעיות הסתברות (רגיל והפוך) על גבי פעמון גאוס אינטראקטיבי.
+- **דפי נוסחאות וטבלאות:** גישה מהירה לכלי העזר הסטטיסטיים המסורתיים בפורמט דיגיטלי.
+- **תמיכה מלאה ב-RTL:** ממשק משתמש קפדני שתוכנן מראש לימין-לשמאל, כולל תצוגת נוסחאות מדויקת באמצעות KaTeX.
 
-View your app in AI Studio: https://ai.studio/apps/15c2abee-9cfc-4918-98c6-f4f4c527955c
+## הפעלת הפרויקט (מפתחים)
+קוד האתר מרוכז בתוך תיקיית `web/`. כדי להריץ את סביבת הפיתוח:
 
-## Run Locally
+```bash
+cd web
+npm install
+npm run dev
+```
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## טכנולוגיות
+* React 19
+* TypeScript
+* Vite
+* Tailwind CSS v4
+* D3.js & Recharts (להמחשות הגרפיות)
+* Framer Motion (לאנימציות ה-UI)
+* KaTeX (לרינדור מתמטי)
