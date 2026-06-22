@@ -200,8 +200,12 @@
 }
 
 /* ============================================================================
- * Base body styles
+ * Base document styles
  * ============================================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
@@ -326,6 +330,9 @@ body {
 
 /* Respect prefers-reduced-motion — disable all signature animations */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
   .stagger-in > * {
     animation: none !important;
     opacity: 1;

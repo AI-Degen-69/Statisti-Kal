@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, lazy, useState } from 'react';
+import { Suspense, lazy, useState, useCallback } from 'react';
 import { ReviewOverlayProvider } from './components/review-overlay';
 import LandingPage from './components/LandingPage';
 import SiteFooter from './components/SiteFooter';
 import SiteHeader, { type SitePage } from './components/SiteHeader';
 import { PageLayout } from './components/ui/PageLayout';
+import { PageTransition } from './components/PageTransition';
 import type { CalcMode } from './NormalDistributionCalculator';
 
 type ActivePage = 'landing' | 'hypothesis' | 'normal';
@@ -20,7 +21,10 @@ export default function App() {
   const [activePage, setActivePage] = useState<ActivePage>('landing');
   const [normalMode, setNormalMode] = useState<CalcMode>('hypothesis');
 
-  const handleNavigate = (page: SitePage) => {
+  const handleNavigate = useCallback((page: SitePage) => {
+    // Smooth scroll to top on every navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
     if (page === 'landing' || page === 'hypothesis') {
       setActivePage(page);
       return;
@@ -33,37 +37,39 @@ export default function App() {
     }
     setNormalMode(page);
     setActivePage('normal');
-  };
+  }, []);
 
   return (
     <ReviewOverlayProvider storageKey="statistikal_feedback_v1">
-      {activePage === 'hypothesis' ? (
-        <PageLayout
-          header={<SiteHeader activePage="hypothesis" onNavigate={handleNavigate} />}
-          footer={<SiteFooter onNavigate={handleNavigate} />}
-        >
+      <PageTransition pageKey={activePage === 'normal' ? `normal-${normalMode}` : activePage}>
+        {activePage === 'hypothesis' ? (
+          <PageLayout
+            header={<SiteHeader activePage="hypothesis" onNavigate={handleNavigate} />}
+            footer={<SiteFooter onNavigate={handleNavigate} />}
+          >
+            <Suspense fallback={<PageLoadingState />}>
+              <HypothesisTestingCalculator />
+            </Suspense>
+          </PageLayout>
+        ) : null}
+
+        {activePage === 'normal' ? (
           <Suspense fallback={<PageLoadingState />}>
-            <HypothesisTestingCalculator />
+            <NormalDistributionCalculator
+              key={normalMode}
+              initialMode={normalMode}
+              onNavigate={handleNavigate}
+            />
           </Suspense>
-        </PageLayout>
-      ) : null}
+        ) : null}
 
-      {activePage === 'normal' ? (
-        <Suspense fallback={<PageLoadingState />}>
-          <NormalDistributionCalculator
-            key={normalMode}
-            initialMode={normalMode}
+        {activePage === 'landing' ? (
+          <LandingPage
             onNavigate={handleNavigate}
+            onTryHypothesis={() => handleNavigate('hypothesis')}
           />
-        </Suspense>
-      ) : null}
-
-      {activePage === 'landing' ? (
-        <LandingPage
-          onNavigate={handleNavigate}
-          onTryHypothesis={() => setActivePage('hypothesis')}
-        />
-      ) : null}
+        ) : null}
+      </PageTransition>
     </ReviewOverlayProvider>
   );
 }

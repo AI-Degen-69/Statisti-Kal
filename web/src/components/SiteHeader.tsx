@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Award, BookOpen, Home, Sliders, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Home, ScrollText, Sliders, TrendingUp } from 'lucide-react';
 
 export type SitePage = 'landing' | 'hypothesis' | 'forward' | 'inverse' | 'table' | 'formula-sheet';
 
@@ -8,64 +8,44 @@ interface SiteHeaderProps {
   onNavigate: (page: SitePage) => void;
 }
 
-interface NavigationItem {
+interface NavItem {
   id: SitePage;
   label: string;
   icon: ReactNode;
-  accent: 'brass' | 'cobalt' | 'teal' | 'neutral';
+  group: 'hypothesis' | 'calculator' | 'reference';
 }
 
-type NavElement = NavigationItem | { id: string; isSeparator: true };
+// Visual groups:
+// hypothesis  → brass, bold CTA
+// calculators → cobalt, interactive feel
+// reference   → teal/muted, informational feel
 
-const navigationItems: NavElement[] = [
-  { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="h-4 w-4" />, accent: 'brass' },
-  { id: 'sep1', isSeparator: true },
-  { id: 'forward', label: 'חישובי הסתברויות (Z)', icon: <TrendingUp className="h-4 w-4" />, accent: 'cobalt' },
-  { id: 'inverse', label: 'חישוב אחוזונים (Quantile)', icon: <Sliders className="h-4 w-4" />, accent: 'cobalt' },
-  { id: 'sep2', isSeparator: true },
-  { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="h-4 w-4" />, accent: 'teal' },
-  { id: 'formula-sheet', label: 'נוסחאות', icon: <TrendingUp className="h-4 w-4" />, accent: 'neutral' },
-];
+const inverseItem: NavItem = { id: 'inverse', label: 'חישוב אחוזונים', icon: <Sliders className="h-4 w-4 shrink-0" />, group: 'calculator' };
+const forwardItem: NavItem = { id: 'forward', label: 'חישובי הסתברויות', icon: <TrendingUp className="h-4 w-4 shrink-0" />, group: 'calculator' };
+const hypothesisItem: NavItem = { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="h-4 w-4 shrink-0" />, group: 'hypothesis' };
+const tableItem: NavItem = { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="h-4 w-4 shrink-0" />, group: 'reference' };
+const formulaItem: NavItem = { id: 'formula-sheet', label: 'נוסחאות', icon: <ScrollText className="h-4 w-4 shrink-0" />, group: 'reference' };
 
 export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps): ReactElement {
   return (
     <>
-      <div className="hidden lg:block lg:flex-1" />
-
-      <nav className="flex w-full flex-wrap lg:flex-nowrap justify-center items-center gap-1.5 md:w-auto lg:flex-none lg:justify-center" aria-label="ניווט ראשי">
-        {navigationItems.map((item) => {
-          if ('isSeparator' in item) {
-            return (
-              <div key={item.id} className="hidden sm:block h-6 w-px bg-[var(--color-border)] mx-1" />
-            );
-          }
-
-          const isActive = item.id === activePage;
-          const activeClass = getActiveClass(item.accent);
-          const inactiveClass = getInactiveClass(item.accent);
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onNavigate(item.id)}
-              className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3.5 py-2.5 text-xs font-black tracking-wide transition sm:py-2 whitespace-nowrap ${isActive ? activeClass : inactiveClass
-                }`}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
-      <div className="w-full text-right sm:w-auto lg:flex-1 flex md:justify-end">
+      {/* 1. Logo (Because parent dir="rtl", this is on the far right) */}
+      <div className="w-full text-right sm:w-auto lg:flex-1 flex md:justify-start">
         <button
           type="button"
           onClick={() => onNavigate('landing')}
           className="flex items-center gap-4 text-right"
           aria-label="חזרה לדף הבית"
         >
+          <button
+            type="button"
+            onClick={() => onNavigate('landing')}
+            className="flex cursor-pointer select-none items-center gap-4 rounded-sm border border-2 border-[rgb(240,241,245)] px-3 py-2 transition bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]"
+            aria-label="דף הבית"
+            title="דף הבית"
+          >
+            <Home className="h-6 w-6 text-[#e2e2f0]" />
+          </button>
           <div>
             <h1 className="select-none text-xl font-black tracking-tight text-[var(--color-text-primary)] sm:text-2xl">
               סטטיטי-קל
@@ -74,45 +54,79 @@ export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps):
               סטטיסטיקה בדרך מובנת, פשוטה וברורה
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => onNavigate('landing')}
-            className="flex cursor-pointer select-none items-center gap-4 rounded-sm border border-2 border-[rgb(240,241,245)] px-3.5 py-[17px] transition bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]"
-            aria-label="דף הבית"
-            title="דף הבית"
-          >
-            <Home className="h-6 w-6 text-[#e2e2f0] sm:h-7 sm:w-7" style={{ borderRadius: '24px' }} />
-          </button>
         </button>
       </div>
+
+      {/* 2. Navigation items (Flows right-to-left) */}
+      <nav
+        className="flex w-full flex-wrap lg:flex-nowrap justify-center items-center gap-1 lg:gap-2 md:w-auto lg:flex-none lg:justify-center"
+        aria-label="ניווט ראשי"
+      >
+        <NavButton item={inverseItem} isActive={activePage === 'inverse'} onNavigate={onNavigate} />
+        <NavButton item={forwardItem} isActive={activePage === 'forward'} onNavigate={onNavigate} />
+        
+        <Separator />
+        
+        <NavButton item={hypothesisItem} isActive={activePage === 'hypothesis'} onNavigate={onNavigate} />
+        
+        <Separator />
+        
+        <NavButton item={tableItem} isActive={activePage === 'table'} onNavigate={onNavigate} />
+        <NavButton item={formulaItem} isActive={activePage === 'formula-sheet'} onNavigate={onNavigate} />
+      </nav>
+
+      {/* 3. Empty spacer for balanced flex layout (sits on the far left) */}
+      <div className="hidden lg:block lg:flex-1" />
     </>
   );
 }
 
-function getActiveClass(accent: NavigationItem['accent']): string {
-  if (accent === 'brass') {
-    return 'bg-[var(--color-accent-brass)] text-[var(--color-background)] border-[var(--color-accent-brass)] shadow-md shadow-[var(--color-accent-brass)]/20';
-  }
+// ── Sub-components ─────────────────────────────────────────────────────────────
 
-  if (accent === 'teal') {
-    return 'bg-[var(--color-accent-teal)] text-[var(--color-background)] border-[var(--color-accent-teal)] shadow-md shadow-[var(--color-accent-teal)]/15';
-  }
-
-  if (accent === 'neutral') {
-    return 'bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] border-[var(--color-text-secondary)]';
-  }
-
-  return 'bg-[var(--color-accent-cobalt)] text-white border-[var(--color-accent-cobalt)] shadow-md shadow-[var(--color-accent-cobalt-line)]/10';
+function Separator(): ReactElement {
+  return <div className="hidden sm:block h-6 w-px bg-[var(--color-border)] mx-1" />;
 }
 
-function getInactiveClass(accent: NavigationItem['accent']): string {
-  if (accent === 'brass') {
-    return 'bg-[var(--color-surface)] border-[var(--color-accent-brass)]/45 text-[var(--color-accent-brass)] hover:bg-[var(--color-accent-brass)]/10';
+function NavButton({
+  item,
+  isActive,
+  onNavigate,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  onNavigate: (page: SitePage) => void;
+}): ReactElement {
+  return (
+    <button
+      key={item.id}
+      type="button"
+      onClick={() => onNavigate(item.id)}
+      className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3 py-2 text-sm font-medium tracking-wide transition whitespace-nowrap ${getButtonClass(item.group, isActive)}`}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      {/* Icon first (RTL: appears on right) */}
+      {item.icon}
+      <span>{item.label}</span>
+    </button>
+  );
+}
+
+// ── Style logic per group ──────────────────────────────────────────────────────
+
+function getButtonClass(group: NavItem['group'], isActive: boolean): string {
+  if (group === 'hypothesis') {
+    return isActive
+      ? 'bg-[var(--color-accent-brass)] text-[var(--color-background)] border-[var(--color-accent-brass)] shadow-md shadow-[var(--color-accent-brass)]/20 font-black'
+      : 'bg-[var(--color-surface)] border-[var(--color-accent-brass)]/45 text-[var(--color-accent-brass)] hover:bg-[var(--color-accent-brass)]/10 font-black';
   }
 
-  if (accent === 'neutral') {
-    return 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]';
+  if (group === 'calculator') {
+    return isActive
+      ? 'bg-[var(--color-accent-cobalt)] text-white border-[var(--color-accent-cobalt)] shadow-md shadow-[var(--color-accent-cobalt-line)]/15'
+      : 'bg-[var(--color-surface)] border-[var(--color-accent-cobalt-line)]/60 text-[var(--color-text-secondary)] hover:border-[var(--color-accent-cobalt-line)] hover:text-[var(--color-accent-cobalt)] hover:bg-[var(--color-accent-cobalt-bg)]';
   }
 
-  return 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]';
+  return isActive
+    ? 'bg-[var(--color-accent-teal)]/15 text-[var(--color-accent-teal)] border-[var(--color-accent-teal)]/50 shadow-sm'
+    : 'bg-transparent border-[var(--color-border)]/60 text-[var(--color-text-secondary)]/80 hover:bg-[var(--color-surface)] hover:text-[var(--color-text-secondary)] hover:border-[var(--color-border)]';
 }
