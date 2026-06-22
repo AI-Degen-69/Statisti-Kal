@@ -15,10 +15,14 @@ interface NavigationItem {
   accent: 'brass' | 'cobalt' | 'teal' | 'neutral';
 }
 
-const navigationItems: NavigationItem[] = [
+type NavElement = NavigationItem | { id: string; isSeparator: true };
+
+const navigationItems: NavElement[] = [
   { id: 'hypothesis', label: 'בדיקת השערות', icon: <Award className="h-4 w-4" />, accent: 'brass' },
+  { id: 'sep1', isSeparator: true },
   { id: 'forward', label: 'חישובי הסתברויות (Z)', icon: <TrendingUp className="h-4 w-4" />, accent: 'cobalt' },
   { id: 'inverse', label: 'חישוב אחוזונים (Quantile)', icon: <Sliders className="h-4 w-4" />, accent: 'cobalt' },
+  { id: 'sep2', isSeparator: true },
   { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="h-4 w-4" />, accent: 'teal' },
   { id: 'formula-sheet', label: 'נוסחאות', icon: <TrendingUp className="h-4 w-4" />, accent: 'neutral' },
 ];
@@ -26,30 +30,16 @@ const navigationItems: NavigationItem[] = [
 export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps): ReactElement {
   return (
     <>
-      <div className="w-full text-right sm:w-auto">
-        <button
-          type="button"
-          onClick={() => onNavigate('landing')}
-          className="group flex cursor-pointer items-center gap-3 text-right"
-          aria-label="חזרה לדף הבית"
-          title="דף הבית"
-        >
-          <div className="rounded-sm border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-[var(--color-text-secondary)] transition-colors group-hover:bg-[var(--color-surface-raised)] group-hover:text-[var(--color-text-primary)]">
-            <Home className="h-6 w-6 sm:h-7 sm:w-7" />
-          </div>
-          <div>
-            <h1 className="select-none text-xl font-black tracking-tight text-[var(--color-text-primary)] sm:text-2xl">
-              סטטיטי-קל
-            </h1>
-            <p className="mt-0.5 text-xs font-medium text-[var(--color-text-secondary)] sm:text-sm">
-              סטטיסטיקה בדרך מובנת, פשוטה וברורה
-            </p>
-          </div>
-        </button>
-      </div>
+      <div className="hidden lg:block lg:flex-1" />
 
-      <nav className="flex w-full flex-wrap justify-center gap-1.5 md:w-auto md:justify-end" aria-label="ניווט ראשי">
+      <nav className="flex w-full flex-wrap lg:flex-nowrap justify-center items-center gap-1.5 md:w-auto lg:flex-none lg:justify-center" aria-label="ניווט ראשי">
         {navigationItems.map((item) => {
+          if ('isSeparator' in item) {
+            return (
+              <div key={item.id} className="hidden sm:block h-6 w-px bg-[var(--color-border)] mx-1" />
+            );
+          }
+
           const isActive = item.id === activePage;
           const activeClass = getActiveClass(item.accent);
           const inactiveClass = getInactiveClass(item.accent);
@@ -59,7 +49,7 @@ export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps):
               key={item.id}
               type="button"
               onClick={() => onNavigate(item.id)}
-              className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3.5 py-2.5 text-xs font-black tracking-wide transition sm:py-2 ${isActive ? activeClass : inactiveClass
+              className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3.5 py-2.5 text-xs font-black tracking-wide transition sm:py-2 whitespace-nowrap ${isActive ? activeClass : inactiveClass
                 }`}
             >
               {item.icon}
@@ -69,7 +59,7 @@ export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps):
         })}
       </nav>
 
-      <div className="w-full text-right sm:w-auto">
+      <div className="w-full text-right sm:w-auto lg:flex-1 flex md:justify-end">
         <button
           type="button"
           onClick={() => onNavigate('landing')}
