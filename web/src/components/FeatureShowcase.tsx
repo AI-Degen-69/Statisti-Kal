@@ -61,7 +61,7 @@ export function FeatureShowcase(): ReactElement {
             <div className="accent-bar" />
             <span className="text-heading-label font-black text-[var(--color-accent-brass)]">פחות טכניקה שחורה</span>
           </div>
-          <h2 className="block text-display-h2 text-[var(--color-text-primary)]">
+          <h2 data-toc id="landing-focus" className="block text-display-h2 text-[var(--color-text-primary)]">
             איך המערכת עוזרת לכם להתמקד בעיקר?
           </h2>
           <p className="mx-auto block max-w-3xl text-body-lg font-semibold text-[var(--color-text-secondary)]">

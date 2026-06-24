@@ -21,7 +21,8 @@ import {
   Sliders,
   X,
   Award,
-  TrendingUp
+  TrendingUp,
+  Star
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -744,6 +745,28 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   const [isPopularOpen, setIsPopularOpen] = useState<boolean>(false);
   const [isTTableOpen, setIsTTableOpen] = useState<boolean>(false);
 
+  useEffect(() => {
+    const handleOpenPath = (event: Event) => {
+      const customEvent = event as CustomEvent<{ ids?: string[] }>;
+      const openIds = customEvent.detail?.ids ?? [];
+
+      if (openIds.includes('normal-z-table')) {
+        setIsZTableOpen(true);
+      }
+
+      if (openIds.includes('normal-popular-z')) {
+        setIsPopularOpen(true);
+      }
+
+      if (openIds.includes('normal-t-table')) {
+        setIsTTableOpen(true);
+      }
+    };
+
+    window.addEventListener('toc-open-path', handleOpenPath);
+    return () => window.removeEventListener('toc-open-path', handleOpenPath);
+  }, []);
+
   // Student's T-distribution states
   const [tDf, setTDf] = useLocalStorageState<number | ''>('ND_tDf', '');
   const [tAlpha, setTAlpha] = useLocalStorageState<number>('ND_tAlpha', 0.05);
@@ -975,20 +998,30 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
   return (
     <div className="space-y-6 text-right" dir="rtl">
       <div className="border-b border-[var(--color-border)] pb-4">
-        <h3 className="text-lg font-bold text-[var(--color-text-primary)]">טבלאות התפלגות סטטיסטיות</h3>
+        <h2 data-toc id="normal-distribution-tables" className="text-lg font-bold text-[var(--color-text-primary)]">טבלאות התפלגות סטטיסטיות</h2>
         <p className="text-xs text-[var(--color-text-secondary)] mt-1 font-sans">איתור ערכים קריטיים וחיפוש מדויק בהתפלגות נורמלית ובהתפלגות t של Student</p>
       </div>
 
       {/* Z-Table Accordion */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
+      <div id="normal-z-table" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
         <button 
           onClick={() => setIsZTableOpen(!isZTableOpen)}
           className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
         >
-          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-            <span className="text-[var(--color-accent-cobalt)]">1.</span>
-            טבלת התפלגות נורמלית סטנדרטית (Z)
-            <InlineMath math="\Phi(Z)" />
+          <h3
+            data-toc
+            data-toc-label="התפלגות נורמלית סטנדרטית - טבלת ערכי Z"
+            data-toc-target="normal-z-table"
+            data-toc-open="normal-z-table"
+            className="text-base font-bold text-[var(--color-text-primary)] flex flex-wrap items-center gap-x-2 gap-y-1"
+          >
+            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface-elevated)] px-1.5 text-[var(--color-accent-cobalt)] shadow-[var(--shadow-soft)]">
+              <InlineMath math="Z" />
+            </span>
+            <span>התפלגות נורמלית סטנדרטית - טבלת ערכי Z</span>
+            <span dir="ltr" className="text-sm font-medium text-[var(--color-text-secondary)]">
+              <InlineMath math="\text{Standard\ Normal\ Distribution\ -\ Z-Score\ Table}" />
+            </span>
           </h3>
           {isZTableOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
         </button>
@@ -1144,14 +1177,14 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
       </div>
 
       {/* Popular Z-Scores Accordion */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
+      <div id="normal-popular-z" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
         <button 
           onClick={() => setIsPopularOpen(!isPopularOpen)}
           className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
         >
           <div className="flex items-center gap-2">
-            <Sliders size={18} className="text-[var(--color-accent-cobalt)]" />
-            <h3 className="text-base font-bold text-[var(--color-text-primary)]">ערכים וציוני תקן פופולריים למבחני השערות</h3>
+            <Star size={18} className="text-[var(--color-accent-cobalt)]" />
+            <h3 data-toc data-toc-target="normal-popular-z" data-toc-open="normal-popular-z" className="text-base font-bold text-[var(--color-text-primary)]">ערכים וציוני תקן פופולריים למבחני השערות</h3>
           </div>
           {isPopularOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
         </button>
@@ -1199,14 +1232,25 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
       </div>
 
       {/* T-Table Accordion */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
+      <div id="normal-t-table" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
         <button 
           onClick={() => setIsTTableOpen(!isTTableOpen)}
           className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
         >
-          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-            <span className="text-[var(--color-accent-cobalt)]">2.</span>
-            טבלת התפלגות Student's <InlineMath math="t" /> (ערכים קריטיים)
+          <h3
+            data-toc
+            data-toc-label="ערכים קריטיים להתפלגות Student's"
+            data-toc-target="normal-t-table"
+            data-toc-open="normal-t-table"
+            className="text-base font-bold text-[var(--color-text-primary)] flex flex-wrap items-center gap-x-2 gap-y-1"
+          >
+            <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface-elevated)] px-1.5 text-[var(--color-accent-cobalt)] shadow-[var(--shadow-soft)]">
+              <InlineMath math="t" />
+            </span>
+            <span>ערכים קריטיים להתפלגות Student's t</span>
+            <span dir="ltr" className="text-sm font-medium text-[var(--color-text-secondary)]">
+              <InlineMath math="\text{Critical\ Values\ for\ Student's\ t-Distribution}" />
+            </span>
           </h3>
           {isTTableOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
         </button>
@@ -1778,7 +1822,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
               <div className="lg:col-span-4 bg-[var(--color-surface)] border border-[var(--color-border)] p-5 rounded-lg space-y-5 text-right relative overflow-hidden shadow-sm">
                 <div className="absolute top-0 right-0 w-full h-1 bg-[var(--color-accent-cobalt-bg-hover)]" />
 
-                <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2 border-b border-[var(--color-border)] pb-2">
+                <h2 data-toc id="normal-distribution-controls" className="text-base sm:text-lg font-black text-white flex items-center gap-2 border-b border-[var(--color-border)] pb-2">
                   <Sliders className="text-[var(--color-accent-cobalt)] w-5 h-5" />
                   הגדרות ופרמטרי ההתפלגות
                 </h2>
@@ -1998,7 +2042,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
 
                 {/* Step by Step calculations panel */}
                 <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg p-5 sm:p-6 text-right space-y-4">
-                  <h3 className="text-sm sm:text-base font-black text-[var(--color-text-primary)] flex items-center gap-2 border-b border-[var(--color-border)] pb-2">
+                  <h3 data-toc id="normal-distribution-academic-path" className="text-sm sm:text-base font-black text-[var(--color-text-primary)] flex items-center gap-2 border-b border-[var(--color-border)] pb-2">
                     <Info size={16} className="text-[var(--color-accent-brass)]" />
                     דרך נוסחתית ואופן פתרון הדרגתי (Academic Path)
                   </h3>
