@@ -672,6 +672,28 @@ export default function HypothesisTestingCalculator() {
     const [showCI, setShowCI] = useState<boolean>(false);
     const [showPower, setShowPower] = useState<boolean>(false);
 
+    useEffect(() => {
+        const handleOpenPath = (event: Event) => {
+            const customEvent = event as CustomEvent<{ ids?: string[] }>;
+            const openIds = customEvent.detail?.ids ?? [];
+
+            if (openIds.includes('hypothesis-panel')) {
+                setShowHypothesisTesting(true);
+            }
+
+            if (openIds.includes('confidence-panel')) {
+                setShowCI(true);
+            }
+
+            if (openIds.includes('power-panel')) {
+                setShowPower(true);
+            }
+        };
+
+        window.addEventListener('toc-open-path', handleOpenPath);
+        return () => window.removeEventListener('toc-open-path', handleOpenPath);
+    }, []);
+
     // Error validations
     const errors = useMemo(() => {
         const errList: { [key: string]: string } = {};
@@ -1324,7 +1346,7 @@ export default function HypothesisTestingCalculator() {
             />
 
             {/* Default Study Accordion */}
-            <AnimatedDetails defaultOpen className="group relative bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg mb-8 shadow-sm border-r-4 border-r-[var(--color-accent-cobalt)] overflow-hidden [&_summary::-webkit-details-marker]:hidden">
+            <AnimatedDetails id="hypothesis-study-example" tocId="hypothesis-study-example" defaultOpen className="group relative bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg mb-8 shadow-sm border-r-4 border-r-[var(--color-accent-cobalt)] overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                 <summary className="relative z-10 cursor-pointer select-none p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center gap-4 border-b border-[var(--color-border)]/70 overflow-hidden">
                     <div className="pointer-events-none absolute inset-0 overflow-hidden">
                         <span className="absolute top-2 left-[18%] -rotate-6 text-2xl sm:text-4xl font-mono font-black text-[var(--color-accent-cobalt)]/10" dir="ltr"><InlineMath math="\bar{X} = 36.82^\circ C" /></span>
@@ -1336,7 +1358,7 @@ export default function HypothesisTestingCalculator() {
                         <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)] shrink-0">
                             <Globe2 size={20} />
                         </div>
-                        <h2 className="font-black text-[var(--color-text-primary)] text-base sm:text-lg">
+                        <h2 data-toc data-toc-target="hypothesis-study-example" data-toc-open="hypothesis-study-example" className="font-black text-[var(--color-text-primary)] text-base sm:text-lg">
                             דוגמה מהמציאות: בדיקת השערות על טמפרטורת גוף (צלזיוס)
                         </h2>
                     </div>
@@ -1466,9 +1488,9 @@ export default function HypothesisTestingCalculator() {
             <div className="tour-step-inputs rounded-lg p-5 md:p-6 border shadow-md transition-colors bg-[var(--color-surface)] border-[var(--color-border)]">
                 <div className="flex items-center gap-2 border-b border-[var(--color-border)] pb-4 mb-5">
                     <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Sliders size={20} /></div>
-                    <h3 className="text-lg sm:text-xl font-black text-[var(--color-text-primary)]">
+                    <h2 data-toc id="hypothesis-parameters" className="text-lg sm:text-xl font-black text-[var(--color-text-primary)]">
                         פרמטרים והשערות מחקר
-                    </h3>
+                    </h2>
                 </div>
 
                 <div className="flex flex-col gap-6">
@@ -2008,8 +2030,7 @@ export default function HypothesisTestingCalculator() {
 
                     {/* Solutions Steps Accordion / Panel */}
                     
-                    <div className="tour-step-accordion-ht rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
-                        
+                    <div id="hypothesis-panel" className="tour-step-accordion-ht rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-3 lg:order-3">
                         <div
                             role="button"
                             tabIndex={0}
@@ -2071,12 +2092,14 @@ export default function HypothesisTestingCalculator() {
                             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 text-right">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Calculator size={24} /></div>
-                                    <span className="text-xl sm:text-2xl font-black flex items-center flex-wrap gap-2">
-                                        בדיקת השערות
-                                        <span className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <h2 data-toc data-toc-target="hypothesis-panel" data-toc-open="hypothesis-panel" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">
+                                            בדיקת השערות
+                                        </h2>
+                                        <span aria-hidden="true" className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
                                             <InlineMath math={String.raw`\text{Hypothesis Testing}`} />
                                         </span>
-                                    </span>
+                                    </div>
                                 </div>
                                 {isValid && decisionData && (
                                     <div className="mr-0 sm:mr-3 flex items-center shrink-0 z-20">
@@ -2119,12 +2142,12 @@ export default function HypothesisTestingCalculator() {
                                     <div className="px-8 py-6.5 text-base flex flex-col gap-4">
 
                                         {/* Step 1: Hypothesis Formulation */}
-                                        <AnimatedDetails className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                                        <AnimatedDetails id="hypothesis-step-1" tocId="hypothesis-step-1" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                             <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                 <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
                                                     <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0">1</span>
-                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">ניסוח השערות המחקר</span>
+                                                    <h3 data-toc data-toc-target="hypothesis-step-1" data-toc-open="hypothesis-panel,hypothesis-step-1" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">ניסוח השערות המחקר</h3>
                                                 </div>
                                                 <div className="text-[var(--color-text-secondary)] group-[.is-open]:rotate-180 transition-transform duration-300">
                                                     <ChevronDown size={24} />
@@ -2221,12 +2244,12 @@ export default function HypothesisTestingCalculator() {
 
 
                                         {/* Step 2: Select an appropriate test */}
-                                        <AnimatedDetails id="step-2" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                                        <AnimatedDetails id="step-2" tocId="step-2" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                             <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                 <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
                                                     <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0">2</span>
-                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">בחירת מבחן סטטיסטי מתאים</span>
+                                                    <h3 data-toc data-toc-target="step-2" data-toc-open="hypothesis-panel,step-2" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">בחירת מבחן סטטיסטי מתאים</h3>
                                                 </div>
                                                 <div className="text-[var(--color-text-secondary)] group-[.is-open]:rotate-180 transition-transform duration-300">
                                                     <ChevronDown size={24} />
@@ -2434,12 +2457,12 @@ export default function HypothesisTestingCalculator() {
                                             </div></AnimatedDetails>
 
                                         {/* Step 3: Specify the level of significance */}
-                                        <AnimatedDetails className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                                        <AnimatedDetails id="hypothesis-step-3" tocId="hypothesis-step-3" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                             <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                 <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
                                                     <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0">3</span>
-                                                    <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קביעת רמת המובהקות (<InlineMath math="\alpha" />)</span>
+                                                    <h3 data-toc data-toc-target="hypothesis-step-3" data-toc-open="hypothesis-panel,hypothesis-step-3" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קביעת רמת המובהקות (<InlineMath math="\alpha" />)</h3>
                                                 </div>
                                                 <div className="text-[var(--color-text-secondary)] group-[.is-open]:rotate-180 transition-transform duration-300">
                                                     <ChevronDown size={24} />
@@ -2526,12 +2549,12 @@ export default function HypothesisTestingCalculator() {
                                         {isValid && stats && decisionData ? (
                                             <>
                                                 {/* Step 4: Critical Value derivation & SE */}
-                                                <AnimatedDetails className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                                                <AnimatedDetails id="hypothesis-step-4" tocId="hypothesis-step-4" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                                     <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                         <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
                                                             <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0">4</span>
-                                                            <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קביעת הערכים הקריטיים והגדרת כלל ההחלטה</span>
+                                                            <h3 data-toc data-toc-target="hypothesis-step-4" data-toc-open="hypothesis-panel,hypothesis-step-4" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קביעת הערכים הקריטיים והגדרת כלל ההחלטה</h3>
                                                         </div>
                                                         <div className="text-[var(--color-text-secondary)] group-[.is-open]:rotate-180 transition-transform duration-300">
                                                             <ChevronDown size={24} />
@@ -2759,11 +2782,11 @@ export default function HypothesisTestingCalculator() {
 
                                                             <div className="space-y-4 mt-8">
                                                                 {/* Approach 1 */}
-                                                                <AnimatedDetails className="group rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
+                                                                <AnimatedDetails id="hypothesis-step-4-test-statistic" tocId="hypothesis-step-4-test-statistic" className="group rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden">
                                                                     <summary className="flex items-center gap-3 p-4 sm:p-5 cursor-pointer text-[var(--color-accent-cobalt)] font-bold outline-none select-none hover:bg-[var(--color-surface-raised)] rounded-t-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                                         <div className="flex-1 flex items-center gap-3">
                                                                             <Target size={20} />
-                                                                            <span className="text-lg sm:text-xl">כלל סטטיסטי המבחן</span>
+                                                                            <h4 data-toc data-toc-target="hypothesis-step-4-test-statistic" data-toc-open="hypothesis-panel,hypothesis-step-4,hypothesis-step-4-test-statistic" className="text-lg sm:text-xl">כלל סטטיסטי המבחן</h4>
                                                                         </div>
                                                                         <ChevronDown size={22} className="transition-transform duration-300 group-[.is-open]:rotate-180 text-[var(--color-text-secondary)]" />
                                                                     </summary>
@@ -2835,11 +2858,11 @@ export default function HypothesisTestingCalculator() {
                                                                     const paramSymbol = testType === 'sum' ? '\\sum X' : testType === 'single' ? 'X' : '\\bar{X}';
                                                                     const muSymbol = testType === 'sum' ? 'E(\\sum X)' : '\\mu_0';
                                                                     return (
-                                                                        <AnimatedDetails className="group rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden" defaultOpen={false}>
+                                                                        <AnimatedDetails id="hypothesis-step-4-rejection-region" tocId="hypothesis-step-4-rejection-region" className="group rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden" defaultOpen={false}>
                                                                             <summary className="flex items-center gap-3 p-4 sm:p-5 cursor-pointer text-[var(--color-accent-cobalt)] font-bold outline-none select-none hover:bg-[var(--color-surface-raised)] rounded-t-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                                                 <div className="flex-1 flex items-center gap-3">
                                                                                     <Map size={20} />
-                                                                                    <span className="text-lg sm:text-xl">כלל אזור הדחייה</span>
+                                                                                    <h4 data-toc data-toc-target="hypothesis-step-4-rejection-region" data-toc-open="hypothesis-panel,hypothesis-step-4,hypothesis-step-4-rejection-region" className="text-lg sm:text-xl">כלל אזור הדחייה</h4>
                                                                                 </div>
                                                                                 <ChevronDown size={22} className="transition-transform duration-300 group-[.is-open]:rotate-180 text-[var(--color-text-secondary)]" />
                                                                             </summary>
@@ -2880,11 +2903,11 @@ export default function HypothesisTestingCalculator() {
                                                                 })()}
 
                                                                 {/* Approach 3 */}
-                                                                <AnimatedDetails className="group rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden" defaultOpen={false}>
+                                                                <AnimatedDetails id="hypothesis-step-4-p-value" tocId="hypothesis-step-4-p-value" className="group rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm transition-all duration-300 [&_summary::-webkit-details-marker]:hidden" defaultOpen={false}>
                                                                     <summary className="flex items-center gap-3 p-4 sm:p-5 cursor-pointer text-[var(--color-accent-cobalt)] font-bold outline-none select-none hover:bg-[var(--color-surface-raised)] rounded-t-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                                         <div className="flex-1 flex items-center gap-3">
                                                                             <Percent size={20} />
-                                                                            <span className="text-lg sm:text-xl">כלל מובהקות התוצאה (P-Value)</span>
+                                                                            <h4 data-toc data-toc-target="hypothesis-step-4-p-value" data-toc-open="hypothesis-panel,hypothesis-step-4,hypothesis-step-4-p-value" className="text-lg sm:text-xl">כלל מובהקות התוצאה (P-Value)</h4>
                                                                         </div>
                                                                         <ChevronDown size={22} className="transition-transform duration-300 group-[.is-open]:rotate-180 text-[var(--color-text-secondary)]" />
                                                                     </summary>
@@ -2933,12 +2956,12 @@ export default function HypothesisTestingCalculator() {
 
 
                                                 {/* Step 5: P-Value Calculation */}
-                                                <AnimatedDetails className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm text-right [&_summary::-webkit-details-marker]:hidden">
+                                                <AnimatedDetails id="hypothesis-step-5" tocId="hypothesis-step-5" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm text-right [&_summary::-webkit-details-marker]:hidden">
 
                                                     <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                         <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
                                                             <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0 shrink-0">5</span>
-                                                            <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">חישוב סטטיסטי המבחן</span>
+                                                            <h3 data-toc data-toc-target="hypothesis-step-5" data-toc-open="hypothesis-panel,hypothesis-step-5" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">חישוב סטטיסטי המבחן</h3>
                                                         </div>
                                                         <div className="text-[var(--color-text-secondary)] group-[.is-open]:rotate-180 transition-transform duration-300">
                                                             <ChevronDown size={24} />
@@ -3017,12 +3040,12 @@ export default function HypothesisTestingCalculator() {
                                                     </div></AnimatedDetails>
 
                                                 {/* Step 6: P-Value Calculation and Final Decision */}
-                                                <AnimatedDetails id="step-6" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm text-right [&_summary::-webkit-details-marker]:hidden">
+                                                <AnimatedDetails id="step-6" tocId="step-6" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm text-right [&_summary::-webkit-details-marker]:hidden">
 
                                                     <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                         <div className="flex items-center gap-3 font-extrabold text-[var(--color-accent-brass)]">
                                                             <span className="w-9 h-9 rounded-full bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-cobalt-bg)] bg-[var(--color-accent-brass)]/20 text-[var(--color-accent-brass)] text-base font-black flex items-center justify-center border border-[var(--color-accent-brass)]/50 shrink-0 shrink-0">6</span>
-                                                            <span className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קבלת החלטה / הסקת מסקנות</span>
+                                                            <h3 data-toc data-toc-target="step-6" data-toc-open="hypothesis-panel,step-6" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">קבלת החלטה / הסקת מסקנות</h3>
                                                             <span className="text-xs font-bold text-[var(--color-text-primary)]0 mr-auto font-mono">
                                                                 <InlineMath math="\alpha" /> = {alpha} | <InlineMath math="n" /> = {n}
                                                             </span>
@@ -3085,11 +3108,13 @@ export default function HypothesisTestingCalculator() {
                                                                 return (
                                                                     <div className="space-y-4">
                                                                         {/* Accordion 1 */}
-                                                                        <AnimatedDetails className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
+                                                                        <AnimatedDetails id="hypothesis-step-6-test-statistic" tocId="hypothesis-step-6-test-statistic" className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
                                                                             <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden">
                                                                                 <div className="flex items-center gap-3">
-                                                                                    <span className="w-8 h-8 rounded-full bg-[var(--color-accent-cobalt-bg)]/20 text-[var(--color-accent-cobalt)] flex items-center justify-center font-mono">1</span>
-                                                                                    <span>סטטיסטי המבחן <span className="text-sm font-normal text-[var(--color-text-secondary)] hidden sm:inline-block mr-1">(Standardized Scale)</span></span>
+                                                                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-accent-cobalt-line)]/30 bg-[var(--color-accent-cobalt-bg)]/18 text-[var(--color-accent-cobalt)]">
+                                                                                        <Target size={16} />
+                                                                                    </span>
+                                                                                    <h4 data-toc data-toc-target="hypothesis-step-6-test-statistic" data-toc-open="hypothesis-panel,step-6,hypothesis-step-6-test-statistic" className="text-lg sm:text-xl">גישת סטטיסטי המבחן <span className="text-sm font-normal text-[var(--color-text-secondary)] hidden sm:inline-block mr-1">(Standardized Scale)</span></h4>
                                                                                 </div>
                                                                                 <span className="transition group-[.is-open]:rotate-180">
                                                                                     <ChevronDown size={20} className="text-[var(--color-text-primary)]0" />
@@ -3141,11 +3166,13 @@ export default function HypothesisTestingCalculator() {
                                                                         </AnimatedDetails>
 
                                                                         {/* Accordion 2 */}
-                                                                        <AnimatedDetails className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
+                                                                        <AnimatedDetails id="hypothesis-step-6-rejection-region" tocId="hypothesis-step-6-rejection-region" className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
                                                                             <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden">
                                                                                 <div className="flex items-center gap-3">
-                                                                                    <span className="w-8 h-8 rounded-full bg-[var(--color-accent-cobalt-bg)]/20 text-[var(--color-accent-cobalt)] flex items-center justify-center font-mono">2</span>
-                                                                                    <span>אזורי דחייה/אי-דחייה ע"פ ממוצע המדגם <span dir="ltr" className="inline-block px-1">(<InlineMath math="\bar{X}" />)</span> <span className="text-sm font-normal text-[var(--color-text-secondary)] hidden sm:inline-block mr-1">(Original Scale)</span></span>
+                                                                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-accent-cobalt-line)]/30 bg-[var(--color-accent-cobalt-bg)]/18 text-[var(--color-accent-cobalt)]">
+                                                                                        <Map size={16} />
+                                                                                    </span>
+                                                                                    <h4 data-toc data-toc-target="hypothesis-step-6-rejection-region" data-toc-open="hypothesis-panel,step-6,hypothesis-step-6-rejection-region" className="text-lg sm:text-xl">גישת אזורי דחייה/אי-דחייה ע"פ ממוצע המדגם <span dir="ltr" className="inline-block px-1">(<InlineMath math="\bar{X}" />)</span> <span className="text-sm font-normal text-[var(--color-text-secondary)] hidden sm:inline-block mr-1">(Original Scale)</span></h4>
                                                                                 </div>
                                                                                 <span className="transition group-[.is-open]:rotate-180">
                                                                                     <ChevronDown size={20} className="text-[var(--color-text-primary)]0" />
@@ -3198,11 +3225,13 @@ export default function HypothesisTestingCalculator() {
                                                                         </AnimatedDetails>
 
                                                                         {/* Accordion 3 */}
-                                                                        <AnimatedDetails className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
+                                                                        <AnimatedDetails id="hypothesis-step-6-p-value" tocId="hypothesis-step-6-p-value" className="group border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] overflow-hidden">
                                                                             <summary className="flex justify-between items-center font-bold cursor-pointer list-none p-5 text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors [&::-webkit-details-marker]:hidden">
                                                                                 <div className="flex items-center gap-3">
-                                                                                    <span className="w-8 h-8 rounded-full bg-[var(--color-accent-cobalt-bg)]/20 text-[var(--color-accent-cobalt)] flex items-center justify-center font-mono">3</span>
-                                                                                    <span>מובהקות התוצאה (P-Value) <span className="text-sm font-normal text-[var(--color-text-secondary)] hidden sm:inline-block mr-1">(Probability)</span></span>
+                                                                                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-accent-cobalt-line)]/30 bg-[var(--color-accent-cobalt-bg)]/18 text-[var(--color-accent-cobalt)]">
+                                                                                        <Percent size={16} />
+                                                                                    </span>
+                                                                                    <h4 data-toc data-toc-target="hypothesis-step-6-p-value" data-toc-open="hypothesis-panel,step-6,hypothesis-step-6-p-value" className="text-lg sm:text-xl">גישת מובהקות התוצאה (P-Value) <span className="text-sm font-normal text-[var(--color-text-secondary)] hidden sm:inline-block mr-1">(Probability)</span></h4>
                                                                                 </div>
                                                                                 <span className="transition group-[.is-open]:rotate-180">
                                                                                     <ChevronDown size={20} className="text-[var(--color-text-primary)]0" />
@@ -3296,7 +3325,7 @@ export default function HypothesisTestingCalculator() {
 
                     {/* Confidence Interval Section */}
                     {isValid && stats && (
-                        <div className="tour-step-accordion-ci rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-4 lg:order-4 text-right mt-6">
+                        <div id="confidence-panel" className="tour-step-accordion-ci rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-4 lg:order-4 text-right mt-6">
                             <button
                                 onClick={() => setShowCI(!showCI)}
                                 className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
@@ -3321,12 +3350,14 @@ export default function HypothesisTestingCalculator() {
                                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 text-right">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Target size={24} /></div>
-                                        <span className="text-xl sm:text-2xl font-black flex items-center flex-wrap gap-2">
-                                            רווח סמך לתוחלת
-                                            <span className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
+                                        <div className="flex flex-col items-start gap-1">
+                                            <h2 data-toc data-toc-target="confidence-panel" data-toc-open="confidence-panel" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">
+                                                רווח סמך לתוחלת
+                                            </h2>
+                                            <span aria-hidden="true" className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
                                                 <InlineMath math="\text{Confidence Interval}" />
                                             </span>
-                                        </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
@@ -3484,7 +3515,7 @@ export default function HypothesisTestingCalculator() {
 
                     {/* Power Section */}
                     {isValid && stats && (
-                        <div className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-5 lg:order-5 text-right mt-6">
+                        <div id="power-panel" className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-5 lg:order-5 text-right mt-6">
                             <button
                                 onClick={() => setShowPower(!showPower)}
                                 className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
@@ -3509,12 +3540,14 @@ export default function HypothesisTestingCalculator() {
                                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 text-right">
                                     <div className="flex items-center gap-3">
                                         <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Activity size={24} /></div>
-                                        <span className="text-xl sm:text-2xl font-black flex items-center flex-wrap gap-2">
-                                            עוצמת מבחן
-                                            <span className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
+                                        <div className="flex flex-col items-start gap-1">
+                                            <h2 data-toc data-toc-target="power-panel" data-toc-open="power-panel" className="text-xl sm:text-2xl font-black text-[var(--color-text-primary)]">
+                                                עוצמת מבחן
+                                            </h2>
+                                            <span aria-hidden="true" className="text-base sm:text-lg font-serif text-[var(--color-text-secondary)] opacity-80" dir="ltr">
                                                 <InlineMath math="\text{Statistical Power}" />
                                             </span>
-                                        </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">

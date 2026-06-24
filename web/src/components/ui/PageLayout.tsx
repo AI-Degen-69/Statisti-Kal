@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useScrollPosition } from '../../hooks/useScrollPosition';
 import { ScrollToTopButton } from '../ScrollToTopButton';
 import { TableOfContents } from './TableOfContents';
@@ -38,6 +38,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   const scrollY = useScrollPosition();
   const isScrolled = scrollY > 10;
   const showScrollTop = scrollY > 400;
+  const mainRef = useRef<HTMLElement | null>(null);
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text-primary)] font-sans flex flex-col">
@@ -56,7 +57,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       )}
 
       <div className={`flex-1 flex flex-col items-center ${outerClassName}`}>
-        <main className={`w-full ${contentWidthClassName} mx-auto flex flex-col gap-6`} dir={dir}>
+        <main ref={mainRef} className={`w-full ${contentWidthClassName} mx-auto flex flex-col gap-6`} dir={dir}>
           {children}
         </main>
 
@@ -67,7 +68,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
         )}
       </div>
 
-      <TableOfContents />
+      <TableOfContents rootRef={mainRef} />
       <ScrollToTopButton visible={showScrollTop} />
     </div>
   );

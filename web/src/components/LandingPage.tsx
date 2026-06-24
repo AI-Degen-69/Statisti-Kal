@@ -135,7 +135,7 @@ export default function LandingPage({ onNavigate, onTryHypothesis }: LandingPage
       footer={<SiteFooter onNavigate={onNavigate} />}
       contentWidthClassName="max-w-none"
     >
-      <main className="relative flex w-full flex-col overflow-hidden">
+      <div className="relative flex w-full flex-col overflow-hidden">
         {/* Hero Section */}
         <div className="relative isolate px-6 pt-8 lg:pt-14 pb-20 mb-12 overflow-hidden">
           <div className="absolute inset-0 -z-20 h-full w-full bg-[var(--color-background)] bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
@@ -199,8 +199,8 @@ export default function LandingPage({ onNavigate, onTryHypothesis }: LandingPage
 
         <FeatureShowcase />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <h2 className="text-display-h2 text-center text-[var(--color-text-primary)] mb-12">הכלים שלנו</h2>
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <h2 data-toc id="landing-tools" className="text-display-h2 text-center text-[var(--color-text-primary)] mb-12">הכלים שלנו</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="p-6 flex flex-col items-center text-center hover:shadow-lg transition-all duration-300 bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent-cobalt-line)] hover:-translate-y-1">
               <div className="w-16 h-16 bg-[var(--color-accent-cobalt-bg)] text-[var(--color-accent-cobalt)] rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-accent-cobalt-line)]">
@@ -241,11 +241,11 @@ export default function LandingPage({ onNavigate, onTryHypothesis }: LandingPage
               </Button>
             </Card>
           </div>
-        </div>
+        </section>
 
-        <div className="bg-[var(--color-surface-raised)] border-y border-[var(--color-border)] py-20 mt-10">
+        <section className="bg-[var(--color-surface-raised)] border-y border-[var(--color-border)] py-20 mt-10">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-display-h2 font-display text-[var(--color-text-primary)] mb-10">למה סטטיסטי-קל?</h2>
+            <h2 data-toc id="landing-why" className="text-display-h2 font-display text-[var(--color-text-primary)] mb-10">למה סטטיסטי-קל?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-right">
               <div className="flex gap-4 items-start bg-[var(--color-surface)] p-6 rounded-[24px] border border-[var(--color-border)] shadow-sm">
                 <div className="shrink-0 mt-1 bg-[var(--color-accent-cobalt-bg)] p-3 rounded-xl border border-[var(--color-accent-cobalt-line)] text-[var(--color-accent-cobalt)] shadow-inner">
@@ -267,8 +267,8 @@ export default function LandingPage({ onNavigate, onTryHypothesis }: LandingPage
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        </section>
+      </div>
     </PageLayout>
   );
 }
