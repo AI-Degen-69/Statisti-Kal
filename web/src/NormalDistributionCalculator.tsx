@@ -47,9 +47,7 @@ import {
   EmptyState,
   Heading,
   InputTooltip,
-  ModeTabs,
   SectionHeader,
-  type ModeTab,
 } from './components/ui';
 
 // --- Math Utilities ---
@@ -216,19 +214,6 @@ interface NavigationTab {
 }
 
 type CalculatorMode = Extract<CalcMode, 'forward' | 'inverse'>;
-
-const CALCULATOR_MODE_TABS: ReadonlyArray<ModeTab<CalculatorMode>> = [
-  {
-    id: 'forward',
-    label: 'הסתברות',
-    icon: <Percent size={16} />,
-  },
-  {
-    id: 'inverse',
-    label: 'אחוזון',
-    icon: <Target size={16} />,
-  },
-];
 
 function getCalculatorHeroCopy(mode: CalculatorMode): { title: string; description: string; badge: string } {
   if (mode === 'forward') {
@@ -400,18 +385,18 @@ interface VariantOption {
 }
 
 const FORWARD_VARIANT_OPTIONS: readonly VariantOption[] = [
-  { value: 'below', label: <InlineMathToken math="P(X \le x)" />, description: null },
-  { value: 'above', label: <InlineMathToken math="P(X \ge x)" />, description: null },
-  { value: 'between', label: <InlineMathToken math="P(x_1 \le X \le x_2)" />, description: null },
-  { value: 'outside', label: <InlineMathToken math="P(X \le x_1 \;\cup\; X \ge x_2)" />, description: null },
-  { value: 'conditional', label: <InlineMathToken math="P(A \mid B)=\frac{P(A \cap B)}{P(B)}" />, description: null },
+  { value: 'below', label: 'שטח מצד שמאל', description: <InlineMathToken math="P(X \le x)" /> },
+  { value: 'above', label: 'שטח מצד ימין', description: <InlineMathToken math="P(X \ge x)" /> },
+  { value: 'between', label: 'בין שני ערכים', description: <InlineMathToken math="P(x_1 \le X \le x_2)" /> },
+  { value: 'outside', label: 'מחוץ לתחום', description: <InlineMathToken math="P(X \le x_1 \;\cup\; X \ge x_2)" /> },
+  { value: 'conditional', label: 'הסתברות מותנית', description: <InlineMathToken math="P(A \mid B)=\frac{P(A \cap B)}{P(B)}" /> },
 ];
 
 const INVERSE_VARIANT_OPTIONS: readonly VariantOption[] = [
-  { value: 'below', label: <InlineMathToken math="P(X \le x)=p" />, description: null },
-  { value: 'above', label: <InlineMathToken math="P(X \ge x)=p" />, description: null },
-  { value: 'between', label: <InlineMathToken math="P(x_1 \le X \le x_2)=p" />, description: null },
-  { value: 'outside', label: <InlineMathToken math="P(X \le x_1 \;\cup\; X \ge x_2)=p" />, description: null },
+  { value: 'below', label: 'אחוזון שמאלי', description: <InlineMathToken math="P(X \le x)=p" /> },
+  { value: 'above', label: 'אחוזון ימני', description: <InlineMathToken math="P(X \ge x)=p" /> },
+  { value: 'between', label: 'טווח מרכזי', description: <InlineMathToken math="P(x_1 \le X \le x_2)=p" /> },
+  { value: 'outside', label: 'טווח זנבות', description: <InlineMathToken math="P(X \le x_1 \;\cup\; X \ge x_2)=p" /> },
 ];
 
 interface CalculationVariantPickerProps {
@@ -458,6 +443,42 @@ const CalculationVariantPicker: React.FC<CalculationVariantPickerProps> = ({
         );
       })}
     </div>
+  </div>
+);
+
+const CalculatorModeSwitch: React.FC<{
+  value: CalculatorMode;
+  onChange: (value: CalculatorMode) => void;
+}> = ({ value, onChange }) => (
+  <div
+    className="grid grid-cols-2 gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-1"
+    role="tablist"
+    aria-label="בחירת מצב מחשבון"
+  >
+    {[
+      { id: 'forward' as const, label: 'הסתברות', icon: <Percent size={14} /> },
+      { id: 'inverse' as const, label: 'אחוזון', icon: <Target size={14} /> },
+    ].map((item) => {
+      const isActive = value === item.id;
+
+      return (
+        <button
+          key={item.id}
+          type="button"
+          role="tab"
+          aria-selected={isActive}
+          onClick={() => onChange(item.id)}
+          className={`inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-black transition-all ${
+            isActive
+              ? 'bg-[linear-gradient(135deg,#24D1C7,#1C9EDE)] text-[#08131A] shadow-[0_0_0_1px_rgba(36,209,199,0.65)]'
+              : 'bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]'
+          }`}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </button>
+      );
+    })}
   </div>
 );
 
@@ -2314,7 +2335,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                       <div className="rounded-lg bg-[var(--color-accent-cobalt-bg)]/20 p-2 text-[var(--color-accent-cobalt)]">
                         <Sliders size={20} />
                       </div>
-                      <div className="text-right">
+                      <div className="flex-1 text-right">
                         <h2 data-toc id="normal-distribution-controls" className="text-lg sm:text-xl font-black text-[var(--color-text-primary)]">
                           הגדרות ופרמטרי ההתפלגות
                         </h2>
@@ -2322,31 +2343,25 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                           קלט נקי יותר: בלי עמודת הגדרת חישוב מיותרת, ועם אזור פרמטרים שמפנה מקום למה שבאמת צריך.
                         </p>
                       </div>
+                      <div className="w-full max-w-[20rem]">
+                        <CalculatorModeSwitch
+                          value={calculatorMode}
+                          onChange={handleCalculatorModeChange}
+                        />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:items-start">
                       <div className="flex flex-col gap-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                          <div className="flex-1">
-                            <div className="w-full scale-[0.94] origin-right">
-                              <ModeTabs
-                                tabs={CALCULATOR_MODE_TABS}
-                                activeTab={calculatorMode}
-                                onChange={handleCalculatorModeChange}
-                                orientation="horizontal"
-                                ariaLabel="מצבי מחשבון נורמלי"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-end">
-                            <button
-                              onClick={resetNormalCalculator}
-                              className="inline-flex min-w-44 items-center justify-center gap-2 rounded-sm border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 text-sm font-black text-[var(--color-text-primary)] transition hover:bg-[var(--color-surface)]"
-                            >
-                              <RefreshCw size={14} />
-                              אפס ערכים
-                            </button>
-                          </div>
+                        <div className="flex justify-end">
+                          <button
+                            onClick={resetNormalCalculator}
+                            aria-label="אפס ערכים"
+                            title="אפס ערכים"
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] transition hover:bg-[var(--color-surface)]"
+                          >
+                            <RefreshCw size={15} />
+                          </button>
                         </div>
 
                         <CalculationVariantPicker
