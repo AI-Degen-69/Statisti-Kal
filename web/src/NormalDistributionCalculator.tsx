@@ -724,7 +724,7 @@ const NormalChart: React.FC<{
   };
 
   return (
-    <div className="h-[350px] w-full" dir="ltr">
+    <div className="h-[400px] w-full" dir="ltr">
       <div className="mb-3 flex flex-wrap items-center gap-4 border-b border-[var(--color-border)] pb-3">
         {legendChips.map((chip) => (
           <div key={chip.math} className="flex items-center gap-1.5 font-black text-sm select-none" style={{ color: chip.color }}>
@@ -738,7 +738,7 @@ const NormalChart: React.FC<{
         ))}
       </div>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 8, right: 10, left: -25, bottom: 48 }}>
+        <AreaChart data={chartData} margin={{ top: 8, right: 10, left: -25, bottom: 76 }}>
             <defs>
               <linearGradient id="mainColor" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={curveColor} stopOpacity={0.1} />
@@ -2483,7 +2483,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                   <div dir="rtl">
                     <ChartWrapper
                       className="curve-glow"
-                      height={300}
+                      height={380}
                       isEmpty={!isValid}
                       emptyState={(
                         <EmptyState
