@@ -619,7 +619,6 @@ const NormalChart: React.FC<{
   const curveColor = 'var(--color-accent-brass)';
   const secondaryCurveColor = 'var(--color-accent-teal)';
   const zLineColor = 'var(--color-accent-cobalt)';
-  const boundaryLineColor = 'var(--color-accent-crimson)';
   const mainGridColor = 'var(--chart-grid)';
   const axisLabelColor = 'var(--chart-axis-label)';
   const shadedColor = 'var(--color-accent-cobalt)';
@@ -635,7 +634,18 @@ const NormalChart: React.FC<{
       { value: mean, label: 'μ', color: 'var(--color-accent-brass)' },
     ];
 
-    if (mode === 'inverse') {
+    if (type === 'conditional' && mode === 'forward') {
+      markers.push({ value: x1, label: 'a₁', color: 'var(--color-accent-cobalt)' });
+      if (condTypeA === 'between') {
+        markers.push({ value: x2, label: 'a₂', color: 'var(--color-accent-cobalt)' });
+      }
+      if (typeof condX1 === 'number') {
+        markers.push({ value: condX1, label: 'b₁', color: 'var(--color-accent-teal)' });
+      }
+      if (condType === 'between' && typeof condX2 === 'number') {
+        markers.push({ value: condX2, label: 'b₂', color: 'var(--color-accent-teal)' });
+      }
+    } else if (mode === 'inverse') {
       markers.push({ value: x1, label: 'X', color: 'var(--color-accent-cobalt)' });
       if (type === 'between' || type === 'outside') {
         markers.push({ value: x2, label: 'X₂', color: 'var(--color-accent-teal)' });
@@ -648,7 +658,7 @@ const NormalChart: React.FC<{
     }
 
     return markers;
-  }, [mean, mode, type, x1, x2]);
+  }, [mean, mode, type, x1, x2, condType, condTypeA, condX1, condX2]);
 
   const xAxisTicks = useMemo(() => {
     const baseTicks = [
@@ -672,6 +682,26 @@ const NormalChart: React.FC<{
 
     return finalTicks;
   }, [mean, stdDev, xDomain, xMarkers]);
+
+  const legendChips = useMemo(() => {
+    const chips: Array<{ label: string; color: string; style: 'line' | 'area' }> = [
+      { label: 'μ', color: curveColor, style: 'line' },
+    ];
+
+    if (type === 'conditional' && mode === 'forward') {
+      chips.push({ label: 'A / a₁,a₂', color: zLineColor, style: 'line' });
+      chips.push({ label: 'B / b₁,b₂', color: secondaryCurveColor, style: 'area' });
+    } else {
+      chips.push({ label: type === 'between' || type === 'outside' ? 'X₁' : 'X', color: zLineColor, style: 'line' });
+      if (mode === 'inverse' && (type === 'between' || type === 'outside')) {
+        chips.push({ label: 'X₂', color: secondaryCurveColor, style: 'line' });
+      } else if (type === 'between' || type === 'outside') {
+        chips.push({ label: 'X₂', color: secondaryCurveColor, style: 'line' });
+      }
+    }
+
+    return chips;
+  }, [curveColor, mode, secondaryCurveColor, type, zLineColor]);
 
   // Customized tooltip
   const CustomTooltipInner = ({ active, payload }: any) => {
@@ -719,8 +749,20 @@ const NormalChart: React.FC<{
 
   return (
     <div className="h-[350px] w-full" dir="ltr">
+      <div className="mb-3 flex flex-wrap items-center gap-4 border-b border-[var(--color-border)] pb-3">
+        {legendChips.map((chip) => (
+          <div key={chip.label} className="flex items-center gap-1.5 font-black text-sm select-none" style={{ color: chip.color }}>
+            {chip.style === 'line' ? (
+              <span className="inline-block h-3 w-0.5" style={{ backgroundColor: chip.color }} />
+            ) : (
+              <span className="inline-block h-3 w-3 border" style={{ backgroundColor: `${chip.color}33`, borderColor: chip.color }} />
+            )}
+            <span dir="ltr">{chip.label}</span>
+          </div>
+        ))}
+      </div>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -25, bottom: 48 }}>
+        <AreaChart data={chartData} margin={{ top: 8, right: 10, left: -25, bottom: 48 }}>
             <defs>
               <linearGradient id="mainColor" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={curveColor} stopOpacity={0.1} />
@@ -841,14 +883,14 @@ const NormalChart: React.FC<{
                 {(condTypeA === 'below' || condTypeA === 'above' || condTypeA === 'between') && (
                   <ReferenceLine
                     x={x1}
-                    stroke={boundaryLineColor}
+                    stroke={zLineColor}
                     strokeWidth={2.5}
                   />
                 )}
                 {condTypeA === 'between' && (
                   <ReferenceLine
                     x={x2}
-                    stroke={boundaryLineColor}
+                    stroke={zLineColor}
                     strokeWidth={2.5}
                   />
                 )}
