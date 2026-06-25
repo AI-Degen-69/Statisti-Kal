@@ -259,9 +259,9 @@ const CONDITIONAL_EVENT_OPTIONS: ReadonlyArray<{
   math: string;
   note: string;
 }> = [
-  { value: 'below', math: 'X \\le v_1', note: 'זנב שמאלי' },
-  { value: 'above', math: 'X \\ge v_1', note: 'זנב ימני' },
-  { value: 'between', math: 'v_1 \\le X \\le v_2', note: 'תחום כלוא' },
+  { value: 'below', math: 'X \\le v_1', note: 'עד ערך נתון' },
+  { value: 'above', math: 'X \\ge v_1', note: 'מעל ערך נתון' },
+  { value: 'between', math: 'v_1 \\le X \\le v_2', note: 'בין שני ערכים' },
 ];
 
 function getConditionalEventMath(type: CondType, variablePrefix: 'a' | 'b'): string {
@@ -296,17 +296,17 @@ const ConditionalEventPicker: React.FC<{
           type="button"
           onClick={() => onChange(option.value)}
           disabled={disabled}
-          className={`rounded-lg border px-3 py-3 text-center transition-all ${
+          className={`rounded-lg border px-2.5 py-2.5 text-center transition-all ${
             isActive
               ? `${accentClass} shadow-[0_0_0_1px_currentColor]`
               : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:border-[var(--color-border-strong)]'
           } ${disabled ? 'cursor-not-allowed opacity-60 grayscale-[0.15]' : ''}`}
         >
-          <span className="block text-lg font-black">
+          <span className="block text-base font-black sm:text-lg">
             <InlineMathToken math={math} />
           </span>
           <span
-            className="mt-1 block text-caption font-bold"
+            className="mt-0.5 block text-caption font-bold"
             style={{ color: isActive ? accentColor : 'var(--color-text-secondary)' }}
           >
             {option.note}
@@ -314,6 +314,105 @@ const ConditionalEventPicker: React.FC<{
         </button>
       );
     })}
+  </div>
+);
+
+interface ConditionalValueFieldProps {
+  label: React.ReactNode;
+  helper: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  disabled?: boolean;
+}
+
+const ConditionalValueField: React.FC<ConditionalValueFieldProps> = ({
+  label,
+  helper,
+  value,
+  onChange,
+  error,
+  disabled = false,
+}) => (
+  <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/88 p-2.5">
+    <label className="mb-1 block text-heading-label font-black text-[var(--color-text-primary)]">
+      {label}
+    </label>
+    <p className="mb-2 text-caption text-[var(--color-text-secondary)]">{helper}</p>
+    <input
+      type="text"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      disabled={disabled}
+      dir="ltr"
+      className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-2 text-center text-sm font-mono font-bold text-[var(--color-text-primary)] outline-none transition focus:border-[var(--color-accent-cobalt-line)] disabled:cursor-not-allowed disabled:opacity-60"
+    />
+    {error ? <p className="mt-1 text-caption text-[var(--color-error)]">{error}</p> : null}
+  </div>
+);
+
+interface ConditionalEventDefinitionCardProps {
+  stepNumber: string;
+  title: React.ReactNode;
+  description: React.ReactNode;
+  formula: string;
+  value: CondType;
+  onChange: (value: CondType) => void;
+  disabled?: boolean;
+  accentClass: string;
+  accentColor: string;
+  variablePrefix: 'a' | 'b';
+  fields: React.ReactNode;
+  expressionToneClass: string;
+}
+
+const ConditionalEventDefinitionCard: React.FC<ConditionalEventDefinitionCardProps> = ({
+  stepNumber,
+  title,
+  description,
+  formula,
+  value,
+  onChange,
+  disabled = false,
+  accentClass,
+  accentColor,
+  variablePrefix,
+  fields,
+  expressionToneClass,
+}) => (
+  <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/72 p-3.5">
+    <div className="mb-3 flex items-start justify-between gap-3 border-b border-[var(--color-border)] pb-3">
+      <div className="text-right">
+        <p className="text-caption font-black tracking-[0.12em] text-[var(--color-text-secondary)]">
+          {stepNumber}
+        </p>
+        <h4 className="mt-1 text-body-base font-black text-[var(--color-text-primary)]">{title}</h4>
+        <p className="mt-1 text-caption leading-relaxed text-[var(--color-text-secondary)]">{description}</p>
+      </div>
+      <div className={`rounded-full border px-2.5 py-1 text-sm font-black ${expressionToneClass}`}>
+        <InlineMathToken math={formula} />
+      </div>
+    </div>
+
+    <ConditionalEventPicker
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      accentClass={accentClass}
+      accentColor={accentColor}
+      variablePrefix={variablePrefix}
+    />
+
+    <div className={`mt-3 rounded-lg border px-3 py-2 text-right ${expressionToneClass}`}>
+      <p className="text-caption font-bold text-[var(--color-text-secondary)]">ניסוח פורמלי</p>
+      <p className="mt-1 text-body-sm font-black">
+        <InlineMathToken math={`${variablePrefix === 'a' ? 'A' : 'B'} = \\left\\{${getConditionalEventMath(value, variablePrefix)}\\right\\}`} />
+      </p>
+    </div>
+
+    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      {fields}
+    </div>
   </div>
 );
 
@@ -456,8 +555,8 @@ const CalculatorModeSwitch: React.FC<{
       type="button"
       role="switch"
       aria-checked={isInverse}
-      aria-label={`מצב מחשבון: ${isInverse ? 'אחוזון' : 'הסתברות'}`}
-      title={isInverse ? 'עכשיו: אחוזון. לחיצה תעביר להסתברות.' : 'עכשיו: הסתברות. לחיצה תעביר לאחוזון.'}
+      aria-label={`מצב מחשבון: ${isInverse ? 'אחוזונים' : 'הסתברות'}`}
+      title={isInverse ? 'עכשיו: אחוזונים. לחיצה תעביר להסתברות.' : 'עכשיו: הסתברות. לחיצה תעביר לאחוזונים.'}
       onClick={() => onChange(isInverse ? 'forward' : 'inverse')}
       className="grid w-full cursor-pointer grid-cols-2 gap-2 rounded-lg border border-[rgba(36,209,199,0.38)] bg-[var(--color-surface-raised)] p-1 transition-all hover:border-[rgba(36,209,199,0.62)]"
     >
@@ -468,7 +567,7 @@ const CalculatorModeSwitch: React.FC<{
             : 'bg-transparent text-[var(--color-text-secondary)]'
         }`}
       >
-        <Percent size={14} />
+        <InlineMathToken math="P" className="text-base" />
         <span>הסתברות</span>
       </span>
       <span
@@ -478,8 +577,8 @@ const CalculatorModeSwitch: React.FC<{
             : 'bg-transparent text-[var(--color-text-secondary)]'
         }`}
       >
-        <Target size={14} />
-        <span>אחוזון</span>
+        <span dir="ltr" className="text-sm font-black">%</span>
+        <span>אחוזונים</span>
       </span>
     </button>
   );
@@ -598,7 +697,7 @@ const NormalChart: React.FC<{
   const xDomain = [mean - 4.2 * stdDev, mean + 4.2 * stdDev] as const;
   const xMarkers = useMemo(() => {
     const markers: Array<{ value: number; math: string; color: string }> = [
-      { value: mean, math: '\\mu', color: 'var(--color-accent-brass)' },
+      { value: mean, math: '\mu', color: 'var(--color-accent-brass)' },
     ];
 
     if (type === 'conditional' && mode === 'forward') {
@@ -652,7 +751,7 @@ const NormalChart: React.FC<{
 
   const legendChips = useMemo(() => {
     const chips: Array<{ math: string; color: string; style: 'line' | 'area' }> = [
-      { math: '\\mu', color: curveColor, style: 'line' },
+      { math: '\mu', color: curveColor, style: 'line' },
     ];
 
     if (type === 'conditional' && mode === 'forward') {
@@ -2365,186 +2464,162 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                           ? 'border-[var(--color-accent-cobalt)]/45 bg-[linear-gradient(140deg,rgba(92,92,255,0.14),rgba(92,92,255,0.05))] shadow-[0_0_0_1px_var(--color-accent-cobalt)]'
                           : 'border-[var(--color-border)] bg-[var(--color-surface-raised)]/55 opacity-60 grayscale-[0.15]'
                       }`}>
-                        <div className="mb-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/78 p-3">
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <p className="text-body-sm font-black text-[var(--color-text-primary)]">נוסחת יסוד</p>
-                            <div className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-1 text-[var(--color-text-secondary)]">
-                              <InlineMathToken math="P(A \mid B)=\frac{P(A \cap B)}{P(B)}" />
-                            </div>
-                          </div>
-
-                          <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/70 p-2 text-center">
-                            <BlockMath math={'P(\\textcolor{#FFBF00}{A}\\mid\\textcolor{#3FE0D0}{B})=\\frac{P(\\textcolor{#FFBF00}{A}\\cap\\textcolor{#3FE0D0}{B})}{P(\\textcolor{#3FE0D0}{B})}'} />
-                          </div>
-
-                          <div className="mt-3 grid gap-3 md:grid-cols-2">
-                            <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/55 p-3 text-right">
-                              <p className="text-body-sm font-black text-[var(--color-accent-amber)]">
-                                מונה: <InlineMathToken math="P(A \cap B)" className="mr-1" />
-                              </p>
-                              <p className="mt-1 text-caption leading-relaxed text-[var(--color-text-secondary)]">
-                                השטח המשותף שבו <InlineMathToken math="A" className="mx-1 text-[var(--color-accent-amber)]" /> וגם <InlineMathToken math="B" className="mx-1 text-[var(--color-accent-teal)]" /> מתקיימים יחד.
-                              </p>
-                            </div>
-
-                            <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/55 p-3 text-right">
-                              <p className="text-body-sm font-black text-[var(--color-accent-teal)]">
-                                מכנה: <InlineMathToken math="P(B)" className="mr-1" />
-                              </p>
-                              <p className="mt-1 text-caption leading-relaxed text-[var(--color-text-secondary)]">
-                                זהו עולם התנאי החדש: מחשבים הכול רק בתוך המסגרת של <InlineMathToken math="B" className="mx-1 text-[var(--color-accent-teal)]" />.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
                         <div className="mb-4 flex items-start justify-between gap-3 border-b border-[var(--color-border)] pb-3">
                           <div className="text-right">
                             <h3 className={`text-body-base font-black ${mode === 'forward' && forwardType === 'conditional' ? 'text-[var(--color-accent-cobalt)]' : 'text-[var(--color-text-primary)]/75'}`}>
                               <span className="inline-flex items-center gap-2 whitespace-nowrap">
                                 <span>הסתברות מותנית</span>
-                                <InlineMathToken math="P(A \\mid B)" />
+                                <InlineMathToken math="P(A \mid B)" />
                               </span>
                             </h3>
-                            <p className="max-w-md text-body-sm leading-relaxed text-[var(--color-text-secondary)]">
-                              חישוב <InlineMathToken math="P(A \\mid B)" className="mx-1" /> כאשר מאורע <InlineMathToken math="A" className="mx-1" /> נבחן רק בתוך מסגרת <InlineMathToken math="B" className="mx-1" />.
+                            <p className="max-w-2xl text-body-sm leading-relaxed text-[var(--color-text-secondary)]">
+                              פותרים בסדר קבוע: מגדירים קודם את עולם התנאי <InlineMathToken math="B" className="mx-1" />, אחר כך את המאורע המבוקש <InlineMathToken math="A" className="mx-1" />, ואז מחשבים <InlineMathToken math="P(A \cap B)" className="mx-1" /> ומחלקים ב־<InlineMathToken math="P(B)" className="mx-1" />.
                             </p>
                           </div>
                           <div className={`h-3 w-3 rounded-full ${mode === 'forward' && forwardType === 'conditional' ? 'bg-[var(--color-accent-cobalt)]' : 'bg-[var(--color-border-strong)]'}`} />
                         </div>
 
-                                                <div className="space-y-4">
-                          {/* STEP 1: EVENT B */}
-                          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/72 p-3">
-                            <p className="mb-3 border-b border-[var(--color-border)] pb-2 text-body-sm font-black text-[var(--color-accent-teal)]">
-                              שלב 1: תנאי הרקע (מאורע <InlineMathToken math="B" className="mr-1" />)
+                        <div className="mb-4 grid gap-2 lg:grid-cols-3">
+                          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/78 p-3 text-right">
+                            <p className="text-caption font-black tracking-[0.12em] text-[var(--color-accent-teal)]">STEP 1</p>
+                            <p className="mt-1 text-body-sm font-black text-[var(--color-text-primary)]">מגדירים תנאי רקע</p>
+                            <p className="mt-1 text-caption text-[var(--color-text-secondary)]">
+                              בוחרים את <InlineMathToken math="B" className="mx-1" /> והערכים שמייצרים את עולם החישוב.
                             </p>
-                            <label className="mb-2 block text-heading-label text-[var(--color-text-secondary)]">צורת המאורע <InlineMathToken math="B" className="mr-1" />:</label>
-                            <ConditionalEventPicker
-                              value={condType}
-                              onChange={setCondType}
-                              disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                              accentClass="border-[var(--color-accent-teal)]/60 bg-[linear-gradient(135deg,rgba(63,224,208,0.16),rgba(63,224,208,0.05))] text-[var(--color-accent-teal)]"
-                              accentColor="var(--color-accent-teal)"
-                              variablePrefix="b"
-                            />
+                          </div>
+                          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/78 p-3 text-right">
+                            <p className="text-caption font-black tracking-[0.12em] text-[var(--color-accent-amber)]">STEP 2</p>
+                            <p className="mt-1 text-body-sm font-black text-[var(--color-text-primary)]">מגדירים את המאורע המבוקש</p>
+                            <p className="mt-1 text-caption text-[var(--color-text-secondary)]">
+                              בוחרים את <InlineMathToken math="A" className="mx-1" /> באותה שפה פורמלית של תחום או זנב.
+                            </p>
+                          </div>
+                          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/78 p-3 text-right">
+                            <p className="text-caption font-black tracking-[0.12em] text-[var(--color-accent-cobalt)]">STEP 3</p>
+                            <p className="mt-1 text-body-sm font-black text-[var(--color-text-primary)]">מחשבים יחס</p>
+                            <p className="mt-1 text-caption text-[var(--color-text-secondary)]">
+                              <InlineMathToken math="P(A \mid B)=\frac{P(A\ \cap B)}{P(B)}" />
+                            </p>
+                          </div>
+                        </div>
 
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:[direction:ltr] mt-3">
-                              {condType === 'between' ? (
-                                <div dir="rtl">
-                                  <label className="mb-1 block text-heading-label text-[var(--color-text-secondary)]">ערך <InlineMathToken math="b_1" className="mr-1" />:</label>
-                                  <input
-                                    type="text"
+                        <div className="grid gap-3 xl:grid-cols-2">
+                          <ConditionalEventDefinitionCard
+                            stepNumber="STEP 1"
+                            title={<>תנאי הרקע <InlineMathToken math="B" className="mr-1 text-[var(--color-accent-teal)]" /></>}
+                            description={<>בחר קודם את התחום שבתוכו עובדים. כל החישוב הסופי יתבצע רק בתוך <InlineMathToken math="B" className="mx-1 text-[var(--color-accent-teal)]" />.</>}
+                            formula="B"
+                            value={condType}
+                            onChange={setCondType}
+                            disabled={!(mode === 'forward' && forwardType === 'conditional')}
+                            accentClass="border-[var(--color-accent-teal)]/60 bg-[linear-gradient(135deg,rgba(63,224,208,0.16),rgba(63,224,208,0.05))] text-[var(--color-accent-teal)]"
+                            accentColor="var(--color-accent-teal)"
+                            variablePrefix="b"
+                            expressionToneClass="border-[var(--color-accent-teal)]/30 bg-[rgba(63,224,208,0.08)] text-[var(--color-accent-teal)]"
+                            fields={
+                              condType === 'between' ? (
+                                <>
+                                  <ConditionalValueField
+                                    label={<>גבול תחתון <InlineMathToken math="b_1" className="mr-1" /></>}
+                                    helper="תחילת תחום התנאי"
                                     value={condX1Input}
-                                    onChange={e => handleCondX1Change(e.target.value)}
+                                    onChange={handleCondX1Change}
+                                    error={mode === 'forward' && forwardType === 'conditional' ? errors.condX1 : undefined}
                                     disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono text-[var(--color-text-primary)] focus:border-[var(--color-accent-cobalt-line)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                   />
-                                  {mode === 'forward' && forwardType === 'conditional' && errors.condX1 ? <p className="mt-1 text-caption text-[var(--color-error)]">{errors.condX1}</p> : null}
-                                </div>
-                              ) : null}
-                              {condType === 'between' ? (
-                                <div dir="rtl">
-                                  <label className="mb-1 block text-heading-label text-[var(--color-text-secondary)]">ערך <InlineMathToken math="b_2" className="mr-1" />:</label>
-                                  <input
-                                    type="text"
+                                  <ConditionalValueField
+                                    label={<>גבול עליון <InlineMathToken math="b_2" className="mr-1" /></>}
+                                    helper="סיום תחום התנאי"
                                     value={condX2Input}
-                                    onChange={e => handleCondX2Change(e.target.value)}
+                                    onChange={handleCondX2Change}
+                                    error={mode === 'forward' && forwardType === 'conditional' ? errors.condX2 : undefined}
                                     disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono text-[var(--color-text-primary)] focus:border-[var(--color-accent-cobalt-line)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                   />
-                                  {mode === 'forward' && forwardType === 'conditional' && errors.condX2 ? <p className="mt-1 text-caption text-[var(--color-error)]">{errors.condX2}</p> : null}
-                                </div>
+                                </>
                               ) : (
-                                <div dir="rtl" className="md:col-span-2">
-                                  <label className="mb-1 block text-heading-label text-[var(--color-text-secondary)]">ערך <InlineMathToken math="b_1" className="mr-1" />:</label>
-                                  <input
-                                    type="text"
+                                <div className="sm:col-span-2">
+                                  <ConditionalValueField
+                                    label={<>ערך סף <InlineMathToken math="b_1" className="mr-1" /></>}
+                                    helper={condType === 'below' ? 'כל מה שמתחת לסף הזה ייחשב חלק מ־B' : 'כל מה שמעל הסף הזה ייחשב חלק מ־B'}
                                     value={condX1Input}
-                                    onChange={e => handleCondX1Change(e.target.value)}
+                                    onChange={handleCondX1Change}
+                                    error={mode === 'forward' && forwardType === 'conditional' ? errors.condX1 : undefined}
                                     disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono text-[var(--color-text-primary)] focus:border-[var(--color-accent-cobalt-line)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                   />
-                                  {mode === 'forward' && forwardType === 'conditional' && errors.condX1 ? <p className="mt-1 text-caption text-[var(--color-error)]">{errors.condX1}</p> : null}
                                 </div>
-                              )}
-                            </div>
-                          </div>
+                              )
+                            }
+                          />
 
-                          {/* STEP 2: EVENT A */}
-                          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/72 p-3">
-                            <p className="mb-3 border-b border-[var(--color-border)] pb-2 text-body-sm font-black text-[var(--color-accent-amber)]">
-                              שלב 2: המאורע המבוקש (מאורע <InlineMathToken math="A" className="mr-1" />)
-                            </p>
-                            <label className="mb-2 block text-heading-label text-[var(--color-text-secondary)]">צורת המאורע <InlineMathToken math="A" className="mr-1" />:</label>
-                            <ConditionalEventPicker
-                              value={condTypeA}
-                              onChange={setCondTypeA}
-                              disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                              accentClass="border-[var(--color-accent-amber)]/60 bg-[linear-gradient(135deg,rgba(255,191,0,0.16),rgba(255,191,0,0.05))] text-[var(--color-accent-amber)]"
-                              accentColor="var(--color-accent-amber)"
-                              variablePrefix="a"
-                            />
-
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:[direction:ltr] mt-3">
-                              {condTypeA === 'between' ? (
-                                <div dir="rtl">
-                                  <label className="mb-1 block text-heading-label text-[var(--color-text-secondary)]">ערך <InlineMathToken math="a_1" className="mr-1" />:</label>
-                                  <input
-                                    type="text"
+                          <ConditionalEventDefinitionCard
+                            stepNumber="STEP 2"
+                            title={<>המאורע המבוקש <InlineMathToken math="A" className="mr-1 text-[var(--color-accent-amber)]" /></>}
+                            description={<>הגדר את <InlineMathToken math="A" className="mx-1 text-[var(--color-accent-amber)]" /> בצורה פורמלית. אחר כך המערכת תמצא אוטומטית את החיתוך <InlineMathToken math="A \cap B" className="mx-1 text-[var(--color-accent-cobalt)]" />.</>}
+                            formula="A"
+                            value={condTypeA}
+                            onChange={setCondTypeA}
+                            disabled={!(mode === 'forward' && forwardType === 'conditional')}
+                            accentClass="border-[var(--color-accent-amber)]/60 bg-[linear-gradient(135deg,rgba(255,191,0,0.16),rgba(255,191,0,0.05))] text-[var(--color-accent-amber)]"
+                            accentColor="var(--color-accent-amber)"
+                            variablePrefix="a"
+                            expressionToneClass="border-[var(--color-accent-amber)]/30 bg-[rgba(255,191,0,0.08)] text-[var(--color-accent-amber)]"
+                            fields={
+                              condTypeA === 'between' ? (
+                                <>
+                                  <ConditionalValueField
+                                    label={<>גבול תחתון <InlineMathToken math="a_1" className="mr-1" /></>}
+                                    helper="תחילת המאורע המבוקש"
                                     value={x1Input}
-                                    onChange={e => handleX1Change(e.target.value)}
+                                    onChange={handleX1Change}
+                                    error={mode === 'forward' && forwardType === 'conditional' ? errors.x1 : undefined}
                                     disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono text-[var(--color-text-primary)] focus:border-[var(--color-accent-cobalt-line)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                   />
-                                  {mode === 'forward' && forwardType === 'conditional' && errors.x1 ? <p className="mt-1 text-caption text-[var(--color-error)]">{errors.x1}</p> : null}
-                                </div>
-                              ) : null}
-                              {condTypeA === 'between' ? (
-                                <div dir="rtl">
-                                  <label className="mb-1 block text-heading-label text-[var(--color-text-secondary)]">ערך <InlineMathToken math="a_2" className="mr-1" />:</label>
-                                  <input
-                                    type="text"
+                                  <ConditionalValueField
+                                    label={<>גבול עליון <InlineMathToken math="a_2" className="mr-1" /></>}
+                                    helper="סיום המאורע המבוקש"
                                     value={x2Input}
-                                    onChange={e => handleX2Change(e.target.value)}
+                                    onChange={handleX2Change}
+                                    error={mode === 'forward' && forwardType === 'conditional' ? errors.x2 : undefined}
                                     disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono text-[var(--color-text-primary)] focus:border-[var(--color-accent-cobalt-line)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                   />
-                                  {mode === 'forward' && forwardType === 'conditional' && errors.x2 ? <p className="mt-1 text-caption text-[var(--color-error)]">{errors.x2}</p> : null}
-                                </div>
+                                </>
                               ) : (
-                                <div dir="rtl" className="md:col-span-2">
-                                  <label className="mb-1 block text-heading-label text-[var(--color-text-secondary)]">ערך <InlineMathToken math="a_1" className="mr-1" />:</label>
-                                  <input
-                                    type="text"
+                                <div className="sm:col-span-2">
+                                  <ConditionalValueField
+                                    label={<>ערך סף <InlineMathToken math="a_1" className="mr-1" /></>}
+                                    helper={condTypeA === 'below' ? 'A הוא כל מה שנמצא מתחת לסף הזה' : 'A הוא כל מה שנמצא מעל הסף הזה'}
                                     value={x1Input}
-                                    onChange={e => handleX1Change(e.target.value)}
+                                    onChange={handleX1Change}
+                                    error={mode === 'forward' && forwardType === 'conditional' ? errors.x1 : undefined}
                                     disabled={!(mode === 'forward' && forwardType === 'conditional')}
-                                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono text-[var(--color-text-primary)] focus:border-[var(--color-accent-cobalt-line)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
                                   />
-                                  {mode === 'forward' && forwardType === 'conditional' && errors.x1 ? <p className="mt-1 text-caption text-[var(--color-error)]">{errors.x1}</p> : null}
                                 </div>
-                              )}
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/55 p-3 text-right">
+                          <div className="grid gap-2 lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+                            <div>
+                              <p className="text-caption font-bold text-[var(--color-text-secondary)]">תנאי רקע</p>
+                              <p className="mt-1 text-body-sm font-black text-[var(--color-accent-teal)]">
+                                <InlineMathToken math={`B = \\left\\{${getConditionalEventMath(condType, 'b')}\\right\\}`} />
+                              </p>
+                            </div>
+                            <div className="rounded-full border border-[var(--color-border)] px-3 py-1 text-sm font-black text-[var(--color-accent-cobalt)]">
+                              <InlineMathToken math="A \cap B" />
+                            </div>
+                            <div>
+                              <p className="text-caption font-bold text-[var(--color-text-secondary)]">מאורע מבוקש</p>
+                              <p className="mt-1 text-body-sm font-black text-[var(--color-accent-amber)]">
+                                <InlineMathToken math={`A = \\left\\{${getConditionalEventMath(condTypeA, 'a')}\\right\\}`} />
+                              </p>
                             </div>
                           </div>
-
-                          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/55 p-3 text-right">
-                            <p className="text-body-sm font-black text-[var(--color-text-primary)]">
-                              מאורע פעיל:
-                              <span className="mr-2 text-[var(--color-accent-amber)]">
-                                <InlineMathToken math={`A = \\left\\{${getConditionalEventMath(condTypeA, 'a')}\\right\\}`} />
-                              </span>
-                            </p>
-                            <p className="mt-1 text-body-sm font-black text-[var(--color-text-primary)]">
-                              תנאי רקע:
-                              <span className="mr-2 text-[var(--color-accent-teal)]">
-                                <InlineMathToken math={`B = \\left\\{${getConditionalEventMath(condType, 'b')}\\right\\}`} />
-                              </span>
-                            </p>
-                            <p className="mt-2 text-caption leading-relaxed text-[var(--color-text-secondary)]">
-                              לכן מחשבים קודם את <InlineMathToken math="A \cap B" className="mx-1 text-[var(--color-accent-cobalt)]" /> בתוך התחום של <InlineMathToken math="B" className="mx-1 text-[var(--color-accent-teal)]" />, ואז מחלקים ב־<InlineMathToken math="P(B)" className="mx-1 text-[var(--color-accent-teal)]" />.
-                            </p>
-                          </div>
+                          <p className="mt-3 text-caption leading-relaxed text-[var(--color-text-secondary)]">
+                            הקריאה הרשמית היא: קודם <InlineMathToken math="P(B)" className="mx-1 text-[var(--color-accent-teal)]" />, אחר כך <InlineMathToken math="P(A \cap B)" className="mx-1 text-[var(--color-accent-cobalt)]" />, ולבסוף היחס ביניהן.
+                          </p>
                         </div>
                       </div>
                   </div>
