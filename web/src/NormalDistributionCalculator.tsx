@@ -216,17 +216,31 @@ interface NavigationTab {
 
 type CalculatorMode = Extract<CalcMode, 'forward' | 'inverse'>;
 
-function getCalculatorHeroCopy(mode: CalculatorMode): { title: string; badge: string } {
+interface HeroStep {
+  number: number;
+  title: string;
+  description: React.ReactNode;
+}
+
+function getCalculatorHeroCopy(mode: CalculatorMode): { title: string; steps: HeroStep[] } {
   if (mode === 'forward') {
     return {
       title: 'מחשבון הסתברות בהתפלגות נורמלית',
-      badge: 'Probability Flow',
+      steps: [
+        { number: 1, title: 'הגדירו התפלגות', description: <>הזינו את פרמטרי תוחלת (<InlineMath math="\mu" />) וסטיית תקן (<InlineMath math="\sigma" />) של המדגם.</> },
+        { number: 2, title: 'בחרו יעד חישוב', description: <>בחרו סוג שטח (מעל, מתחת, בין) והזינו ערכי מטרה (<InlineMath math="X" />).</> },
+        { number: 3, title: 'קבלו תוצאות', description: <>צפו בגרף החישוב, ב-<InlineMath math="Z" />-score ובדרך הפתרון המלאה צעד-אחר-צעד.</> },
+      ]
     };
   }
 
   return {
     title: 'מחשבון אחוזונים וערכים קריטיים',
-    badge: 'Percentile Flow',
+    steps: [
+      { number: 1, title: 'הגדירו התפלגות', description: <>הזינו את פרמטרי תוחלת (<InlineMath math="\mu" />) וסטיית תקן (<InlineMath math="\sigma" />) של המדגם.</> },
+      { number: 2, title: 'בחרו אחוזון יעד', description: <>בחרו כיוון (למשל, אחוזון עליון) והזינו את ההסתברות (<InlineMath math="P" />).</> },
+      { number: 3, title: 'קבלו תוצאות', description: <>גלו את הערך המדויק (<InlineMath math="X" />), ה-<InlineMath math="Z" />-score וצפו בגרף אינטראקטיבי.</> },
+    ]
   };
 }
 
@@ -998,10 +1012,14 @@ const NormalChart: React.FC<{
 
 const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
   const isResult = text.startsWith('תוצאה סופית:');
-  const stepMatch = text.match(/^שלב\s+(\d+):\s*(.*)$/);
-  const isStepTitle = Boolean(stepMatch);
-  const stepNumber = stepMatch?.[1] ?? null;
-  const normalizedText = stepMatch?.[2] ?? text;
+  const stepMatch = text.match(/^שלב\s+(\d+)\s*\|\s*(.*?)\s*\|\s*(.*)$/);
+  const fallbackMatch = !stepMatch ? text.match(/^שלב\s+(\d+):\s*(.*)$/) : null;
+  
+  const isStepTitle = Boolean(stepMatch || fallbackMatch);
+  const stepNumber = stepMatch?.[1] ?? fallbackMatch?.[1] ?? null;
+  const stepTitle = stepMatch?.[2] ?? null;
+  const normalizedText = stepMatch?.[3] ?? fallbackMatch?.[2] ?? text;
+  
   const isPureMath = /^\[MATH\].*\[\/MATH\]$/.test(normalizedText.trim());
   const parts = normalizedText.split(/\[MATH\](.*?)\[\/MATH\]/g);
   const blockTone = isResult
@@ -1055,7 +1073,7 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
                   {stepNumber}
                 </span>
                 <span className="text-body-base font-black text-[var(--color-text-primary)]">
-                  שלב {stepNumber}
+                  {stepTitle ? stepTitle.trim() : `שלב ${stepNumber}`}
                 </span>
               </div>
             ) : null}
@@ -1091,7 +1109,9 @@ const FormattedStep: React.FC<{ text: string }> = ({ text }) => {
                   );
                 }
 
-                if (!part && parts.length > 1) return null;
+                const cleanPart = part.trim();
+                if (!cleanPart && parts.length > 1) return null;
+                if (/^[.,:\s]+$/.test(part)) return null;
 
                 return (
                   <span key={i} className={`align-middle font-sans ${isResult ? 'font-bold' : 'font-medium'}`}>
@@ -1956,7 +1976,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
 
     if (mode === 'forward') {
       const steps: string[] = [];
-      steps.push(`שלב 1: זיהוי פרמטרי ההתפלגות. האוכלוסייה מתפלגת נורמלית עם תוחלת [MATH]\\mu = ${mean}[/MATH] וסטיית תקן [MATH]\\sigma = ${stdDev}[/MATH].`);
+      steps.push(`שלב 1 | זיהוי פרמטרי ההתפלגות | האוכלוסייה מתפלגת נורמלית עם תוחלת [MATH]\\mu = ${mean}[/MATH] וסטיית תקן [MATH]\\sigma = ${stdDev}[/MATH].`);
 
       if (forwardType === 'conditional') {
         // interval B elements
@@ -1967,13 +1987,13 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
           pB = normalCDF(condX1, mean, stdDev);
           bExpr = `X \\le ${condX1}`;
           bText = `P(X \\le ${condX1}) = \\Phi\\left(\\frac{${condX1} - ${mean}}{${stdDev}}\\right) = \\Phi(${((condX1 - mean) / stdDev).toFixed(2)}) = ${pB.toFixed(4)}`;
-          steps.push(`שלב 2: חישוב הסתברות תנאי הרקע B: [MATH]P(${bExpr})[/MATH].`);
+          steps.push(`שלב 2 | חישוב הסתברות תנאי הרקע B | [MATH]P(${bExpr})[/MATH].`);
           steps.push(`[MATH]${bText}[/MATH]`);
         } else if (condType === 'above') {
           pB = 1 - normalCDF(condX1, mean, stdDev);
           bExpr = `X \\ge ${condX1}`;
           bText = `P(X \\ge ${condX1}) = 1 - \\Phi(${((condX1 - mean) / stdDev).toFixed(2)}) = ${pB.toFixed(4)}`;
-          steps.push(`שלב 2: חישוב הסתברות תנאי הרקע B: [MATH]P(${bExpr})[/MATH].`);
+          steps.push(`שלב 2 | חישוב הסתברות תנאי הרקע B | [MATH]P(${bExpr})[/MATH].`);
           steps.push(`[MATH]${bText}[/MATH]`);
         } else {
           const bStart = Math.min(condX1, condX2);
@@ -1981,7 +2001,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
           pB = normalCDF(bEnd, mean, stdDev) - normalCDF(bStart, mean, stdDev);
           bExpr = `${bStart} \\le X \\le ${bEnd}`;
           bText = `P(${bExpr}) = \\Phi(${((bEnd - mean) / stdDev).toFixed(2)}) - \\Phi(${((bStart - mean) / stdDev).toFixed(2)}) = ${pB.toFixed(4)}`;
-          steps.push(`שלב 2: חישוב הסתברות תנאי הרקע B: [MATH]P(${bExpr})[/MATH].`);
+          steps.push(`שלב 2 | חישוב הסתברות תנאי הרקע B | [MATH]P(${bExpr})[/MATH].`);
           steps.push(`[MATH]${bText}[/MATH]`);
         }
 
@@ -2004,7 +2024,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
         const interE = Math.min(rA[1], rB[1]);
 
         let pJoint = 0;
-        steps.push(`שלב 3: הגדרת חיתוך המאורעות [MATH]A \\cap B[/MATH] כדי לחשב [MATH]P(A \\cap B)[/MATH].`);
+        steps.push(`שלב 3 | הגדרת חיתוך המאורעות | המאורע [MATH]A \\cap B[/MATH] מוגדר כחיתוך שני התנאים כדי לחשב [MATH]P(A \\cap B)[/MATH].`);
 
         if (interS < interE) {
           const capStartSym = interS === -Infinity ? '-\\infty' : interS.toFixed(2);
@@ -2018,7 +2038,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
         }
 
         const finalProb = pB > 0 ? pJoint / pB : 0;
-        steps.push(`שלב 4: שימוש בנוסחת ההסתברות המותנית: [MATH]P(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}[/MATH].`);
+        steps.push(`שלב 4 | חישוב הסתברות מותנית | שימוש בנוסחת ההסתברות המותנית: [MATH]P(A \\mid B) = \\frac{P(A \\cap B)}{P(B)}[/MATH].`);
         steps.push(`תוצאה סופית: מהשלבים לעיל נקבל: [MATH]P(A \\mid B) = \\frac{${pJoint.toFixed(4)}}{${pB.toFixed(4)}} = ${finalProb.toFixed(4)}[/MATH]`);
 
         return {
@@ -2034,17 +2054,17 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
       const z2 = (x2 - mean) / stdDev;
       let prob = 0;
 
-      steps.push(`שלב 2: תקינה והמרת ערכי הגבול לציוני תקן (Z-score). נוסחת ציון התקן היא [MATH]Z = \\frac{X - \\mu}{\\sigma}[/MATH].`);
+      steps.push(`שלב 2 | תקינה והמרת ערכים לציון תקן (Z) | נוסחת ציון התקן היא [MATH]Z = \\frac{X - \\mu}{\\sigma}[/MATH].`);
 
       if (forwardType === 'below') {
         prob = normalCDF(x1, mean, stdDev);
         steps.push(`החלפת ערכים נותנת: [MATH]Z_1 = \\frac{${x1} - ${mean}}{${stdDev}} = ${z1.toFixed(4)}[/MATH].`);
-        steps.push(`שלב 3: שימוש בפונקציית ההתפלגות המצטברת (CDF) לאיתור השטח שמשמאל ל-Z: [MATH]P(X \\le ${x1}) = P(Z \\le ${z1.toFixed(2)}) = \\Phi(${z1.toFixed(2)})[/MATH].`);
+        steps.push(`שלב 3 | איתור שטח משמאל | שימוש בפונקציית ההתפלגות המצטברת (CDF) לאיתור השטח שמשמאל ל-Z: [MATH]P(X \\le ${x1}) = P(Z \\le ${z1.toFixed(2)}) = \\Phi(${z1.toFixed(2)})[/MATH].`);
         steps.push(`תוצאה סופית: ההסבר הסטטיסטי מבוטא כשטח ההתפלגות [MATH]P(X \\le ${x1}) = ${prob.toFixed(4)}[/MATH] (או ${(prob * 100).toFixed(2)}% מהאוכלוסייה).`);
       } else if (forwardType === 'above') {
         prob = 1 - normalCDF(x1, mean, stdDev);
         steps.push(`החלפת ערכים נותנת: [MATH]Z_1 = \\frac{${x1} - ${mean}}{${stdDev}} = ${z1.toFixed(4)}[/MATH].`);
-        steps.push(`שלב 3: השטח מימין ל-Z הוא המשלים לשלם: [MATH]P(X \\ge ${x1}) = P(Z \\ge ${z1.toFixed(2)}) = 1 - \\Phi(${z1.toFixed(2)})[/MATH].`);
+        steps.push(`שלב 3 | איתור שטח מימין | השטח מימין ל-Z הוא המשלים לשלם: [MATH]P(X \\ge ${x1}) = P(Z \\ge ${z1.toFixed(2)}) = 1 - \\Phi(${z1.toFixed(2)})[/MATH].`);
         steps.push(`תוצאה סופית: השטח המבוקש מימין הוא [MATH]P(X \\ge ${x1}) = 1 - ${normalCDF(x1, mean, stdDev).toFixed(4)} = ${prob.toFixed(4)}[/MATH] (או ${(prob * 100).toFixed(2)}%).`);
       } else if (forwardType === 'between') {
         const minX = Math.min(x1, x2);
@@ -2055,7 +2075,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
         steps.push(`חישוב ציוני תקן לשני הגבולות:`);
         steps.push(`[MATH]Z_{Min} = \\frac{${minX} - ${mean}}{${stdDev}} = ${zMin.toFixed(2)}[/MATH]`);
         steps.push(`[MATH]Z_{Max} = \\frac{${maxX} - ${mean}}{${stdDev}} = ${zMax.toFixed(2)}[/MATH]`);
-        steps.push(`שלב 3: מציאת ההפרש בין השטח המצטבר של הגבול העליון לגבול התחתון: [MATH]P(${minX} \\le X \\le ${maxX}) = \\Phi(${zMax.toFixed(2)}) - \\Phi(${zMin.toFixed(2)})[/MATH].`);
+        steps.push(`שלב 3 | שטח בין שני גבולות | מציאת ההפרש בין השטח המצטבר של הגבול העליון לגבול התחתון: [MATH]P(${minX} \\le X \\le ${maxX}) = \\Phi(${zMax.toFixed(2)}) - \\Phi(${zMin.toFixed(2)})[/MATH].`);
         steps.push(`תוצאה סופית: השטח הכלוא בין שני הגבולות במדגם הוא [MATH]P(${minX} \\le X \\le ${maxX}) = ${normalCDF(maxX, mean, stdDev).toFixed(4)} - ${normalCDF(minX, mean, stdDev).toFixed(4)} = ${prob.toFixed(4)}[/MATH] (או ${(prob * 100).toFixed(2)}%).`);
       } else {
         const minX = Math.min(x1, x2);
@@ -2066,7 +2086,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
         steps.push(`חישוב ציוני תקן לשני הקצוות:`);
         steps.push(`[MATH]Z_{Min} = \\frac{${minX} - ${mean}}{${stdDev}} = ${zMin.toFixed(2)}[/MATH]`);
         steps.push(`[MATH]Z_{Max} = \\frac{${maxX} - ${mean}}{${stdDev}} = ${zMax.toFixed(2)}[/MATH]`);
-        steps.push(`שלב 3: השטח שמחוץ לשני הגבולות (שני הזנבות במשותף) מחושב כמשלים של השטח שביניהם: [MATH]P(X \\le ${minX} \\cup X \\ge ${maxX}) = 1 - (\\Phi(${zMax.toFixed(2)}) - \\Phi(${zMin.toFixed(2)}))[/MATH].`);
+        steps.push(`שלב 3 | השטח בזנבות | השטח שמחוץ לשני הגבולות (שני הזנבות במשותף) מחושב כמשלים של השטח שביניהם: [MATH]P(X \\le ${minX} \\cup X \\ge ${maxX}) = 1 - (\\Phi(${zMax.toFixed(2)}) - \\Phi(${zMin.toFixed(2)}))[/MATH].`);
         steps.push(`תוצאה סופית: השטח המשולב בקצוות התפלגות האוכלוסייה הוא [MATH]P(X \\le ${minX} \\cup X \\ge ${maxX}) = ${prob.toFixed(4)}[/MATH] (או ${(prob * 100).toFixed(2)}%).`);
       }
 
@@ -2079,24 +2099,24 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
     } else {
       // Inverse mode
       const steps: string[] = [];
-      steps.push(`שלב 1: זיהוי פרמטרים והגדרת ההסתברות המבוקשת. ההתפלגות היא [MATH]\\mu = ${mean}, \\sigma = ${stdDev}[/MATH] והשטח המצטבר הנתון הוא [MATH]p = ${inverseProb}[/MATH] (כלומר ${(inverseProb * 100).toFixed(1)}%).`);
+      steps.push(`שלב 1 | זיהוי פרמטרים והסתברות | ההתפלגות היא [MATH]\\mu = ${mean}, \\sigma = ${stdDev}[/MATH] והשטח המצטבר הנתון הוא [MATH]p = ${inverseProb}[/MATH] (כלומר ${(inverseProb * 100).toFixed(1)}%).`);
 
       let z = 0;
       let calculatedX = mean;
-      steps.push(`שלב 2: מציאת ציון התקן (Z-score) התואם לשטח הנתון בהתפלגות הנורמלית הסטנדרטית באמצעות פונקציה הפוכה:`);
+      steps.push(`שלב 2 | מציאת ציון התקן התואם | מציאת ציון התקן (Z-score) התואם לשטח הנתון בהתפלגות הנורמלית הסטנדרטית באמצעות פונקציה הפוכה:`);
 
       if (inverseType === 'below') {
         z = inverseNormalCDF(inverseProb);
         calculatedX = mean + z * stdDev;
         steps.push(`עבור שטח מצטבר משמאל של [MATH]p = ${inverseProb}[/MATH], ציון התקן התואם הוא [MATH]Z = \\Phi^{-1}(${inverseProb}) = ${z.toFixed(4)}[/MATH].`);
-        steps.push(`שלב 3: שחרור הציון היחסי חזרה לערך פיזי לא משומר ע"י הנוסחה: [MATH]X = \\mu + Z \\cdot \\sigma[/MATH].`);
+        steps.push(`שלב 3 | חילוץ ערך פיזי (X) | שחרור הציון היחסי חזרה לערך פיזי לא מנורמל ע"י הנוסחה: [MATH]X = \\mu + Z \\cdot \\sigma[/MATH].`);
         steps.push(`תוצאה סופית: ערך ה-X המתקבל הוא [MATH]X = ${mean} + (${z.toFixed(2)}) \\cdot ${stdDev} = ${calculatedX.toFixed(2)}[/MATH].`);
       } else if (inverseType === 'above') {
         z = inverseNormalCDF(1 - inverseProb);
         calculatedX = mean + z * stdDev;
         steps.push(`בגלל שמבוקש שטח מצטבר מימין (מעל) של [MATH]p = ${inverseProb}[/MATH], אנו מחפשים שטח משמאל של [MATH]1 - p = ${(1 - inverseProb).toFixed(4)}[/MATH].`);
         steps.push(`ערך ה-Z התואם הוא [MATH]Z = \\Phi^{-1}(${(1 - inverseProb).toFixed(4)}) = ${z.toFixed(4)}[/MATH].`);
-        steps.push(`שלב 3: המרה חזרה לערכי X: [MATH]X = \\mu + Z \\cdot \\sigma[/MATH].`);
+        steps.push(`שלב 3 | המרה חזרה לערכי X | נחלץ את ערך ה-X המקורי: [MATH]X = \\mu + Z \\cdot \\sigma[/MATH].`);
         steps.push(`תוצאה סופית: ערך ה-X המתקבל הוא [MATH]X = ${mean} + (${z.toFixed(2)}) \\cdot ${stdDev} = ${calculatedX.toFixed(2)}[/MATH].`);
       } else if (inverseType === 'between') {
         // Area strictly in the middle is inverseProb. Tails combined are (1 - inverseProb). Individual tail is (1-inverseProb)/2
@@ -2108,7 +2128,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
         steps.push(`מבוקש שטח מרכזי סימטרי של [MATH]p = ${inverseProb}[/MATH]. המשמעות היא שכל אחד משני הזנבות בקצוות מחזיק שטח של [MATH]\\frac{1 - ${inverseProb}}{2} = ${tailArea.toFixed(4)}[/MATH].`);
         steps.push(`ציון תקן לגבול התחתון: [MATH]Z_{Lower} = \\Phi^{-1}(${tailArea.toFixed(4)}) = ${lowerZ.toFixed(4)}[/MATH]`);
         steps.push(`ציון תקן לגבול העליון: [MATH]Z_{Upper} = ${upperZ.toFixed(4)}[/MATH]`);
-        steps.push(`שלב 3: המרה חזרה לשני ערכי ה-X המקוריים בקצוות:`);
+        steps.push(`שלב 3 | המרה חזרה לשני ערכי ה-X | המרה חזרה לשני ערכי ה-X המקוריים בקצוות:`);
         steps.push(`[MATH]X_{Lower} = ${mean} + (${lowerZ.toFixed(2)}) \\cdot ${stdDev} = ${lowerX.toFixed(2)}[/MATH]`);
         steps.push(`[MATH]X_{Upper} = ${mean} + (${upperZ.toFixed(2)}) \\cdot ${stdDev} = ${upperX.toFixed(2)}[/MATH]`);
         steps.push(`תוצאה סופית: הטווח הכלוא המבוקש הינו בדיוק [MATH]X \\in [${lowerX.toFixed(2)}, ${upperX.toFixed(2)}][/MATH].`);
@@ -2130,7 +2150,7 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
         steps.push(`מבוקש שחלקם המשותף של שני הזנבות החיצוניים יהיה [MATH]p = ${inverseProb}[/MATH], מה שאומר שכל זנב לבדו מחזיק שטח של [MATH]\\frac{${inverseProb}}{2} = ${tailArea.toFixed(4)}[/MATH].`);
         steps.push(`ציון תקן לגבול התחתון: [MATH]Z_{Lower} = \\Phi^{-1}(${tailArea.toFixed(4)}) = ${lowerZ.toFixed(4)}[/MATH]`);
         steps.push(`ציון תקן לגבול העליון: [MATH]Z_{Upper} = ${upperZ.toFixed(4)}[/MATH]`);
-        steps.push(`שלב 3: המרת ערכי ה-Z חזרה לערכי X:`);
+        steps.push(`שלב 3 | המרת ערכי ה-Z חזרה לערכי X | המרת ערכי ה-Z חזרה לערכי X:`);
         steps.push(`[MATH]X_{Lower} = ${mean} + (${lowerZ.toFixed(2)}) \\cdot ${stdDev} = ${lowerX.toFixed(2)}[/MATH]`);
         steps.push(`[MATH]X_{Upper} = ${mean} + (${upperZ.toFixed(2)}) \\cdot ${stdDev} = ${upperX.toFixed(2)}[/MATH]`);
         steps.push(`תוצאה סופית: הטווח החיצוני המבוקש הוא [MATH]X \\le ${lowerX.toFixed(2)}[/MATH] או [MATH]X \\ge ${upperX.toFixed(2)}[/MATH].`);
@@ -2282,13 +2302,9 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                 </div>
 
                 <div className="relative z-10 space-y-6 p-5 sm:p-6 md:p-8">
-                  <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="max-w-3xl space-y-4 text-right">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-accent-brass)]/40 bg-[var(--color-accent-brass)]/12 px-3 py-1 text-caption font-black tracking-[0.08em] text-[var(--color-accent-brass)]">
-                        <Sparkles size={14} />
-                        {heroCopy.badge}
-                      </span>
-                      <div className="space-y-3">
+                  <div className="flex flex-col gap-6">
+                    <div className="w-full space-y-6 text-right">
+                      <div className="space-y-3 max-w-3xl">
                         <div className="accent-bar" />
                         <Heading
                           level="page"
@@ -2298,36 +2314,21 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                           {heroCopy.title}
                         </Heading>
                       </div>
-                    </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[26rem]">
-                      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/85 p-4 text-right">
-                        <div className="mb-2 flex items-center gap-2 text-[var(--color-accent-brass)]">
-                          <Calculator size={16} />
-                          <span className="text-caption font-black tracking-[0.08em]">CENTER</span>
-                        </div>
-                        <div className="font-mono text-mono-lg text-[var(--color-text-primary)]" dir="ltr">{mean.toFixed(2)}</div>
-                        <p className="text-body-sm text-[var(--color-text-secondary)]">תוחלת נוכחית</p>
-                      </div>
-                      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/85 p-4 text-right">
-                        <div className="mb-2 flex items-center gap-2 text-[var(--color-accent-cobalt)]">
-                          <Sigma size={16} />
-                          <span className="text-caption font-black tracking-[0.08em]">SPREAD</span>
-                        </div>
-                        <div className="font-mono text-mono-lg text-[var(--color-text-primary)]" dir="ltr">{stdDev.toFixed(2)}</div>
-                        <p className="text-body-sm text-[var(--color-text-secondary)]">סטיית תקן פעילה</p>
-                      </div>
-                      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/85 p-4 text-right">
-                        <div className="mb-2 flex items-center gap-2 text-[var(--color-accent-teal)]">
-                          <Target size={16} />
-                          <span className="text-caption font-black tracking-[0.08em]">OUTPUT</span>
-                        </div>
-                        <div className="font-mono text-mono-lg text-[var(--color-text-primary)]" dir="ltr">
-                          {mode === 'forward' ? `${(chartProb * 100).toFixed(2)}%` : chartProb.toFixed(4)}
-                        </div>
-                        <p className="text-body-sm text-[var(--color-text-secondary)]">
-                          {mode === 'forward' ? 'שטח מחושב' : 'אחוזון יעד'}
-                        </p>
+                      <div className="grid gap-4 sm:grid-cols-3 pt-2">
+                        {heroCopy.steps.map((step) => (
+                          <div key={step.number} className="relative rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)]/85 p-4 text-right flex flex-col gap-2 transition-colors hover:border-[var(--color-accent-cobalt)]/50">
+                            <div className="flex items-center gap-2.5 mb-1">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-cobalt)]/10 text-sm font-black text-[var(--color-accent-cobalt)]">
+                                {step.number}
+                              </div>
+                              <h3 className="text-body-base font-bold text-[var(--color-text-primary)]">{step.title}</h3>
+                            </div>
+                            <p className="text-body-sm leading-relaxed text-[var(--color-text-secondary)]">
+                              {step.description}
+                            </p>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
