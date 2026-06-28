@@ -190,7 +190,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
   const sections: Section[] = [
     {
       id: 'c1',
-      title: '1. הסתברות וקומבינטוריקה',
+      title: 'הסתברות וקומבינטוריקה',
       icon: <Layers className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -320,7 +320,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-4">
               <div className="space-y-1">
-                <h4 className="font-extrabold text-xs sm:text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">1. משפט המכפלה (Product Rule)</h4>
+                <h4 className="font-extrabold text-xs sm:text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">משפט המכפלה (Product Rule)</h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)] leading-relaxed">
                   הצלבת הסתברויות עבור תת-מאורעות:
                 </p>
@@ -330,7 +330,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               </div>
 
               <div className="space-y-1">
-                <h4 className="font-extrabold text-xs sm:text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">2. חוק ההסתברות השלמה (Total Probability)</h4>
+                <h4 className="font-extrabold text-xs sm:text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">חוק ההסתברות השלמה (Total Probability)</h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)] leading-relaxed">
                   אם מאורעות <InlineMath math="B_1, B_2, \dots, B_n" /> מהווים חלוקה זרה של מרחב המדגם <InlineMath math="\Omega" />:
                 </p>
@@ -340,7 +340,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
               </div>
 
               <div className="space-y-1">
-                <h4 className="font-extrabold text-xs sm:text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">3. חוק בייס (Bayes' Theorem)</h4>
+                <h4 className="font-extrabold text-xs sm:text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">חוק בייס (Bayes' Theorem)</h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)] leading-relaxed">
                   הסתברות אפוסטריורית (עדכון הסתברות גורם):
                 </p>
@@ -355,7 +355,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c2',
-      title: '2. משתנים מקריים בדידים',
+      title: 'משתנים מקריים בדידים',
       icon: <BookOpen className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -484,7 +484,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c3',
-      title: '3. משתנים מקריים רציפים',
+      title: 'משתנים מקריים רציפים',
       icon: <TrendingUp className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -555,7 +555,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c4',
-      title: '4. התפלגויות מיוחדות',
+      title: 'התפלגויות מיוחדות',
       icon: <Sigma className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -564,7 +564,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
             <div className="space-y-4">
               {/* Discrete Uniform */}
               <div className="p-4 rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border)]/60 bg-white dark:bg-[var(--color-surface-raised)]/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">1. התפלגות אחידה בדידה (Discrete Uniform)</h4>
+                <h4 className="font-extrabold text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">התפלגות אחידה בדידה (Discrete Uniform)</h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-primary)] leading-relaxed mb-3">
                   כאשר למשתנה יש <InlineMath math="n" /> תוצאות אפשריות בעלות הסתברות שווה. עבור ערכים שלמים בקטע סגור <InlineMath math="[a, b]" />:
                 </p>
@@ -586,7 +586,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
 
               {/* Binomial */}
               <div className="p-4 rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border)]/60 bg-white dark:bg-[var(--color-surface-raised)]/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">2. התפלגות בינומית <InlineMath math="(X \sim Bin(n, p))" /></h4>
+                <h4 className="font-extrabold text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">התפלגות בינומית <InlineMath math="(X \sim Bin(n, p))" /></h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-primary)] leading-relaxed mb-3">
                   סופרת את מספר ההצלחות בתוך סידרה של <InlineMath math="n" /> ניסויי ברנולי בלתי תלויים עם סיכוי מוגדר <InlineMath math="p" /> להצלחה בכל שלב.
                 </p>
@@ -614,7 +614,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
             <div className="space-y-4">
               {/* Continuous Uniform */}
               <div className="p-4 rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border)]/60 bg-white dark:bg-[var(--color-surface-raised)]/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">1. התפלגות אחידה רציפה <InlineMath math="(X \sim U(a, b))" /></h4>
+                <h4 className="font-extrabold text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">התפלגות אחידה רציפה <InlineMath math="(X \sim U(a, b))" /></h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-primary)] leading-relaxed mb-3">
                   כאשר המשתנה מרוח בצפיפות קבועה ואחידה מעל קטע יחיד ומוגדר <InlineMath math="[a, b]" />.
                 </p>
@@ -636,11 +636,20 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                     <InlineMath math="\frac{(b-a)^2}{12}" />
                   </div>
                 </div>
+                <div className="mt-2 p-3 bg-[var(--color-surface-raised)] dark:bg-[var(--color-surface)] rounded-lg flex flex-col md:flex-row items-center justify-between gap-2.5 text-xs sm:text-sm">
+                  <div>
+                    <strong className="block text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">מציאת אחוזון (Percentile):</strong>
+                    <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)] text-xs">מציאת הערך <InlineMath math="X" /> שמתחתיו שטח בגודל <InlineMath math="p" /> (הסתברות):</span>
+                  </div>
+                  <div className="text-base font-mono font-black text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] bg-[var(--color-surface-raised)]/40 px-3 py-2 rounded-[var(--rounded-lg)] border border-[var(--color-border)] shadow-sm">
+                    <InlineMath math="X = a + p \cdot (b - a)" />
+                  </div>
+                </div>
               </div>
 
               {/* Normal Distribution */}
               <div className="p-4 rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border)]/60 bg-white dark:bg-[var(--color-surface-raised)]/80 shadow-sm animate-fade-in">
-                <h4 className="font-extrabold text-sm text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">2. התפלגות נורמלית <InlineMath math="(X \sim N(\mu, \sigma^2))" /></h4>
+                <h4 className="font-extrabold text-sm text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] mb-2 border-r-2 border-[var(--color-accent-cobalt-line)] pr-2 text-right" dir="rtl">התפלגות נורמלית <InlineMath math="(X \sim N(\mu, \sigma^2))" /></h4>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] dark:text-[var(--color-text-primary)] leading-relaxed mb-3">
                   ההתפלגות המרכזית במחקר. סימטרית לחלוטין סביב התוחלת (צורת פעמון גאוס).
                 </p>
@@ -650,7 +659,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
                       <strong className="block text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">נוסחת התקנון (Standardization):</strong>
                       <span className="text-[var(--color-text-secondary)] dark:text-[var(--color-text-secondary)] text-xs">מעבר ממשתנה מקרי כללי למשתנה נורמלי סטנדרטי <InlineMath math="Z" />:</span>
                     </div>
-                    <div className="text-lg font-mono font-black text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)] bg-white dark:bg-[var(--color-surface-raised)]/90 px-3 py-1 rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border)]/50">
+                    <div className="text-base font-mono font-black text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)] bg-[var(--color-surface-raised)]/40 px-3 py-2 rounded-[var(--rounded-lg)] border border-[var(--color-border)] shadow-sm">
                       <InlineMath math="Z = \frac{X - \mu}{\sigma} \sim N(0, 1)" />
                     </div>
                   </div>
@@ -720,7 +729,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c5',
-      title: '5. משתנה מקרי דו-מימדי',
+      title: 'משתנה מקרי דו-מימדי',
       icon: <Percent className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -820,7 +829,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c6',
-      title: '6. סטטיסטיקה תיאורית',
+      title: 'סטטיסטיקה תיאורית',
       icon: <BarChart2 className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -924,7 +933,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c7',
-      title: '7. אמידה ורווחי סמך',
+      title: 'אמידה ורווחי סמך',
       icon: <UserCheck className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {
@@ -956,19 +965,19 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
           content: (
             <div className="space-y-4">
               <div className="p-3.5 bg-[var(--color-surface-raised)] dark:bg-[var(--color-surface)]/50 rounded-lg text-xs sm:text-sm leading-relaxed text-[var(--color-text-secondary)] dark:text-[var(--color-text-primary)]">
-                <strong>1. אומד חסר הטיה (Unbiased Estimator):</strong>
+                <strong>אומד חסר הטיה (Unbiased Estimator):</strong>
                 <br />
                 אומד שהתוחלת התיאורטית שלו שווה לפרמטר האמיתי באוכלוסייה:
-                <div className="my-2 p-1.5 bg-white dark:bg-[var(--color-surface)] rounded text-center font-mono font-black text-xs text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]">
+                <div className="my-2 p-2 bg-[var(--color-surface-raised)]/40 rounded-[var(--rounded-lg)] border border-[var(--color-border)] shadow-sm text-center font-mono font-black text-base text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                   <InlineMath math="\mathbb{E}[\hat{\theta}] = \theta" />
                 </div>
               </div>
 
               <div className="p-3.5 bg-[var(--color-surface-raised)] dark:bg-[var(--color-surface)]/50 rounded-lg text-xs sm:text-sm leading-relaxed text-[var(--color-text-secondary)] dark:text-[var(--color-text-primary)]">
-                <strong>2. טעות ריבועית ממוצעת (MSE - Mean Squared Error):</strong>
+                <strong>טעות ריבועית ממוצעת (MSE - Mean Squared Error):</strong>
                 <br />
                 מדד לטיב האומד הבוחן שילוב של שונות וסטייה מהתוחלת (הטיה בריבוע):
-                <div className="my-2 p-1.5 bg-white dark:bg-[var(--color-surface)] rounded text-center font-mono font-black text-xs text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]">
+                <div className="my-2 p-2 bg-[var(--color-surface-raised)]/40 rounded-[var(--rounded-lg)] border border-[var(--color-border)] shadow-sm text-center font-mono font-black text-base text-[var(--color-text-primary)] dark:text-[var(--color-text-primary)]">
                   <InlineMath math="MSE(\hat{\theta}) = \mathbb{E}\left[(\hat{\theta} - \theta)^2\right] = Var(\hat{\theta}) + \left[Bias(\hat{\theta})\right]^2" />
                 </div>
               </div>
@@ -1065,7 +1074,7 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
     },
     {
       id: 'c8',
-      title: '8. פרוטוקול שלבי פתרון בבדיקת השערות',
+      title: 'פרוטוקול שלבי פתרון בבדיקת השערות',
       icon: <Award className="w-5 h-5 text-[var(--color-accent-cobalt)] dark:text-[var(--color-accent-cobalt)]" />,
       subsections: [
         {

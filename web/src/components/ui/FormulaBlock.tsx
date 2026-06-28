@@ -115,18 +115,17 @@ export interface ResultBlockProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const ResultBlock: React.FC<ResultBlockProps> = ({ children, className = '', ...rest }) => (
-  <div className={`overflow-hidden rounded-[var(--rounded-lg)] border shadow-sm border-[var(--color-accent-brass)]/45 bg-[var(--color-accent-brass)]/10 my-4 ${className}`} {...rest}>
-    <div className="flex items-stretch h-full">
-      <div className="w-1 shrink-0 bg-[var(--color-accent-brass)]" aria-hidden="true" />
-      <div className="flex w-full items-center gap-4 p-4 sm:p-5">
-        <div className="hidden shrink-0 sm:flex text-[var(--color-accent-brass)]/65">
-          <Award size={30} strokeWidth={1.4} />
-        </div>
-        <div className="min-w-0 flex-1 space-y-3 text-[var(--color-accent-brass)] font-bold text-sm md:text-base leading-relaxed">
-          {children}
-        </div>
+  <div className={`flex flex-row items-center w-[95%] md:w-[85%] mx-auto gap-4 sm:gap-6 py-3 my-2 ${className}`} dir="ltr" {...rest}>
+      <div className="flex-1 overflow-x-auto scrollbar-thin rounded-[var(--rounded-lg)] shadow-sm">
+          <div className="relative border border-[var(--color-border)] border-l-4 border-solid border-l-[var(--color-accent-brass)] rounded-[var(--rounded-lg)] bg-[var(--color-accent-brass)]/10 px-6 py-4 text-center flex flex-col items-center justify-center min-h-[84px] h-auto w-full min-w-max [&_.katex-display]:!overflow-visible [&_.katex-display]:w-full [&_.katex-display]:!m-0 [&_.katex-display]:flex [&_.katex-display]:justify-center font-sans text-[var(--color-accent-brass)]">
+              <div dir="rtl" className="w-full flex flex-col items-center justify-center space-y-3 font-bold text-base md:text-lg leading-relaxed">
+                {children}
+              </div>
+          </div>
       </div>
-    </div>
+      <div className="shrink-0 w-10 sm:w-12 flex justify-center text-[var(--color-accent-brass)]/60">
+          <Award size={36} strokeWidth={1.2} />
+      </div>
   </div>
 );
 
