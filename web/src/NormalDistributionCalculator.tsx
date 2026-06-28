@@ -1462,7 +1462,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
       <div id="normal-z-table" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
         <button
           onClick={() => setIsZTableOpen(!isZTableOpen)}
-          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
+          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)] cursor-pointer"
         >
           <h3
             data-toc
@@ -1479,7 +1479,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
               <InlineMath math="\text{Standard\ Normal\ Distribution\ -\ Z-Score\ Table}" />
             </span>
           </h3>
-          {isZTableOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
+          <ChevronDown size={20} className={`text-[var(--color-text-secondary)] transition-transform duration-200 ${isZTableOpen ? 'rotate-180' : ''}`} />
         </button>
 
         <AnimatePresence>
@@ -1676,7 +1676,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
       <div id="normal-t-table" className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg overflow-hidden">
         <button
           onClick={() => setIsTTableOpen(!isTTableOpen)}
-          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)]"
+          className="w-full flex items-center justify-between p-4 bg-[var(--color-surface)] hover:bg-[var(--color-surface-raised)] transition-colors border-b border-[var(--color-border)] cursor-pointer"
         >
           <h3
             data-toc
@@ -1693,7 +1693,7 @@ const ZTable: React.FC<{ activeZ?: number | null; showSearch?: boolean }> = ({ a
               <InlineMath math="\text{Critical\ Values\ for\ Student's\ t-Distribution}" />
             </span>
           </h3>
-          {isTTableOpen ? <ChevronUp size={20} className="text-[var(--color-text-secondary)]" /> : <ChevronDown size={20} className="text-[var(--color-text-secondary)]" />}
+          <ChevronDown size={20} className={`text-[var(--color-text-secondary)] transition-transform duration-200 ${isTTableOpen ? 'rotate-180' : ''}`} />
         </button>
 
         <AnimatePresence>

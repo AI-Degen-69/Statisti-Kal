@@ -1991,7 +1991,7 @@ export default function HypothesisTestingCalculator() {
                                     setShowHypothesisTesting(!showHypothesisTesting);
                                 }
                             }}
-                            className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                            className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] cursor-pointer"
                         >
                             <div className="flex justify-end gap-3 lg:col-span-2 order-2 lg:order-2 mb-2">
                                 <button
@@ -2001,7 +2001,7 @@ export default function HypothesisTestingCalculator() {
                                         setShowCI(true);
                                         setShowPower(true);
                                     }}
-                                    className="px-4 py-2 text-sm font-bold bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md hover:bg-[var(--color-surface)] transition-colors shadow-sm flex items-center gap-2"
+                                    className="px-4 py-2 text-sm font-bold bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md hover:bg-[var(--color-surface)] transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                                 >
                                     <ChevronDown size={16} />
                                     הרחב הכל
@@ -2013,14 +2013,14 @@ export default function HypothesisTestingCalculator() {
                                         setShowCI(false);
                                         setShowPower(false);
                                     }}
-                                    className="px-4 py-2 text-sm font-bold bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md hover:bg-[var(--color-surface)] transition-colors shadow-sm flex items-center gap-2"
+                                    className="px-4 py-2 text-sm font-bold bg-[var(--color-surface-raised)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-md hover:bg-[var(--color-surface)] transition-colors shadow-sm flex items-center gap-2 cursor-pointer"
                                 >
                                     <ChevronUp size={16} />
                                     צמצם הכל
                                 </button>
                                 <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
                                     <div className="text-[var(--color-text-secondary)]">
-                                        {showHypothesisTesting ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                        <ChevronDown size={24} className={`transition-transform duration-200 ${showHypothesisTesting ? 'rotate-180' : ''}`} />
                                     </div>
                                 </div>
                             </div>
@@ -2066,7 +2066,7 @@ export default function HypothesisTestingCalculator() {
                                                     document.getElementById('step-6')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                                 }
                                             }}
-                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm sm:text-base font-black bg-[var(--color-surface)] hover:bg-[var(--color-accent-cobalt-bg)] text-[var(--color-text-primary)] hover:text-[var(--color-accent-cobalt)] border border-[var(--color-border)] shadow-md transition-all duration-300 leading-none group"
+                                            className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm sm:text-base font-black bg-[var(--color-surface)] hover:bg-[var(--color-accent-cobalt-bg)] text-[var(--color-text-primary)] hover:text-[var(--color-accent-cobalt)] border border-[var(--color-border)] shadow-md transition-all duration-300 leading-none group cursor-pointer"
                                         >
                                             <span>קפיצה למסקנה</span>
                                             <Target size={18} className="shrink-0 text-[var(--color-accent-cobalt)] group-hover:scale-110 transition-transform" />
@@ -3242,7 +3242,7 @@ export default function HypothesisTestingCalculator() {
                         <div id="confidence-panel" className="tour-step-accordion-ci rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-4 lg:order-4 text-right mt-6">
                             <button
                                 onClick={() => setShowCI(!showCI)}
-                                className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                                className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] cursor-pointer"
                             >
                                 <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" dir="ltr">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-teal)]">
@@ -3276,7 +3276,7 @@ export default function HypothesisTestingCalculator() {
                                 </div>
                                 <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
                                     <div className="text-[var(--color-text-secondary)]">
-                                        {showCI ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                        <ChevronDown size={24} className={`transition-transform duration-200 ${showCI ? 'rotate-180' : ''}`} />
                                     </div>
                                 </div>
                             </button>
@@ -3562,7 +3562,7 @@ export default function HypothesisTestingCalculator() {
                         <div id="power-panel" className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-5 lg:order-5 text-right mt-6">
                             <button
                                 onClick={() => setShowPower(!showPower)}
-                                className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)]"
+                                className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-black text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] cursor-pointer"
                             >
                                 <div className="absolute inset-0 pointer-events-none select-none overflow-hidden" dir="ltr">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 -rotate-12 opacity-10 text-4xl sm:text-5xl font-mono text-[var(--color-accent-teal)]">
@@ -3596,7 +3596,7 @@ export default function HypothesisTestingCalculator() {
                                 </div>
                                 <div className="relative z-10 flex items-center self-end sm:self-auto gap-4">
                                     <div className="text-[var(--color-text-secondary)]">
-                                        {showPower ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                        <ChevronDown size={24} className={`transition-transform duration-200 ${showPower ? 'rotate-180' : ''}`} />
                                     </div>
                                 </div>
                             </button>
