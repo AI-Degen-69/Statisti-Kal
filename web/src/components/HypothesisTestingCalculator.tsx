@@ -9,7 +9,14 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Joyride, Step } from 'react-joyride';
 import { AnimatedDetails, FormulaTranslation } from './ui/CustomComponents';
-import { FormulaBlock as UIFormulaBlock, ResultBlock } from './ui';
+import { CalcBlock as UICalcBlock, FormulaBlock as UIFormulaBlock, ResultBlock } from './ui';
+import {
+    ChartLegend,
+    ChartTooltipShell,
+    renderChartMathReferenceLabel,
+    type ChartLegendItem,
+    type ChartTooltipProps,
+} from './charts/ChartPrimitives';
 import HypothesisTestDisplay from './HypothesisTestDisplay';
 import { unifiedDecision } from '../lib/statistics/hypothesis';
 import {
@@ -55,13 +62,20 @@ import {
     Tooltip as RechartsTooltip,
     ReferenceLine,
     CartesianGrid,
-    Legend
 } from 'recharts';
 
 const JoyrideComponent = Joyride as any;
 
 // --- Types ---
 type TailType = 'right' | 'left' | 'two-tailed';
+
+interface HypothesisChartDataPoint {
+    x: number;
+    pdfH0: number;
+    pdfH1?: number;
+    alphaShade?: number;
+    powerShade?: number;
+}
 
 const DEFAULT_BODY_TEMPERATURE_STUDY = {
     varianceKnown: true,
@@ -100,14 +114,14 @@ function FormulaBlock({
     return (
         <div className={`flex flex-row items-center w-[95%] md:w-[85%] mx-auto gap-4 sm:gap-6 py-3 my-2 ${className}`} dir="ltr">
             <div className="flex-1 overflow-x-auto scrollbar-thin rounded-lg shadow-sm relative group">
-                <div className="relative border border-[var(--color-border)] border-l-4 border-dashed border-l-[var(--color-accent-brass)]/70 rounded-lg bg-[var(--color-accent-brass)]/5 px-6 py-4 text-lg sm:text-xl md:text-2xl text-center flex flex-col items-center justify-center min-h-[84px] h-auto w-full min-w-max [&_.katex-display]:!overflow-visible [&_.katex-display]:w-full [&_.katex-display]:!m-0 [&_.katex-display]:flex [&_.katex-display]:justify-center font-sans text-[var(--color-text-primary)]">
+                <UIFormulaBlock className="relative border-l-4 border-dashed border-l-[var(--color-accent-brass)]/70 bg-[var(--color-accent-brass)]/5 px-6 py-4 text-lg sm:text-xl md:text-2xl min-h-[84px] h-auto w-full min-w-max [&_.katex-display]:!overflow-visible [&_.katex-display]:w-full [&_.katex-display]:!m-0 [&_.katex-display]:flex [&_.katex-display]:justify-center font-sans text-[var(--color-text-primary)]">
                     {formulaName && translation && (
                         <div className="absolute top-2.5 left-2.5 z-10 transition-opacity opacity-60 hover:opacity-100">
                             <FormulaTranslation formulaName={formulaName} translation={translation} />
                         </div>
                     )}
                     {children}
-                </div>
+                </UIFormulaBlock>
             </div>
             <div className="shrink-0 w-10 sm:w-12 flex justify-center text-[var(--color-accent-brass)]/60">
                 <BookOpen size={36} strokeWidth={1.2} />
@@ -121,9 +135,9 @@ function CalcBlock({ children, className = '' }: { children: React.ReactNode; cl
     return (
         <div className={`flex flex-row items-center w-[95%] md:w-[85%] mx-auto gap-4 sm:gap-6 py-3 my-2 ${className}`} dir="ltr">
             <div className="flex-1 overflow-x-auto scrollbar-thin rounded-lg shadow-sm">
-                <div className="relative border border-[var(--color-border)] border-l-4 border-solid border-l-[var(--color-accent-cobalt)] rounded-lg bg-[var(--color-accent-cobalt)]/5 px-6 py-4 text-lg sm:text-xl md:text-2xl text-center flex flex-col items-center justify-center min-h-[84px] h-auto w-full min-w-max [&_.katex-display]:!overflow-visible [&_.katex-display]:w-full [&_.katex-display]:!m-0 [&_.katex-display]:flex [&_.katex-display]:justify-center font-sans text-[var(--color-text-primary)]">
+                <UICalcBlock label={null} className="relative border-l-4 border-solid border-l-[var(--color-accent-cobalt)] bg-[var(--color-accent-cobalt)]/5 px-6 py-4 text-lg sm:text-xl md:text-2xl min-h-[84px] h-auto w-full min-w-max [&_.katex-display]:!overflow-visible [&_.katex-display]:w-full [&_.katex-display]:!m-0 [&_.katex-display]:flex [&_.katex-display]:justify-center font-sans text-[var(--color-text-primary)]">
                     {children}
-                </div>
+                </UICalcBlock>
             </div>
             <div className="shrink-0 w-10 sm:w-12 flex justify-center text-[var(--color-accent-cobalt)]/60">
                 <Calculator size={36} strokeWidth={1.2} />
@@ -377,25 +391,23 @@ const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, classNam
         >
             {children}
             <Info size={13} className="text-[var(--color-accent-cobalt)] hover:text-[var(--color-accent-cobalt)] cursor-help shrink-0" />
-            {typeof document !== 'undefined' && document.body
+            {isVisible && typeof document !== 'undefined' && document.body
                 ? createPortal(
                     <AnimatePresence>
-                        {isVisible && (
-                            <div
-                                className="pointer-events-none fixed z-[9999]"
-                                style={{ top: position.top, left: position.left, transform: 'translate(-50%, -100%)' }}
+                        <div
+                            className="pointer-events-none fixed z-[9999]"
+                            style={{ top: position.top, left: position.left, transform: 'translate(-50%, -100%)' }}
+                        >
+                            <motion.div
+                                initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                                className={`p-2.5 text-xs rounded-sm shadow-sm text-center leading-normal font-medium bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-sans ${tooltipClassName}`}
                             >
-                                <motion.div
-                                    initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                                    className={`p-2.5 text-xs rounded-sm shadow-sm text-center leading-normal font-medium bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-sans ${tooltipClassName}`}
-                                >
-                                    {content}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-[var(--color-surface)]" />
-                                </motion.div>
-                            </div>
-                        )}
+                                {content}
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-[var(--color-surface)]" />
+                            </motion.div>
+                        </div>
                     </AnimatePresence>,
                     document.body
                 )
@@ -1100,11 +1112,11 @@ export default function HypothesisTestingCalculator() {
         return null;
     };
 
-    const CustomChartTooltip = ({ active, payload }: any) => {
+    const CustomChartTooltip = ({ active, payload }: ChartTooltipProps<HypothesisChartDataPoint>) => {
         if (active && payload && payload.length) {
             const dataPt = payload[0].payload;
             return (
-                <div className="p-3 border rounded-sm shadow-sm text-sm font-sans space-y-2 backdrop-blur-md bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] min-w-[160px]" dir="rtl">
+                <ChartTooltipShell className="text-sm min-w-[160px]">
                     <div className="flex justify-between gap-6 border-b border-[var(--color-border)] pb-2 mb-2">
                         <span className="font-bold text-[var(--color-accent-cobalt)]">ממוצע <InlineMath math="\bar{X}" />:</span>
                         <span className="font-mono font-bold text-[var(--color-accent-cobalt)]" dir="ltr">{dataPt.x.toFixed(2)}</span>
@@ -1120,11 +1132,32 @@ export default function HypothesisTestingCalculator() {
                             <span className="font-mono font-bold" dir="ltr">{dataPt.pdfH1.toFixed(2)}</span>
                         </div>
                     )}
-                </div>
+                </ChartTooltipShell>
             );
         }
         return null;
     };
+
+    const hypothesisLegendItems = useMemo((): ChartLegendItem[] => {
+        const items: ChartLegendItem[] = [
+            { math: 'H_0', color: 'var(--color-accent-brass)', style: 'area' },
+            {
+                math: 'H_1',
+                color: 'var(--color-accent-teal)',
+                style: 'area',
+                onClick: () => setCalculatePower(!calculatePower),
+                muted: !calculatePower,
+            },
+            { math: '\\alpha', color: 'var(--color-accent-crimson)', style: 'area' },
+            { math: 'C', color: 'var(--color-accent-crimson)', style: 'line', label: <span dir="rtl">קריטי</span> },
+        ];
+
+        if (calculatePower) {
+            items.push({ math: '1-\\beta', color: 'var(--color-accent-teal)', style: 'area' });
+        }
+
+        return items;
+    }, [calculatePower]);
 
     return (
         <div className="tour-step-intro space-y-8 bg-[var(--color-background)] min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
@@ -1566,28 +1599,7 @@ export default function HypothesisTestingCalculator() {
                     {/* Overlapping Curves Chart */}
                     <div className="tour-step-graph rounded-lg p-4 md:p-5 border shadow-md transition-all bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 order-1 lg:order-1">
                         <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-[var(--color-border)] pb-3 mb-3">
-                            <div className="flex flex-wrap gap-4 text-xs sm:text-sm">
-                                <span className="flex items-center gap-1.5 font-black text-[var(--color-accent-brass)] select-none">
-                                    <span className="w-3 h-3 rounded-none bg-[var(--color-accent-brass)] inline-block" />
-                                    <InlineMath math="H_0" />
-                                </span>
-                                <span className={`flex items-center gap-1.5 font-black transition-all cursor-pointer select-none ${calculatePower ? 'text-[var(--color-accent-teal)]' : 'text-[var(--color-text-primary)] opacity-60 hover:opacity-100'}`} onClick={() => setCalculatePower(!calculatePower)}>
-                                    <span className={`w-3 h-3 rounded-none inline-block ${calculatePower ? 'bg-[var(--color-accent-teal)]' : 'bg-[var(--color-surface-raised)]/80'}`} />
-                                    <InlineMath math="H_1" />
-                                </span>
-                                <span className="flex items-center gap-1.5 font-black text-[var(--color-accent-crimson)] select-none">
-                                    <span className="w-3 h-3 rounded-none bg-[var(--color-accent-crimson)]/60 border border-[var(--color-accent-crimson)] inline-block" />
-                                    <InlineMath math="\alpha" />
-                                </span>
-                                <span className="flex items-center gap-1.5 font-black text-[var(--color-accent-crimson)] select-none">
-                                    <span className="w-0.5 h-3 bg-[var(--color-accent-crimson)] inline-block" />
-                                    <InlineMath math="C" /> קריטי
-                                </span>
-                                <span className={`flex items-center gap-1.5 font-black transition-all select-none ${calculatePower ? 'text-[var(--color-accent-teal)]' : 'hidden opacity-0'}`}>
-                                    <span className="w-3 h-3 rounded-none bg-[var(--color-accent-teal)]/30 border border-[var(--color-accent-teal)] inline-block" />
-                                    <InlineMath math="1-\beta" />
-                                </span>
-                            </div>
+                            <ChartLegend items={hypothesisLegendItems} />
                         </div>
 
                         {isValid && stats ? (
@@ -1743,13 +1755,17 @@ export default function HypothesisTestingCalculator() {
                                             stroke="var(--color-accent-brass)"
                                             strokeWidth={1.5}
                                             strokeDasharray="10 4"
-                                            label={({ viewBox }: any) => (
-                                                <foreignObject x={viewBox.x - 20} y={viewBox.y + viewBox.height + 25} width={40} height={30} style={{ overflow: 'visible' }}>
-                                                    <div style={{ color: "var(--color-accent-brass)", fontSize: 15, fontWeight: "bold", textAlign: "center", direction: "ltr" }}>
-                                                        <InlineMath math="\mu_0" />
-                                                    </div>
-                                                </foreignObject>
-                                            )}
+                                            label={(props) =>
+                                                renderChartMathReferenceLabel(props, {
+                                                    math: '\\mu_0',
+                                                    color: 'var(--color-accent-brass)',
+                                                    width: 40,
+                                                    height: 30,
+                                                    xOffset: -20,
+                                                    yOffset: (viewBox) => (viewBox.height ?? 0) + 25,
+                                                    className: 'text-sm font-bold',
+                                                })
+                                            }
                                         />
 
                                         {/* Vertical Reference Line at Mean of H1 */}
@@ -1758,13 +1774,16 @@ export default function HypothesisTestingCalculator() {
                                             stroke="var(--color-accent-teal)"
                                             strokeWidth={1.5}
                                             strokeDasharray="10 4"
-                                            label={calculatePower ? ({ viewBox }: any) => (
-                                                <foreignObject x={viewBox.x - 20} y={viewBox.y + viewBox.height + 25} width={40} height={30} style={{ overflow: 'visible' }}>
-                                                    <div style={{ color: "var(--color-accent-teal)", fontSize: 15, fontWeight: "bold", textAlign: "center", direction: "ltr" }}>
-                                                        <InlineMath math="\mu_1" />
-                                                    </div>
-                                                </foreignObject>
-                                            ) : undefined}
+                                            label={calculatePower ? (props) =>
+                                                renderChartMathReferenceLabel(props, {
+                                                    math: '\\mu_1',
+                                                    color: 'var(--color-accent-teal)',
+                                                    width: 40,
+                                                    height: 30,
+                                                    xOffset: -20,
+                                                    yOffset: (viewBox) => (viewBox.height ?? 0) + 25,
+                                                    className: 'text-sm font-bold',
+                                                }) : undefined}
                                         />
 
                                         {/* Vertical LINE for SELECTOR: Critical Values */}
@@ -1774,25 +1793,33 @@ export default function HypothesisTestingCalculator() {
                                                     x={stats.c1}
                                                     stroke="var(--color-accent-crimson)"
                                                     strokeWidth={2.5}
-                                                    label={({ viewBox }: any) => (
-                                                        <foreignObject x={viewBox.x - 40} y={viewBox.y - 25} width={80} height={30} style={{ overflow: 'visible' }}>
-                                                            <div style={{ color: "var(--color-accent-crimson)", fontSize: 13, fontWeight: "bold", textAlign: "center", direction: "ltr" }}>
-                                                                <InlineMath math={`C_1: ${stats.c1.toFixed(2)}`} />
-                                                            </div>
-                                                        </foreignObject>
-                                                    )}
+                                                    label={(props) =>
+                                                        renderChartMathReferenceLabel(props, {
+                                                            math: `C_1: ${stats.c1.toFixed(2)}`,
+                                                            color: 'var(--color-accent-crimson)',
+                                                            width: 80,
+                                                            height: 30,
+                                                            xOffset: -40,
+                                                            yOffset: -25,
+                                                            className: 'text-xs font-bold',
+                                                        })
+                                                    }
                                                 />
                                                 <ReferenceLine
                                                     x={stats.c2}
                                                     stroke="var(--color-accent-crimson)"
                                                     strokeWidth={2.5}
-                                                    label={({ viewBox }: any) => (
-                                                        <foreignObject x={viewBox.x - 40} y={viewBox.y - 25} width={80} height={30} style={{ overflow: 'visible' }}>
-                                                            <div style={{ color: "var(--color-accent-crimson)", fontSize: 13, fontWeight: "bold", textAlign: "center", direction: "ltr" }}>
-                                                                <InlineMath math={`C_2: ${stats.c2.toFixed(2)}`} />
-                                                            </div>
-                                                        </foreignObject>
-                                                    )}
+                                                    label={(props) =>
+                                                        renderChartMathReferenceLabel(props, {
+                                                            math: `C_2: ${stats.c2.toFixed(2)}`,
+                                                            color: 'var(--color-accent-crimson)',
+                                                            width: 80,
+                                                            height: 30,
+                                                            xOffset: -40,
+                                                            yOffset: -25,
+                                                            className: 'text-xs font-bold',
+                                                        })
+                                                    }
                                                 />
                                             </>
                                         ) : (
@@ -1800,13 +1827,17 @@ export default function HypothesisTestingCalculator() {
                                                 x={stats.c2}
                                                 stroke="var(--color-accent-crimson)"
                                                 strokeWidth={3}
-                                                label={({ viewBox }: any) => (
-                                                    <foreignObject x={viewBox.x - 40} y={viewBox.y - 25} width={80} height={30} style={{ overflow: 'visible' }}>
-                                                        <div style={{ color: "var(--color-accent-crimson)", fontSize: 14, fontWeight: "bold", textAlign: "center", direction: "ltr" }}>
-                                                            <InlineMath math={`C: ${stats.c2.toFixed(2)}`} />
-                                                        </div>
-                                                    </foreignObject>
-                                                )}
+                                                label={(props) =>
+                                                    renderChartMathReferenceLabel(props, {
+                                                        math: `C: ${stats.c2.toFixed(2)}`,
+                                                        color: 'var(--color-accent-crimson)',
+                                                        width: 80,
+                                                        height: 30,
+                                                        xOffset: -40,
+                                                        yOffset: -25,
+                                                        className: 'text-sm font-bold',
+                                                    })
+                                                }
                                             />
                                         )}
 
@@ -2363,8 +2394,11 @@ export default function HypothesisTestingCalculator() {
                                                             {stats && (
                                                                 <div className="relative w-full max-w-lg mx-auto mb-8 mt-2 pt-6 pb-2 px-2 sm:px-5 bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] shadow-inner" dir="ltr">
                                                                     {/* Compact Legend */}
-                                                                    <div className="absolute top-4 right-6 flex items-center gap-1.5 text-xs text-[var(--color-text-primary)] font-bold bg-[var(--color-surface)] py-1.5 px-3 rounded-lg border border-[var(--color-border)]/50 z-10" dir="rtl">
-                                                                        <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> <InlineMath math="\alpha" />
+                                                                    <div className="absolute top-4 right-6 bg-[var(--color-surface)] py-1.5 px-3 rounded-lg border border-[var(--color-border)]/50 z-10" dir="rtl">
+                                                                        <ChartLegend
+                                                                            items={[{ math: '\\alpha', color: 'var(--color-accent-crimson)', style: 'area' }]}
+                                                                            className="gap-1.5"
+                                                                        />
                                                                     </div>
 
                                                                     <div className="h-[200px] w-full">
@@ -2381,12 +2415,12 @@ export default function HypothesisTestingCalculator() {
                                                                             })}>
                                                                                 <defs>
                                                                                     <linearGradient id="miniH0Color" x1="0" y1="0" x2="0" y2="1">
-                                                                                        <stop offset="5%" stopColor={'#818cf8'} stopOpacity={0.3} />
-                                                                                        <stop offset="95%" stopColor={'#818cf8'} stopOpacity={0} />
+                                                                                        <stop offset="5%" stopColor="var(--color-accent-cobalt)" stopOpacity={0.3} />
+                                                                                        <stop offset="95%" stopColor="var(--color-accent-cobalt)" stopOpacity={0} />
                                                                                     </linearGradient>
                                                                                 </defs>
-                                                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={'#334155'} opacity={0.5} />
-                                                                                <XAxis dataKey="x" type="number" domain={[-3.5, 3.5]} tickFormatter={(val) => val.toFixed(2)} stroke="#475569" tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 'bold' }} />
+                                                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" opacity={0.5} />
+                                                                                <XAxis dataKey="x" type="number" domain={[-3.5, 3.5]} tickFormatter={(val) => val.toFixed(2)} stroke="var(--chart-grid)" tick={{ fill: 'var(--chart-axis-label)', fontSize: 12, fontWeight: 'bold' }} />
                                                                                 <YAxis
                                                                                     tickFormatter={(val) => val.toFixed(2)}
                                                                                     tick={{ fill: 'var(--chart-axis-label)', fontSize: 12, fontWeight: 'bold' }}
@@ -2394,18 +2428,18 @@ export default function HypothesisTestingCalculator() {
                                                                                     tickLine={true}
                                                                                     width={45}
                                                                                 />
-                                                                                <Area type="monotone" dataKey="y" stroke="#818cf8" strokeWidth={2.5} fill="url(#miniH0Color)" isAnimationActive={false} />
-                                                                                <Area type="monotone" dataKey="alphaShade" stroke="none" fill="#ef4444" fillOpacity={0.5} isAnimationActive={false} />
+                                                                                <Area type="monotone" dataKey="y" stroke="var(--color-accent-cobalt)" strokeWidth={2.5} fill="url(#miniH0Color)" isAnimationActive={false} />
+                                                                                <Area type="monotone" dataKey="alphaShade" stroke="none" fill="var(--color-accent-crimson)" fillOpacity={0.5} isAnimationActive={false} />
 
                                                                                 {tailType === 'two-tailed' ? (
                                                                                     <>
-                                                                                        <ReferenceLine x={-Math.abs(stats.zCrit)} stroke="#ef4444" strokeWidth={2} strokeDasharray="4 4" label={{ value: `-${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopLeft', fill: '#ef4444', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
-                                                                                        <ReferenceLine x={Math.abs(stats.zCrit)} stroke="#ef4444" strokeWidth={2} strokeDasharray="4 4" label={{ value: `+${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopRight', fill: '#ef4444', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
+                                                                                        <ReferenceLine x={-Math.abs(stats.zCrit)} stroke="var(--color-accent-crimson)" strokeWidth={2} strokeDasharray="4 4" label={{ value: `-${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopLeft', fill: 'var(--color-accent-crimson)', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
+                                                                                        <ReferenceLine x={Math.abs(stats.zCrit)} stroke="var(--color-accent-crimson)" strokeWidth={2} strokeDasharray="4 4" label={{ value: `+${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopRight', fill: 'var(--color-accent-crimson)', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
                                                                                     </>
                                                                                 ) : tailType === 'right' ? (
-                                                                                    <ReferenceLine x={Math.abs(stats.zCrit)} stroke="#ef4444" strokeWidth={2} strokeDasharray="4 4" label={{ value: `+${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopRight', fill: '#ef4444', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
+                                                                                    <ReferenceLine x={Math.abs(stats.zCrit)} stroke="var(--color-accent-crimson)" strokeWidth={2} strokeDasharray="4 4" label={{ value: `+${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopRight', fill: 'var(--color-accent-crimson)', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
                                                                                 ) : (
-                                                                                    <ReferenceLine x={-Math.abs(stats.zCrit)} stroke="#ef4444" strokeWidth={2} strokeDasharray="4 4" label={{ value: `-${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopLeft', fill: '#ef4444', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
+                                                                                    <ReferenceLine x={-Math.abs(stats.zCrit)} stroke="var(--color-accent-crimson)" strokeWidth={2} strokeDasharray="4 4" label={{ value: `-${Math.abs(stats.zCrit).toFixed(2)}`, position: 'insideTopLeft', fill: 'var(--color-accent-crimson)', fontSize: 13, fontWeight: 'bold', offset: 10 }} />
                                                                                 )}
                                                                             </AreaChart>
                                                                         </ResponsiveContainer>
