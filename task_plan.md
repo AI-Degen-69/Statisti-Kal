@@ -53,15 +53,17 @@ Complete
 - **Status:** complete
 
 ### Phase 6: Cross-Calculator UI Consistency Plan
-- [ ] Audit shared visual patterns across normal distribution and hypothesis testing pages
-- [ ] Extract shared chart foundation for axis ticks, grid, tooltip shell, legend chips, reference labels, margins, and semantic color mapping
-- [ ] Extract shared body/layout primitives for calculator sections, panels, parameter grids, calculation blocks, formula blocks, result blocks, and step lists
+- [x] Audit shared visual patterns across normal distribution and hypothesis testing pages
+- [x] Extract shared chart foundation for tooltip shell, legend chips, reference labels, and semantic color mapping
+- [ ] Extract shared chart foundation for axis ticks, chart margins, and responsive chart frame
+- [x] Start shared body/layout reuse by wiring hypothesis `FormulaBlock` and `CalcBlock` wrappers through shared UI primitives
+- [ ] Extract shared body/layout primitives for calculator sections, panels, parameter grids, result blocks, and step lists
 - [ ] Standardize typography: Hebrew section headers, English formal-term translations in dark gray, body text size, caption size, and math text size
 - [ ] Standardize math notation: use inline math components for variables and symbols inside prose instead of plain text variables
 - [ ] Use customized `FormulaBlock`, `CalcBlock`, and `ResultBlock` consistently where they match the content role
 - [ ] Preserve domain-specific layers: H0/H1, alpha/beta/power for hypothesis; probability/percentile shading for normal
 - [ ] Run visual and code verification: `npm run lint:tsc`, `npm test`, `npm run lint:colors`, `npm run build`, plus manual RTL/light-dark review
-- **Status:** pending
+- **Status:** in progress
 
 ## Key Questions
 1. Which functions were already extracted? Answer: pure probability/statistics helpers in `web/src/lib/statistics/math.ts`.

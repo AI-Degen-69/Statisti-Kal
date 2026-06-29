@@ -82,3 +82,18 @@ Start Phase 2: extract normal calculator internal UI units.
 ### Added Follow-Up Scope
 - Added Phase 6 to `task_plan.md` for cross-calculator UI consistency.
 - Captured requirements for shared chart rules, body layout, custom `FormulaBlock`/`CalcBlock`/`ResultBlock`, calculation steps, result blocks, font/color consistency, inline math notation, and Hebrew headers with English formal-term translations.
+
+### Phase 6 Slice Completed
+- Added `web/src/components/charts/ChartPrimitives.tsx`.
+- Reused shared chart legend chips, tooltip shell, and math reference-line labels in `NormalChart`.
+- Reused the same shared chart primitives in the hypothesis chart while preserving domain-specific `H_0`, `H_1`, `\alpha`, `1-\beta`, and critical-value layers.
+- Replaced raw mini alpha-chart colors with semantic chart/accent tokens.
+- Routed hypothesis `FormulaBlock` and `CalcBlock` wrappers through shared UI primitives while keeping existing side icons and visual density.
+- Fixed hidden tooltip portals so SSR/static-render tests do not call `createPortal` while tooltip content is not visible.
+
+### Phase 6 Verification
+- Restored declared npm dependencies with `npm install` because local `node_modules` was missing declared test packages.
+- `npm run lint:tsc` passed.
+- `npm test` passed: 5 files, 24 tests.
+- `npm run lint:colors` passed.
+- `npm run build` passed with existing large chunk warning.

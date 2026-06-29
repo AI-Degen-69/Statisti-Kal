@@ -12,6 +12,23 @@ import {
 } from 'recharts';
 import { normalPDF } from '../../lib/statistics/math';
 import type { CalcMode, CalcType, CondType } from '../calc-ui';
+import {
+  ChartLegend,
+  ChartTooltipShell,
+  renderChartMathReferenceLabel,
+  type ChartLegendItem,
+  type ChartTooltipProps,
+} from './ChartPrimitives';
+
+interface NormalChartDataPoint {
+  x: number;
+  pdf: number;
+  shadedY: number | null;
+  shadedYBelow: number | null;
+  shadedYAbove: number | null;
+  condBShadedY: number | null;
+  intersectShadedY: number | null;
+}
 
 export const NormalChart: React.FC<{
   mean: number;
@@ -171,8 +188,8 @@ export const NormalChart: React.FC<{
     return combined;
   }, [mean, stdDev, xMarkers]);
 
-  const legendChips = useMemo(() => {
-    const chips: Array<{ math: string; color: string; style: 'line' | 'area' }> = [
+  const legendChips = useMemo((): ChartLegendItem[] => {
+    const chips: ChartLegendItem[] = [
       { math: '\\mu', color: curveColor, style: 'line' },
     ];
 
@@ -192,17 +209,17 @@ export const NormalChart: React.FC<{
   }, [curveColor, mode, secondaryCurveColor, type, zLineColor]);
 
   // Customized tooltip
-  const CustomTooltipInner = ({ active, payload }: any) => {
+  const CustomTooltipInner = ({ active, payload }: ChartTooltipProps<NormalChartDataPoint>) => {
     if (active && payload && payload.length) {
       const dataPt = payload[0].payload;
       const zVal = (dataPt.x - mean) / stdDev;
       return (
-        <div className="p-3 border rounded-sm shadow-sm text-xs font-sans text-right space-y-1 backdrop-blur-md bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)]">
+        <ChartTooltipShell className="text-xs text-right space-y-1">
           <p className="font-bold text-sm text-[var(--color-accent-brass)]">נקודה על העקומה</p>
           <p className="flex justify-between gap-4"><span>ערך <InlineMath math="X" />:</span> <span className="font-mono font-bold">{dataPt.x.toFixed(2)}</span></p>
           <p className="flex justify-between gap-4"><span>ציון תקן <InlineMath math="Z" />:</span> <span className="font-mono font-bold">{zVal.toFixed(2)}</span></p>
           <p className="flex justify-between gap-4"><span>צפיפות PDF:</span> <span className="font-mono font-bold">{dataPt.pdf.toFixed(4)}</span></p>
-        </div>
+        </ChartTooltipShell>
       );
     }
     return null;
@@ -252,33 +269,13 @@ export const NormalChart: React.FC<{
     );
   };
 
-  const renderReferenceLabel = (props: any, math: string, color: string) => {
-    const { viewBox } = props;
-    if (!viewBox) return null;
-    return (
-      <foreignObject x={viewBox.x - 40} y={viewBox.y - 20} width={80} height={40} style={{ overflow: 'visible' }}>
-        <div className="flex justify-center items-start h-full leading-none" style={{ color }}>
-          <span className="text-[1.25rem] font-black bg-[var(--color-surface)]/60 px-1 rounded shadow-sm backdrop-blur-md">
-            <InlineMath math={math} />
-          </span>
-        </div>
-      </foreignObject>
-    );
-  };
+  const renderReferenceLabel = (props: unknown, math: string, color: string) =>
+    renderChartMathReferenceLabel(props, { math, color });
 
   return (
     <div className="h-[425px] w-full" dir="ltr">
       <div className="mb-3 flex flex-wrap items-center gap-4 border-b border-[var(--color-border)] pb-3">
-        {legendChips.map((chip) => (
-          <div key={chip.math} className="flex items-center gap-1.5 font-black text-sm select-none" style={{ color: chip.color }}>
-            {chip.style === 'line' ? (
-              <span className="inline-block h-3 w-0.5" style={{ backgroundColor: chip.color }} />
-            ) : (
-              <span className="inline-block h-3 w-3 border" style={{ backgroundColor: `${chip.color}33`, borderColor: chip.color }} />
-            )}
-            <span dir="ltr"><InlineMath math={chip.math} /></span>
-          </div>
-        ))}
+        <ChartLegend items={legendChips} />
       </div>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData} margin={{ top: 24, right: 10, left: -25, bottom: 110 }}>
