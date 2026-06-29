@@ -10,6 +10,13 @@ import {
 } from 'recharts';
 import { renderChartMathReferenceLabel } from './ChartPrimitives';
 
+export type HypothesisAxisTickRole = 'standard' | 'critical' | 'sample';
+
+export interface HypothesisAxisTick {
+  value: number;
+  role: HypothesisAxisTickRole;
+}
+
 export interface HypothesisChartProps {
   chartData: any[];
   stats: {
@@ -22,7 +29,7 @@ export interface HypothesisChartProps {
   chartLimits: { xMin: number; xMax: number };
   tailType: 'left' | 'right' | 'two-tailed';
   calculatePower: boolean;
-  xAxisTicks: number[];
+  xAxisTicks: HypothesisAxisTick[];
   sampleMean: number | null;
 }
 
@@ -46,6 +53,7 @@ export const HypothesisChart: React.FC<HypothesisChartProps> = ({
 
   const { c1, c2 } = stats;
   const { xMin, xMax } = chartLimits;
+  const xAxisTickValues = xAxisTicks.map((tick) => tick.value);
 
   const pct = (x: number) => {
     const p = ((x - xMin) / (xMax - xMin)) * 100;
@@ -110,14 +118,19 @@ export const HypothesisChart: React.FC<HypothesisChartProps> = ({
             dataKey="x"
             type="number"
             domain={[chartLimits.xMin, chartLimits.xMax]}
-            ticks={xAxisTicks}
+            ticks={xAxisTickValues}
             interval={0}
             tick={(props: any) => {
               const { x, y, payload } = props;
               const val = payload.value;
+              const tickRole = xAxisTicks.find((tick) => Math.abs(tick.value - val) < 1e-5)?.role ?? 'standard';
               let fill = 'var(--color-text-secondary)';
 
-              if (Math.abs(val - stats.effectH0Mean) < 1e-4) {
+              if (tickRole === 'critical') {
+                fill = 'var(--color-accent-crimson)';
+              } else if (tickRole === 'sample') {
+                fill = 'var(--color-success)';
+              } else if (Math.abs(val - stats.effectH0Mean) < 1e-4) {
                 fill = 'var(--chart-1)';
               } else if (calculatePower && Math.abs(val - stats.effectH1Mean) < 1e-4) {
                 fill = 'var(--chart-2)';

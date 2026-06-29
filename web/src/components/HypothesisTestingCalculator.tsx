@@ -54,7 +54,7 @@ import {
     ExternalLink
 } from 'lucide-react';
 import { ChartWrapper } from './ui/CustomComponents';
-import { HypothesisChart } from './charts/HypothesisChart';
+import { HypothesisChart, type HypothesisAxisTick } from './charts/HypothesisChart';
 import {
     ResponsiveContainer,
     AreaChart,
@@ -865,15 +865,43 @@ export default function HypothesisTestingCalculator() {
     }, [stats, decisionData, isValid]);
 
     // --- Custom Ticks for X-Axis representing means and standard deviations ---
-    const xAxisTicks = useMemo(() => {
-        if (!stats || !isValid) return [];
-        const { effectH0Mean, se } = stats;
+    const xAxisTicks = useMemo((): HypothesisAxisTick[] => {
+        if (!stats || !decisionData || !isValid) return [];
+        const { effectH0Mean, se, c1, c2 } = stats;
+        const sampleMean = decisionData.xBar;
+        const minDynamicSpacing = se * 0.45;
 
-        return Array.from({ length: 9 }, (_, index) => {
+        const dynamicTicks: HypothesisAxisTick[] = [
+            { value: Number(c2.toFixed(6)), role: 'critical' },
+            { value: Number(sampleMean.toFixed(6)), role: 'sample' },
+        ];
+
+        if (tailType === 'two-tailed') {
+            dynamicTicks.push({ value: Number(c1.toFixed(6)), role: 'critical' });
+        }
+
+        const standardTicks: HypothesisAxisTick[] = Array.from({ length: 9 }, (_, index) => {
             const k = index - 4;
-            return Number((effectH0Mean + k * se).toFixed(6));
+            return { value: Number((effectH0Mean + k * se).toFixed(6)), role: 'standard' };
         });
-    }, [stats, isValid]);
+
+        const visibleStandardTicks = standardTicks.filter((tick) =>
+            dynamicTicks.every((dynamicTick) => Math.abs(tick.value - dynamicTick.value) >= minDynamicSpacing)
+        );
+
+        const ticksByValue = new globalThis.Map<number, HypothesisAxisTick>();
+
+        [...visibleStandardTicks, ...dynamicTicks].forEach((tick) => {
+            const key = Number(tick.value.toFixed(6));
+            const currentTick = ticksByValue.get(key);
+
+            if (!currentTick || currentTick.role === 'standard') {
+                ticksByValue.set(key, { ...tick, value: key });
+            }
+        });
+
+        return Array.from(ticksByValue.values()).sort((a, b) => a.value - b.value);
+    }, [stats, decisionData, isValid, tailType]);
 
     // --- Dynamic Graph Data Generation ---
     const chartData = useMemo(() => {
