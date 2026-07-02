@@ -11,6 +11,7 @@ import { FeatureShowcase } from './FeatureShowcase';
 interface LandingPageProps {
   onNavigate: (page: SitePage) => void;
   onTryHypothesis: () => void;
+  onStartHypothesisTour: () => void;
 }
 
 function TypewriterEffect({ words }: { words: string[] }): ReactElement {
@@ -128,7 +129,7 @@ function ScatteredImages(): ReactElement {
   );
 }
 
-export default function LandingPage({ onNavigate, onTryHypothesis }: LandingPageProps): ReactElement {
+export default function LandingPage({ onNavigate, onTryHypothesis, onStartHypothesisTour }: LandingPageProps): ReactElement {
   return (
     <PageLayout
       header={<SiteHeader activePage="landing" onNavigate={onNavigate} />}
@@ -177,11 +178,11 @@ export default function LandingPage({ onNavigate, onTryHypothesis }: LandingPage
                 <Button
                   size="lg"
                   variant="secondary"
-                  onClick={() => onNavigate('forward')}
+                  onClick={onStartHypothesisTour}
                   className="group transform transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-[var(--color-surface-raised)] border-2 border-[var(--color-border)] h-14 px-8 text-lg bg-[var(--color-surface)]/50 backdrop-blur-sm whitespace-nowrap"
                   leftIcon={<AreaChart className="w-6 h-6 text-[var(--color-accent-cobalt)] transition-transform duration-300 group-hover:-translate-y-1" />}
                 >
-                  התפלגות נורמלית
+                  הפעל סיור מודרך
                 </Button>
               </div>
             </div>

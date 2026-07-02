@@ -12,6 +12,7 @@ import { PageTransition } from './components/PageTransition';
 import type { CalcMode } from './components/calc-ui';
 
 type ActivePage = 'landing' | 'hypothesis' | 'normal';
+const HYPOTHESIS_TOUR_STORAGE_KEY = 'HT_startTourOnOpen';
 
 const HypothesisTestingCalculator = lazy(() => import('./components/HypothesisTestingCalculator'));
 const NormalDistributionCalculator = lazy(() => import('./components/NormalDistributionCalculator'));
@@ -36,6 +37,18 @@ export default function App() {
     }
     setNormalMode(page);
     setActivePage('normal');
+  }, []);
+
+  const handleStartHypothesisTour = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    try {
+      window.localStorage.setItem(HYPOTHESIS_TOUR_STORAGE_KEY, 'true');
+    } catch {
+      // Keep navigation working even when storage is unavailable.
+    }
+
+    setActivePage('hypothesis');
   }, []);
 
   return (
@@ -70,6 +83,7 @@ export default function App() {
         <LandingPage
           onNavigate={handleNavigate}
           onTryHypothesis={() => handleNavigate('hypothesis')}
+          onStartHypothesisTour={handleStartHypothesisTour}
         />
       ) : null}
     </PageTransition>

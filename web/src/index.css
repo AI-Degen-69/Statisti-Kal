@@ -190,43 +190,11 @@
 }
 
 /* ============================================================================
- * Light mode — intentional inversion
- * ============================================================================ */
-@media (prefers-color-scheme: light) {
-  :root {
-    --color-background: #F3F4F6;
-    --color-surface: #FFFFFF;
-    --color-surface-raised: #F9FAFB;
-    --color-border: #E5E7EB;
-    --color-text-primary: #111827;
-    --color-text-secondary: #4B5563;
-    
-    --color-primary: #111827;
-    
-    --color-accent-brass: #B88B2D;
-    --color-accent-teal: #14B8A6;
-    --color-accent-crimson: #DC2626;
-    --color-accent-cobalt: #E5E7EB;
-
-    --color-accent-cobalt-bg: rgba(184, 139, 45, 0.1);
-    --color-accent-cobalt-bg-hover: rgba(184, 139, 45, 0.15);
-    --color-accent-cobalt-line: rgba(184, 139, 45, 0.3);
-    --color-accent-cobalt-strong: #966F1C;
-    --color-accent-cobalt-dark: #7A5712;
-
-    --chart-1: #B88B2D;
-    --chart-2: #14B8A6;
-    --chart-3: #111827;
-    --chart-4: #14B8A6;
-    --chart-5: #DC2626;
-  }
-}
-
-/* ============================================================================
  * Base document styles
  * ============================================================================ */
 html {
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 body {

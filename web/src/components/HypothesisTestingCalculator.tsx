@@ -70,6 +70,7 @@ import {
 } from 'recharts';
 
 const JoyrideComponent = Joyride as any;
+const HYPOTHESIS_TOUR_STORAGE_KEY = 'HT_startTourOnOpen';
 
 // --- Types ---
 type TailType = 'right' | 'left' | 'two-tailed';
@@ -1035,6 +1036,18 @@ export default function HypothesisTestingCalculator() {
             placement: 'top',
         }
     ], []);
+
+    useEffect(() => {
+        try {
+            const shouldStartTour = window.localStorage.getItem(HYPOTHESIS_TOUR_STORAGE_KEY);
+            if (shouldStartTour === 'true') {
+                window.localStorage.removeItem(HYPOTHESIS_TOUR_STORAGE_KEY);
+                setRunTour(true);
+            }
+        } catch {
+            // Ignore storage access issues; manual tour button still works.
+        }
+    }, []);
 
     // Input states
     const [varianceKnown, setVarianceKnown] = useLocalStorageState<boolean>('HT_varianceKnown', DEFAULT_BODY_TEMPERATURE_STUDY.varianceKnown);
