@@ -839,6 +839,77 @@ const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, classNam
     );
 };
 
+interface FloatingFieldErrorProps {
+    message?: string;
+    offsetY?: number;
+    bubbleClassName?: string;
+}
+
+const FloatingFieldError: React.FC<FloatingFieldErrorProps> = ({
+    message,
+    offsetY = 8,
+    bubbleClassName = "px-2.5 py-1",
+}) => {
+    const [position, setPosition] = useState({ top: 0, left: 0 });
+    const anchorRef = useRef<HTMLSpanElement | null>(null);
+
+    useEffect(() => {
+        if (!message) return;
+
+        const updatePosition = () => {
+            if (!anchorRef.current) return;
+
+            const rect = anchorRef.current.getBoundingClientRect();
+            setPosition({
+                top: rect.top + offsetY,
+                left: rect.left,
+            });
+        };
+
+        updatePosition();
+        window.addEventListener('scroll', updatePosition, true);
+        window.addEventListener('resize', updatePosition);
+
+        return () => {
+            window.removeEventListener('scroll', updatePosition, true);
+            window.removeEventListener('resize', updatePosition);
+        };
+    }, [message, offsetY]);
+
+    return (
+        <>
+            <span
+                ref={anchorRef}
+                aria-hidden="true"
+                className="pointer-events-none absolute top-full left-1/2 h-0 w-0 -translate-x-1/2"
+            />
+            {typeof document !== 'undefined' && document.body
+                ? createPortal(
+                    <AnimatePresence>
+                        {message && (
+                            <div
+                                className="pointer-events-none fixed z-[9999]"
+                                style={{ top: position.top, left: position.left, transform: 'translateX(-50%)' }}
+                            >
+                                <motion.div
+                                    initial={{ opacity: 0, y: -5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -5 }}
+                                    className={`relative flex items-center justify-center whitespace-nowrap rounded bg-[var(--color-error)] text-xs font-bold text-white shadow-lg ${bubbleClassName}`}
+                                >
+                                    <div className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-[var(--color-error)]" />
+                                    <span className="relative z-10">{message}</span>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>,
+                    document.body
+                )
+                : null}
+        </>
+    );
+};
+
 interface CellWatermarkProps {
     math: string;
     colorClass: string;
@@ -1363,22 +1434,24 @@ export default function HypothesisTestingCalculator() {
         const xBar = decisionData.xBar;
         const criticalValues = tailType === 'two-tailed' ? [c1, c2] : [c2];
         const criticalPadding = 0.5 * se;
+        const leftExtent = calculatePower ? effectH1Mean - 4 * se : effectH0Mean - 4 * se;
+        const rightExtent = calculatePower ? effectH1Mean + 4 * se : effectH0Mean + 4 * se;
 
         return {
             xMin: Math.min(
                 effectH0Mean - 4 * se,
-                effectH1Mean - 4 * se,
+                leftExtent,
                 xBar - 0.5 * se,
                 ...criticalValues.map((value) => value - criticalPadding)
             ),
             xMax: Math.max(
                 effectH0Mean + 4 * se,
-                effectH1Mean + 4 * se,
+                rightExtent,
                 xBar + 0.5 * se,
                 ...criticalValues.map((value) => value + criticalPadding)
             ),
         };
-    }, [stats, decisionData, isValid, tailType]);
+    }, [stats, decisionData, isValid, tailType, calculatePower]);
 
     // --- Custom Ticks for X-Axis representing means and standard deviations ---
     const xAxisTicks = useMemo((): HypothesisAxisTick[] => {
@@ -1656,7 +1729,7 @@ export default function HypothesisTestingCalculator() {
             },
             { math: '\\alpha', color: 'var(--color-accent-crimson)', style: 'area' },
             { math: 'C', color: 'var(--color-accent-crimson)', style: 'line', label: <span dir="rtl">קריטי</span> },
-            { math: '\\bar{X}', color: 'var(--color-accent-violet)', style: 'line' },
+            { math: '\\bar{X}', color: 'var(--color-text-primary)', style: 'dashed-line' },
         ];
 
         if (calculatePower) {
@@ -1665,21 +1738,6 @@ export default function HypothesisTestingCalculator() {
 
         return items;
     }, [calculatePower]);
-
-    const [lastValidStats, setLastValidStats] = useState<any>(null);
-    const [lastValidDecisionData, setLastValidDecisionData] = useState<any>(null);
-
-    useEffect(() => {
-        if (isValid && stats) {
-            setLastValidStats(stats);
-        }
-    }, [isValid, stats]);
-
-    useEffect(() => {
-        if (isValid && decisionData) {
-            setLastValidDecisionData(decisionData);
-        }
-    }, [isValid, decisionData]);
 
     return (
         <div className="tour-step-intro space-y-8 bg-[var(--color-background)] min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
@@ -1921,19 +1979,7 @@ export default function HypothesisTestingCalculator() {
                                                         placeholder=""
                                                         dir="ltr"
                                                     />
-                                                    <AnimatePresence>
-                                                        {errors.mu0 && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: -5 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: -5 }}
-                                                                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-[var(--color-error)] text-white text-xs font-bold rounded shadow-lg flex items-center justify-center whitespace-nowrap z-50 pointer-events-none"
-                                                            >
-                                                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-error)] rotate-45"></div>
-                                                                <span className="relative z-10">{errors.mu0}</span>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
+                                                    <FloatingFieldError message={errors.mu0} />
                                                 </div>
                                             </div>
                                         </td>
@@ -1955,19 +2001,7 @@ export default function HypothesisTestingCalculator() {
                                                         placeholder=""
                                                         dir="ltr"
                                                     />
-                                                    <AnimatePresence>
-                                                        {errors.mu1 && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: -5 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: -5 }}
-                                                                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-[var(--color-error)] text-white text-xs font-bold rounded shadow-lg flex items-center justify-center whitespace-nowrap z-50 pointer-events-none"
-                                                            >
-                                                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-error)] rotate-45"></div>
-                                                                <span className="relative z-10">{errors.mu1}</span>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
+                                                    <FloatingFieldError message={errors.mu1} />
                                                 </div>
                                             </div>
                                         </td>
@@ -1989,19 +2023,7 @@ export default function HypothesisTestingCalculator() {
                                                             } ${calculatePower && (!muH1Input || errors.muH1) ? 'border-[var(--color-error)] ring-2 ring-[var(--color-error)]/20 text-[var(--color-error)]' : calculatePower ? 'border-[var(--color-border)]' : ''}`}
                                                         placeholder=""
                                                         dir="ltr" />
-                                                    <AnimatePresence>
-                                                        {calculatePower && errors.muH1 && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: -5 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: -5 }}
-                                                                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-[var(--color-error)] text-white text-xs font-bold rounded shadow-lg flex items-center justify-center whitespace-nowrap z-50 pointer-events-none"
-                                                            >
-                                                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-error)] rotate-45"></div>
-                                                                <span className="relative z-10">{errors.muH1}</span>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
+                                                    <FloatingFieldError message={calculatePower ? errors.muH1 : undefined} />
                                                 </div>
                                             </div>
                                         </td>
@@ -2028,19 +2050,7 @@ export default function HypothesisTestingCalculator() {
                                                         placeholder=""
                                                         dir="ltr"
                                                     />
-                                                    <AnimatePresence>
-                                                        {errors.sigma && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: -5 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: -5 }}
-                                                                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-[var(--color-error)] text-white text-xs font-bold rounded shadow-lg flex items-center justify-center whitespace-nowrap z-50 pointer-events-none"
-                                                            >
-                                                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-error)] rotate-45"></div>
-                                                                <span className="relative z-10">{errors.sigma}</span>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
+                                                    <FloatingFieldError message={errors.sigma} />
                                                 </div>
                                             </div>
                                         </td>
@@ -2061,19 +2071,7 @@ export default function HypothesisTestingCalculator() {
                                                         placeholder=""
                                                         dir="ltr"
                                                     />
-                                                    <AnimatePresence>
-                                                        {errors.n && (
-                                                            <motion.div
-                                                                initial={{ opacity: 0, y: -5 }}
-                                                                animate={{ opacity: 1, y: 0 }}
-                                                                exit={{ opacity: 0, y: -5 }}
-                                                                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 bg-[var(--color-error)] text-white text-xs font-bold rounded shadow-lg flex items-center justify-center whitespace-nowrap z-50 pointer-events-none"
-                                                            >
-                                                                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[var(--color-error)] rotate-45"></div>
-                                                                <span className="relative z-10">{errors.n}</span>
-                                                            </motion.div>
-                                                        )}
-                                                    </AnimatePresence>
+                                                    <FloatingFieldError message={errors.n} />
                                                 </div>
                                             </div>
                                         </td>
@@ -2639,39 +2637,9 @@ export default function HypothesisTestingCalculator() {
                                             </div></AnimatedDetails>
 
 
-                                        {(() => {
-                                            const activeStats = stats || lastValidStats;
-                                            const activeDecisionData = decisionData || lastValidDecisionData;
-                                            const isErrorState = !isValid || !stats || !decisionData;
-
-                                            if (!activeStats || !activeDecisionData) {
-                                                return (
-                                                    <div className="py-12 text-center font-bold text-lg md:text-xl text-[var(--color-error)] opacity-80 flex flex-col items-center gap-4 border border-[var(--color-error)]/30 bg-[var(--color-surface)] rounded-lg mt-4">
-                                                        <XCircle size={48} className="opacity-50" />
-                                                        יש לתקן את השגיאות בשלבים הקודמים כדי להמשיך בפתרון
-                                                    </div>
-                                                );
-                                            }
-
-                                            return (
-                                                <div className="relative">
-                                                    {isErrorState && (
-                                                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--color-surface)]/80 backdrop-blur-[1px] rounded-lg border border-[var(--color-error)]/30 transition-all duration-300">
-                                                            <div className="flex flex-col items-center gap-4 bg-[var(--color-surface)]/95 px-8 py-6 rounded-xl shadow-xl border border-[var(--color-error)]/50">
-                                                                <XCircle size={56} className="text-[var(--color-error)] opacity-90" />
-                                                                <div className="text-[var(--color-error)] font-bold text-lg md:text-xl">
-                                                                    יש לתקן את השגיאות בשלבים הקודמים כדי להמשיך בפתרון
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    <div className={isErrorState ? "flex flex-col gap-4 opacity-20 pointer-events-none grayscale-[50%] transition-all duration-300" : "flex flex-col gap-4 transition-all duration-300"}>
-                                                        {(() => {
-                                                            const stats = activeStats;
-                                                            const decisionData = activeDecisionData;
-                                                            return (
-                                                                <>
-                                                                    {/* Step 4: Critical Value derivation & SE */}
+                                        {isValid && stats && decisionData ? (
+                                            <>
+                                                {/* Step 4: Critical Value derivation & SE */}
                                                 <AnimatedDetails id="hypothesis-step-4" tocId="hypothesis-step-4" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                                     <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
@@ -3413,13 +3381,13 @@ export default function HypothesisTestingCalculator() {
                                                             )}
                                                         </div>
                                                     </div></AnimatedDetails>
-                                                                </>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
+                                            </>
+                                        ) : (
+                                            <div className="py-12 text-center font-bold text-lg md:text-xl text-[var(--color-error)] opacity-80 flex flex-col items-center gap-4 border border-[var(--color-error)]/30 bg-[var(--color-surface)] rounded-lg mt-4">
+                                                <XCircle size={48} className="opacity-50" />
+                                                יש לתקן את השגיאות בשלבים הקודמים כדי להמשיך בפתרון
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}
@@ -3450,7 +3418,7 @@ export default function HypothesisTestingCalculator() {
                                 <div className="relative z-10 flex flex-col gap-4 px-8 py-5.5 lg:flex-row lg:items-center lg:justify-between">
                                     <button
                                         onClick={() => setShowCI(!showCI)}
-                                        className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4 text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface)] sm:flex-row sm:items-center sm:justify-between"
+                                        className="flex min-w-0 flex-1 cursor-pointer flex-col gap-4 text-[var(--color-text-primary)] transition-colors sm:flex-row sm:items-center sm:justify-between"
                                     >
                                         <div className="flex items-center gap-3 text-right">
                                             <div className="bg-[var(--color-accent-cobalt-bg)]/20 p-2 rounded-lg text-[var(--color-accent-cobalt)]"><Target size={24} /></div>
