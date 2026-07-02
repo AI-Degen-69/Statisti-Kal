@@ -7,7 +7,6 @@ import { useLocalStorageState } from '../hooks/useLocalStorageState';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Joyride, Step } from 'react-joyride';
 import { AnimatedDetails, FormulaTranslation } from './ui/CustomComponents';
 import { CalcBlock as UICalcBlock, FormulaBlock as UIFormulaBlock, ResultBlock, Disclosure } from './ui';
 import {
@@ -68,9 +67,6 @@ import {
     ReferenceLine,
     CartesianGrid,
 } from 'recharts';
-
-const JoyrideComponent = Joyride as any;
-const HYPOTHESIS_TOUR_STORAGE_KEY = 'HT_startTourOnOpen';
 
 // --- Types ---
 type TailType = 'right' | 'left' | 'two-tailed';
@@ -995,59 +991,11 @@ const CellWatermark: React.FC<CellWatermarkProps> = ({ math, colorClass }) => {
     );
 };
 
-export default function HypothesisTestingCalculator() {
-    // Tour state
-    const [runTour, setRunTour] = useState(false);
-    const tourSteps: Step[] = useMemo(() => [
-        {
-            target: '.tour-step-intro',
-            content: 'ברוכים הבאים למחשבון בדיקת ההשערות! כאן תוכלו לבחון נתונים ולחשב עוצמה בקלות.',
-            disableBeacon: true,
-            placement: 'center',
-        },
-        {
-            target: '.tour-step-inputs',
-            content: 'כאן מזינים את הפרמטרים של אוכלוסיית הבסיס (השערת האפס) ושל המדגם שלכם.',
-            placement: 'right',
-        },
-        {
-            target: '.tour-step-test-type',
-            content: 'בחרו את סוג המבחן והכיוון שלו (חד-צדדי או דו-צדדי).',
-            placement: 'bottom',
-        },
-        {
-            target: '.tour-step-graph',
-            content: 'הגרף יתעדכן בזמן אמת ויציג לכם את התפלגות הדגימה, אזורי הדחייה והעוצמה (1-Beta).',
-            placement: 'left',
-        },
-        {
-            target: '.tour-step-decision',
-            content: 'מטריצת ההחלטה מציגה בצורה ברורה את המסקנה הסטטיסטית של המבחן.',
-            placement: 'top',
-        },
-        {
-            target: '.tour-step-accordion-ht',
-            content: 'בחלק זה מוצגים 6 שלבי הפתרון. בשלב 1 (ניסוח השערות) נקבע צד המבחן וידיעת השונות. בשלב 3 נקבעת רמת המובהקות. שלבים 4, 5 ו-6 מתבצעים אוטומטית עד לקבלת מסקנה.',
-            placement: 'top',
-        },
-        {
-            target: '.tour-step-accordion-ci',
-            content: 'במידת הצורך, כאן תוכלו למצוא גם חישוב מפורט של רווח סמך לתוחלת, ומיד מתחתיו חישוב לעוצמת המבחן (Power).',
-            placement: 'top',
-        }
-    ], []);
+interface HypothesisTestingCalculatorProps {
+    onStartGuidedTour?: () => void;
+}
 
-    useEffect(() => {
-        try {
-            const shouldStartTour = window.localStorage.getItem(HYPOTHESIS_TOUR_STORAGE_KEY);
-            if (shouldStartTour === 'true') {
-                window.localStorage.removeItem(HYPOTHESIS_TOUR_STORAGE_KEY);
-                setRunTour(true);
-            }
-        } catch {
-            // Ignore storage access issues; manual tour button still works.
-        }
-    }, []);
+export default function HypothesisTestingCalculator({ onStartGuidedTour }: HypothesisTestingCalculatorProps) {
 
     // Input states
     const [varianceKnown, setVarianceKnown] = useLocalStorageState<boolean>('HT_varianceKnown', DEFAULT_BODY_TEMPERATURE_STUDY.varianceKnown);
@@ -1166,6 +1114,35 @@ export default function HypothesisTestingCalculator() {
 
         scrollToTarget(target);
         window.setTimeout(() => flashTarget(target), 320);
+    };
+
+    const openPowerSectionFromQuickNav = () => {
+        setShowPower(true);
+
+        const target = document.getElementById('power-panel');
+        if (!target) {
+            return;
+        }
+
+        const targetTop = target.getBoundingClientRect().top + window.scrollY;
+        const viewportOffset = Math.max(Math.round(window.innerHeight * 0.1), 88);
+
+        window.scrollTo({
+            top: Math.max(0, targetTop - viewportOffset),
+            behavior: 'smooth',
+        });
+
+        window.dispatchEvent(new CustomEvent('toc-open-path', { detail: { ids: ['power-panel'] } }));
+
+        window.setTimeout(() => {
+            target.classList.remove('toc-target-flash');
+            void target.offsetWidth;
+            target.classList.add('toc-target-flash');
+
+            window.setTimeout(() => {
+                target.classList.remove('toc-target-flash');
+            }, 1350);
+        }, 320);
     };
 
     useEffect(() => {
@@ -1838,40 +1815,6 @@ export default function HypothesisTestingCalculator() {
 
     return (
         <div className="tour-step-intro space-y-8 bg-[var(--color-background)] min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
-            <JoyrideComponent
-                steps={tourSteps}
-                run={runTour}
-                continuous
-                showSkipButton
-                disableOverlayClose
-                styles={({
-                    options: {
-                        zIndex: 10000,
-                        primaryColor: '#d4a843',
-                        backgroundColor: '#1e1e24',
-                        textColor: '#e0e0e0',
-                        arrowColor: '#1e1e24',
-                        overlayColor: 'rgba(0, 0, 0, 0.65)'
-                    },
-                    tooltip: {
-                        direction: 'rtl',
-                        fontFamily: 'Assistant, sans-serif',
-                        textAlign: 'right',
-                        borderRadius: '8px',
-                        border: '1px solid #3f3f46'
-                    },
-                    buttonNext: { backgroundColor: '#34529e', color: '#fff', borderRadius: '4px', fontWeight: 'bold' },
-                    buttonBack: { color: '#a1a1aa', fontWeight: 'bold' },
-                    buttonSkip: { color: '#ef4444', fontWeight: 'bold' }
-                }) as any}
-                callback={(data) => {
-                    if (data.status === 'finished' || data.status === 'skipped') {
-                        setRunTour(false);
-                    }
-                }}
-                locale={{ back: 'חזור', close: 'סגור', last: 'סיום', next: 'הבא', skip: 'דלג' }}
-            />
-
             {/* Default Study Accordion */}
             <AnimatedDetails id="hypothesis-study-example" tocId="hypothesis-study-example" defaultOpen className="group relative bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg mb-8 shadow-sm border-r-4 border-r-[var(--color-accent-cobalt)] overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                 <summary className="relative z-10 cursor-pointer select-none p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center gap-4 border-b border-[var(--color-border)]/70 overflow-hidden">
@@ -1905,7 +1848,7 @@ export default function HypothesisTestingCalculator() {
                             type="button"
                             onClick={(event) => {
                                 event.preventDefault();
-                                setRunTour(true);
+                                onStartGuidedTour?.();
                             }}
                             className="px-4 py-1.5 bg-[var(--color-accent-cobalt-bg)] text-[var(--color-accent-cobalt)] border border-[var(--color-accent-cobalt-line)]/50 rounded-md text-sm font-bold shadow-sm hover:bg-[var(--color-accent-cobalt-bg-hover)] hover:text-white transition-colors flex items-center gap-2"
                         >
@@ -2172,11 +2115,22 @@ export default function HypothesisTestingCalculator() {
                                         </td>
                                         <td className="relative overflow-hidden p-3 align-middle bg-[var(--color-surface-raised)]">
                                             <CellWatermark math="1-\beta" colorClass="text-[var(--chart-2)]" />
-                                            <div className="relative z-10 flex items-center justify-center gap-3 ctrl-cell-wrapper w-full">
-                                                <span className="w-36 sm:w-44 text-left text-sm sm:text-base text-[var(--color-text-primary)]/90 font-bold shrink-0 flex items-center justify-end gap-1 whitespace-nowrap">
-                                                    <span>הצגת בגרף (</span><InlineMath math="1-\beta" /><span>)</span>
+                                            <button
+                                                type="button"
+                                                onClick={openPowerSectionFromQuickNav}
+                                                disabled={!isValid || !stats}
+                                                className={`tour-power-quick-link relative z-10 inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold transition-all ${
+                                                    isValid && stats
+                                                        ? 'cursor-pointer border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] hover:border-[var(--color-accent-cobalt-line)] hover:text-[var(--color-accent-cobalt)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--chart-2)]/35'
+                                                        : 'cursor-default border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-secondary)] opacity-70'
+                                                }`}
+                                                aria-label="קפיצה לעוצמת מבחן ופתיחת האקורדיון"
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    עוצמת מבחן <span dir="ltr" className="inline-flex align-middle"><InlineMath math="(1-\\beta)" /></span>
                                                 </span>
-                                            </div>
+                                                <ExternalLink size={16} className="shrink-0" />
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -2199,7 +2153,7 @@ export default function HypothesisTestingCalculator() {
                         {/* H₁ Toggle — top-left corner, independent of legend */}
                         {powerEnabled && (
                             <label
-                                className={`absolute top-3 left-3 z-20 flex items-center gap-2.5 pl-3 pr-3.5 py-2 rounded-xl border text-sm font-semibold transition-all duration-300 cursor-pointer select-none backdrop-blur-lg ${
+                                className={`tour-step-graph-toggle absolute top-3 left-3 z-20 flex items-center gap-2.5 pl-3 pr-3.5 py-1.5 rounded-xl border text-sm font-semibold transition-all duration-300 cursor-pointer select-none backdrop-blur-lg ${
                                     showPowerOverlay
                                         ? 'bg-[var(--chart-2)]/12 border-[var(--chart-2)]/50 text-[var(--chart-2)] shadow-[0_0_12px_var(--chart-2)/20]'
                                         : 'bg-[var(--color-surface)]/90 border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-text-secondary)]/50 shadow-md'
@@ -2458,7 +2412,7 @@ export default function HypothesisTestingCalculator() {
 
 
                                         {/* Step 2: Select an appropriate test */}
-                                        <AnimatedDetails id="step-2" tocId="step-2" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                                        <AnimatedDetails id="step-2" tocId="step-2" className="tour-step-test-type group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                             <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
                                                 <div className="flex items-center gap-3 font-extrabold text-[var(--color-primary)]">
@@ -4059,7 +4013,7 @@ export default function HypothesisTestingCalculator() {
 
                     {/* Power Section */}
                     {isValid && stats && (
-                        <div id="power-panel" className="rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-5 lg:order-5 text-right mt-6">
+                        <div id="power-panel" className="tour-power-panel rounded-lg border shadow-md transition-all overflow-hidden bg-[var(--color-surface)] border-[var(--color-border)] w-full min-w-0 lg:col-span-2 order-5 lg:order-5 text-right mt-6">
                             <button
                                 onClick={() => setShowPower(!showPower)}
                                 className="relative overflow-hidden w-full px-8 py-5.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-surface)] transition-colors border-b border-[var(--color-border)] cursor-pointer"

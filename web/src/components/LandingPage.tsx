@@ -69,11 +69,11 @@ function ScatteredImages(): ReactElement {
   }, []);
 
   const images = [
-    { src: '/public_images/landing-showcase-2026-06-22/solution-steps.png', alt: 'שלבי פתרון' },
-    { src: '/public_images/landing-showcase-2026-06-22/t-table.png', alt: 'טבלת T' },
-    { src: '/public_images/landing-showcase-2026-06-22/z-table.png', alt: 'טבלת Z' },
-    { src: '/public_images/landing-showcase-2026-06-22/formula-sheet.png', alt: 'דף נוסחאות' },
-    { src: '/images/hero/hero-hypothesis-chart.png', alt: 'בדיקת השערות' },
+    { src: '/images/landing-showcase-2026-06-22/z-table.png', alt: 'טבלת התפלגות נורמלית Z' },
+    { src: '/images/landing-showcase-2026-06-22/t-table.png', alt: 'טבלת התפלגות Student T' },
+    { src: '/images/carousel/ht-parameters.png', alt: 'פרמטרים והשערות מחקר' },
+    { src: '/images/gemini-picks/05-conclusion-phase.png', alt: 'רווח סמך ועוצמת מבחן' },
+    { src: '/images/gemini-picks/03-chart.png', alt: 'גרף עוצמת מבחן ואזורי דחייה' },
   ];
 
   const positions = [
