@@ -1666,6 +1666,21 @@ export default function HypothesisTestingCalculator() {
         return items;
     }, [calculatePower]);
 
+    const [lastValidStats, setLastValidStats] = useState<any>(null);
+    const [lastValidDecisionData, setLastValidDecisionData] = useState<any>(null);
+
+    useEffect(() => {
+        if (isValid && stats) {
+            setLastValidStats(stats);
+        }
+    }, [isValid, stats]);
+
+    useEffect(() => {
+        if (isValid && decisionData) {
+            setLastValidDecisionData(decisionData);
+        }
+    }, [isValid, decisionData]);
+
     return (
         <div className="tour-step-intro space-y-8 bg-[var(--color-background)] min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
             <JoyrideComponent
@@ -2624,9 +2639,39 @@ export default function HypothesisTestingCalculator() {
                                             </div></AnimatedDetails>
 
 
-                                        {isValid && stats && decisionData ? (
-                                            <>
-                                                {/* Step 4: Critical Value derivation & SE */}
+                                        {(() => {
+                                            const activeStats = stats || lastValidStats;
+                                            const activeDecisionData = decisionData || lastValidDecisionData;
+                                            const isErrorState = !isValid || !stats || !decisionData;
+
+                                            if (!activeStats || !activeDecisionData) {
+                                                return (
+                                                    <div className="py-12 text-center font-bold text-lg md:text-xl text-[var(--color-error)] opacity-80 flex flex-col items-center gap-4 border border-[var(--color-error)]/30 bg-[var(--color-surface)] rounded-lg mt-4">
+                                                        <XCircle size={48} className="opacity-50" />
+                                                        יש לתקן את השגיאות בשלבים הקודמים כדי להמשיך בפתרון
+                                                    </div>
+                                                );
+                                            }
+
+                                            return (
+                                                <div className="relative">
+                                                    {isErrorState && (
+                                                        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--color-surface)]/80 backdrop-blur-[1px] rounded-lg border border-[var(--color-error)]/30 transition-all duration-300">
+                                                            <div className="flex flex-col items-center gap-4 bg-[var(--color-surface)]/95 px-8 py-6 rounded-xl shadow-xl border border-[var(--color-error)]/50">
+                                                                <XCircle size={56} className="text-[var(--color-error)] opacity-90" />
+                                                                <div className="text-[var(--color-error)] font-bold text-lg md:text-xl">
+                                                                    יש לתקן את השגיאות בשלבים הקודמים כדי להמשיך בפתרון
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div className={isErrorState ? "flex flex-col gap-4 opacity-20 pointer-events-none grayscale-[50%] transition-all duration-300" : "flex flex-col gap-4 transition-all duration-300"}>
+                                                        {(() => {
+                                                            const stats = activeStats;
+                                                            const decisionData = activeDecisionData;
+                                                            return (
+                                                                <>
+                                                                    {/* Step 4: Critical Value derivation & SE */}
                                                 <AnimatedDetails id="hypothesis-step-4" tocId="hypothesis-step-4" className="group space-y-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg shadow-sm [&_summary::-webkit-details-marker]:hidden">
 
                                                     <summary className="p-4 sm:p-5 flex items-center justify-between cursor-pointer list-none hover:bg-[var(--color-surface)]/50 transition-colors rounded-lg border-b border-transparent group-[.is-open]:border-[var(--color-border)]">
@@ -3368,13 +3413,13 @@ export default function HypothesisTestingCalculator() {
                                                             )}
                                                         </div>
                                                     </div></AnimatedDetails>
-                                            </>
-                                        ) : (
-                                            <div className="py-12 text-center font-bold text-lg md:text-xl text-[var(--color-error)] opacity-80 flex flex-col items-center gap-4 border border-[var(--color-error)]/30 bg-[var(--color-surface)] rounded-lg mt-4">
-                                                <XCircle size={48} className="opacity-50" />
-                                                יש לתקן את השגיאות בשלבים הקודמים כדי להמשיך בפתרון
-                                            </div>
-                                        )}
+                                                                </>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 </motion.div>
                             )}

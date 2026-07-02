@@ -160,14 +160,14 @@ export const HypothesisChart: React.FC<HypothesisChartProps> = ({
                     fontSize={12}
                     className="font-semibold font-sans"
                   >
-                    {val.toFixed(3)}
+                    {val.toFixed(2)}
                   </text>
                 </g>
               );
             }}
             axisLine={{ stroke: 'var(--color-border)' }}
             tickLine={true}
-            tickFormatter={(val) => val.toFixed(3)}
+            tickFormatter={(val) => val.toFixed(2)}
           />
           <XAxis
             xAxisId="zScore"
@@ -277,22 +277,24 @@ export const HypothesisChart: React.FC<HypothesisChartProps> = ({
           />
 
           {/* Vertical Reference Line at Mean of H1 */}
-          <ReferenceLine
-            x={stats.effectH1Mean}
-            stroke="var(--chart-2)"
-            strokeWidth={1.5}
-            strokeDasharray="4 4"
-            label={calculatePower ? (props) =>
-              renderChartMathReferenceLabel(props, {
-                math: '\\mu_1',
-                color: 'var(--chart-2)',
-                width: 40,
-                height: 30,
-                xOffset: -20,
-                yOffset: -25,
-                className: 'text-sm font-semibold',
-              }) : undefined}
-          />
+          {calculatePower && (
+            <ReferenceLine
+              x={stats.effectH1Mean}
+              stroke="var(--chart-2)"
+              strokeWidth={1.5}
+              strokeDasharray="4 4"
+              label={(props) =>
+                renderChartMathReferenceLabel(props, {
+                  math: '\\mu_1',
+                  color: 'var(--chart-2)',
+                  width: 40,
+                  height: 30,
+                  xOffset: -20,
+                  yOffset: -25,
+                  className: 'text-sm font-semibold',
+                })}
+            />
+          )}
 
           {/* Vertical LINE for SELECTOR: Critical Values */}
           {tailType === 'two-tailed' ? (

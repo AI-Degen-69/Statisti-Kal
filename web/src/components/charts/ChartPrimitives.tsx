@@ -1,7 +1,7 @@
 import React from 'react';
 import { InlineMath } from 'react-katex';
 
-export type ChartLegendItemStyle = 'line' | 'area';
+export type ChartLegendItemStyle = 'line' | 'dashed-line' | 'area';
 
 export interface ChartLegendItem {
   math: string;
@@ -24,6 +24,15 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ items, className = '' 
         <>
           {item.style === 'line' ? (
             <span className="inline-block h-3 w-0.5" style={{ backgroundColor: item.color }} />
+          ) : item.style === 'dashed-line' ? (
+            <span
+              className="chart-legend-dashed-line inline-block h-3 w-0.5"
+              style={{
+                backgroundImage: `repeating-linear-gradient(to bottom, ${item.color} 0 3px, transparent 3px 5px)`,
+                backgroundSize: '100% 8px',
+                animationDuration: '1.4s',
+              }}
+            />
           ) : (
             <span className="inline-block h-3 w-3 border" style={{ backgroundColor: `${item.color}33`, borderColor: item.color }} />
           )}

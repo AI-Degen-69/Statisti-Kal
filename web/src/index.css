@@ -357,6 +357,21 @@ body {
   50% { box-shadow: 0 0 16px rgba(232, 93, 93, 0.4), 0 0 32px rgba(232, 93, 93, 0.2); border-color: rgba(232, 93, 93, 0.5); }
 }
 
+.chart-legend-dashed-line {
+  animation-name: chart-legend-dash-flow;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes chart-legend-dash-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 8px;
+  }
+}
+
 .toc-target-flash {
   animation: toc-target-flash 1.2s ease-out;
   box-shadow:
@@ -395,7 +410,7 @@ body {
     opacity: 1;
     transform: none;
   }
-  .pulse-brass, .pulse-success, .pulse-error {
+  .pulse-brass, .pulse-success, .pulse-error, .chart-legend-dashed-line {
     animation: none !important;
   }
   .curve-glow {
