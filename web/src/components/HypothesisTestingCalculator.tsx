@@ -1049,6 +1049,16 @@ export default function HypothesisTestingCalculator() {
             target: '.tour-step-accordion-ci',
             content: 'במידת הצורך, כאן תוכלו למצוא גם חישוב מפורט של רווח סמך לתוחלת, ומיד מתחתיו חישוב לעוצמת המבחן (Power).',
             placement: 'top',
+        },
+        {
+            target: '.tour-step-nav-table',
+            content: 'בעמוד טבלאות ההתפלגות תוכלו למצוא טבלאות סטטיסטיות כמו טבלת Z ו-t, שימושי למציאת ערכים קריטיים ידנית.',
+            placement: 'bottom',
+        },
+        {
+            target: '.tour-step-nav-formula-sheet',
+            content: 'בעמוד הנוסחאות מרוכזות כל הנוסחאות הסטטיסטיות שנלמדו בקורס, לנוחותכם במהלך פתרון תרגילים.',
+            placement: 'bottom',
         }
     ], []);
 

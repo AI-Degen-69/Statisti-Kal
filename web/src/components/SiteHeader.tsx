@@ -98,7 +98,7 @@ function NavButton({
       key={item.id}
       type="button"
       onClick={() => onNavigate(item.id)}
-      className={`flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3 py-2 text-sm font-medium tracking-wide transition whitespace-nowrap ${getButtonClass(item.group, isActive)}`}
+      className={`tour-step-nav-${item.id} flex cursor-pointer select-none items-center gap-1.5 rounded-sm border px-3 py-2 text-sm font-medium tracking-wide transition whitespace-nowrap ${getButtonClass(item.group, isActive)}`}
       aria-current={isActive ? 'page' : undefined}
     >
       {/* Icon first (RTL: appears on right) */}
