@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, lazy, useState, useCallback, useMemo } from 'react';
+import { Suspense, lazy, useState, useCallback, useMemo, useEffect } from 'react';
 import { Joyride, type Step } from 'react-joyride';
 import LandingPage from './components/LandingPage';
 import SiteFooter from './components/SiteFooter';
@@ -11,19 +11,13 @@ import SiteHeader, { type SitePage } from './components/SiteHeader';
 import { PageLayout } from './components/ui/PageLayout';
 import { PageTransition } from './components/PageTransition';
 import type { CalcMode } from './components/calc-ui';
+import { type TourMode, type GuidedTourStep, getTourStepsByMode } from './config/tours';
 
 type ActivePage = 'landing' | 'hypothesis' | 'normal';
 const JoyrideComponent = Joyride as any;
 
 const HypothesisTestingCalculator = lazy(() => import('./components/HypothesisTestingCalculator'));
 const NormalDistributionCalculator = lazy(() => import('./components/NormalDistributionCalculator'));
-
-interface GuidedTourStep extends Step {
-  context: {
-    page: ActivePage;
-    normalMode?: CalcMode;
-  };
-}
 
 function getTourViewportOffset(): number {
   return Math.max(Math.round(window.innerHeight * 0.1), 88);
@@ -60,8 +54,69 @@ function waitForTourTarget(selector: string, attemptsLeft = 24): Promise<HTMLEle
 export default function App() {
   const [activePage, setActivePage] = useState<ActivePage>('landing');
   const [normalMode, setNormalMode] = useState<CalcMode>('hypothesis');
-  const [guidedTourRun, setGuidedTourRun] = useState(false);
+  const [activeTourMode, setActiveTourMode] = useState<TourMode>(null);
   const [guidedTourIndex, setGuidedTourIndex] = useState(0);
+  const [isTourTransitioning, setIsTourTransitioning] = useState(false);
+
+  useEffect(() => {
+    if (activeTourMode !== 'global') return;
+
+    const handleClick = (e: MouseEvent) => {
+      if (guidedTourIndex === 5) {
+        // Quick nav toggle step
+        const target = e.target as HTMLElement;
+        if (target.closest('.tour-quick-nav-toggle')) {
+          setIsTourTransitioning(true);
+          // Programmatically open the confidence panel
+          window.dispatchEvent(new CustomEvent('toc-open-path', { detail: { ids: ['confidence-panel'] } }));
+          
+          // We must wait for the accordion to fully expand, React to render
+          // the formula blocks (incl. KaTeX), and then scroll the info button
+          // into view before advancing.
+          // Timeline: 350ms (accordion animation) → poll for element →
+          //           scroll → 500ms (scroll settle) → advance tour.
+          const ciFormulaSelector = '.tour-first-ci-formula button';
+          setTimeout(() => {
+            waitForTourTarget(ciFormulaSelector, 30).then((formulaBtn) => {
+              if (formulaBtn) {
+                // Position the button ~40% down the viewport so the
+                // 'top'-placed tooltip has room to display above it.
+                const btnTop = formulaBtn.getBoundingClientRect().top + window.scrollY;
+                const offset = Math.round(window.innerHeight * 0.4);
+                window.scrollTo({
+                  top: Math.max(0, btnTop - offset),
+                  behavior: 'smooth',
+                });
+                // Allow smooth scroll to finish before showing the tooltip
+                setTimeout(() => {
+                  setGuidedTourIndex(6);
+                  setIsTourTransitioning(false);
+                }, 500);
+              } else {
+                // Fallback: advance anyway so the tour doesn't get stuck
+                setGuidedTourIndex(6);
+                setIsTourTransitioning(false);
+              }
+            });
+          }, 350);
+        }
+      } else if (guidedTourIndex === 7) {
+        // Scroll top button step
+        const target = e.target as HTMLElement;
+        if (target.closest('.tour-scroll-top-button')) {
+          setIsTourTransitioning(true);
+          // Native component handles scroll to top. Just delay to let it scroll, then move to step 8.
+          setTimeout(() => {
+            setGuidedTourIndex(8);
+            setIsTourTransitioning(false);
+          }, 600);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [activeTourMode, guidedTourIndex]);
 
   const handleNavigate = useCallback((page: SitePage) => {
     // Smooth scroll to top on every navigation
@@ -81,137 +136,41 @@ export default function App() {
     setActivePage('normal');
   }, []);
 
-  const guidedTourSteps = useMemo<GuidedTourStep[]>(() => [
-    {
-      target: '.tour-step-intro',
-      content: 'ברוכים הבאים לסיור המודרך. נתחיל מלמעלה ונרד לפי הסדר שבו הרכיבים מופיעים בדף, ואז נעבור לכלי הניווט ולדפי העזר.',
-      disableBeacon: true,
-      placement: 'center',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-inputs',
-      content: 'כאן מזינים את הפרמטרים של אוכלוסיית הבסיס, של המדגם, ושל השערת המחקר האלטרנטיבית.',
-      placement: 'right',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-power-quick-link',
-      content: 'זהו קישור מהיר לעוצמת המבחן. לחיצה עליו פותחת את אקורדיון ה-Power ומקפיצה ישירות לחישוב המלא.',
-      placement: 'bottom',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-graph',
-      content: 'זהו אזור הגרף. כאן רואים את התפלגות הדגימה, את אזור הדחייה, את האזור שאינו דחייה, ואת האזורים שנצבעים בזמן אמת.',
-      placement: 'left',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-graph-toggle',
-      content: 'המתג הזה מציג או מסתיר את השערת המחקר בגרף, יחד עם אזור עוצמת המבחן. כך אפשר לראות ישירות את הקשר בין H₁ לבין 1-β.',
-      placement: 'bottom',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-decision',
-      content: 'מטריצת ההחלטה מסכמת את ארבעת המצבים: דחייה נכונה, אי-דחייה נכונה, טעות מסוג I, וטעות מסוג II.',
-      placement: 'top',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-accordion-ht',
-      content: 'באקורדיון הזה תמצאו את ששת שלבי פתרון בדיקת ההשערות, מניסוח ההשערות ועד קבלת המסקנה.',
-      placement: 'top',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-test-type',
-      content: 'כאן בוחרים את סוג המבחן ואת הכיוון שלו, כלומר האם הבדיקה שמאלית, ימנית או דו-צדדית.',
-      placement: 'bottom',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-step-accordion-ci',
-      content: 'כאן נמצא רווח הסמך, ומיד אחריו עוצמת המבחן. שני האזורים האלה משלימים את התמונה מעבר להחלטה הבסיסית של דחייה או אי-דחייה.',
-      placement: 'top',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-power-panel',
-      content: 'כאן מופיע פירוק מלא של עוצמת המבחן: SE, ערך קריטי, חישוב Z תחת H₁, והמשמעות של 1-β מול β.',
-      placement: 'top',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-quick-nav-toggle',
-      content: 'זהו כפתור הניווט המהיר. ממנו אפשר לקפוץ מיידית בין הכותרות המרכזיות של העמוד בלי לגלול ידנית.',
-      placement: 'left',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-scroll-top-button',
-      content: 'וכשאתם כבר עמוק בעמוד, כפתור החזרה לראש העמוד מחזיר אתכם ישירות להתחלה.',
-      placement: 'right',
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-nav-table',
-      content: 'בסרגל העליון תמצאו מעבר ישיר לטבלאות ההתפלגות. ניכנס עכשיו לעמוד הזה כדי לראות איפה מאתרים ערכי Z וערכים קריטיים.',
-      placement: 'bottom',
-      isFixed: true,
-      context: { page: 'hypothesis' },
-    },
-    {
-      target: '.tour-z-table-scroll-anchor',
-      spotlightTarget: '.tour-z-table-root',
-      scrollTarget: '.tour-z-table-scroll-anchor',
-      content: 'זהו עמוד טבלאות ההתפלגות. כאן תמצאו את טבלת ערכי Z הסטנדרטית ואת טבלאות העזר הרלוונטיות לעבודה ידנית.',
-      placement: 'bottom',
-      offset: 18,
-      context: { page: 'normal', normalMode: 'table' },
-    },
-    {
-      target: '.tour-nav-formula-sheet',
-      content: 'בסרגל העליון יש גם מעבר לדף הנוסחאות. ניכנס עכשיו לעמוד הזה כדי לראות היכן נמצאים כל הריכוזים התיאורטיים במקום אחד.',
-      placement: 'bottom',
-      isFixed: true,
-      context: { page: 'normal', normalMode: 'table' },
-    },
-    {
-      target: '.tour-formula-sheet-scroll-anchor',
-      spotlightTarget: '.tour-formula-sheet-root',
-      scrollTarget: '.tour-formula-sheet-scroll-anchor',
-      content: 'זהו דף הנוסחאות. כאן אפשר לחפש, להרחיב ולצמצם נושאים, ולעבור במהירות בין פרקים מרכזיים בסטטיסטיקה.',
-      placement: 'bottom',
-      offset: 18,
-      context: { page: 'normal', normalMode: 'formula-sheet' },
-    },
-  ], []);
+  const currentTourSteps = useMemo(() => getTourStepsByMode(activeTourMode), [activeTourMode]);
 
   const activateTourContext = useCallback((step: GuidedTourStep) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (step.context.page === 'hypothesis') {
+    if (step.context?.page === 'landing') {
+      setActivePage('landing');
+      return;
+    }
+
+    if (step.context?.page === 'hypothesis') {
       setActivePage('hypothesis');
       return;
     }
 
-    if (step.context.page === 'normal' && step.context.normalMode) {
+    if (step.context?.page === 'normal' && step.context.normalMode) {
       setNormalMode(step.context.normalMode);
       setActivePage('normal');
     }
   }, []);
 
   const moveGuidedTourToStep = useCallback(async (nextIndex: number) => {
-    const nextStep = guidedTourSteps[nextIndex];
+    const nextStep = currentTourSteps[nextIndex];
     if (!nextStep) {
       return;
     }
 
     const isAlreadyOnTargetPage =
-      (nextStep.context.page === 'hypothesis' && activePage === 'hypothesis') ||
-      (nextStep.context.page === 'normal' && activePage === 'normal' && normalMode === nextStep.context.normalMode);
+      (nextStep.context?.page === 'landing' && activePage === 'landing') ||
+      (nextStep.context?.page === 'hypothesis' && activePage === 'hypothesis') ||
+      (nextStep.context?.page === 'normal' && activePage === 'normal' && normalMode === nextStep.context.normalMode);
+
+    if (!isAlreadyOnTargetPage) {
+      setIsTourTransitioning(true);
+    }
 
     activateTourContext(nextStep);
 
@@ -224,33 +183,72 @@ export default function App() {
     const settleDelay = isAlreadyOnTargetPage ? 0 : 420;
 
     window.setTimeout(async () => {
-      if (scrollTargetSelector && nextStep.placement !== 'center') {
-        const target = await waitForTourTarget(scrollTargetSelector);
-        if (target) {
-          scrollToTourTarget(target);
+      const selectorToFind = nextStep.scrollToId
+        ? `#${nextStep.scrollToId}`
+        : scrollTargetSelector;
+
+      let target: HTMLElement | null = null;
+      if (selectorToFind && (nextStep.placement !== 'center' || nextStep.scrollToId)) {
+        // Wait extra time for the PageTransition animation to settle
+        if (!isAlreadyOnTargetPage) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
         }
+        target = await waitForTourTarget(selectorToFind, 40);
+      }
+
+      if (nextStep.openPath) {
+        window.dispatchEvent(new CustomEvent('toc-open-path', { detail: { ids: nextStep.openPath } }));
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+
+      if (target) {
+        scrollToTourTarget(target);
       }
 
       window.setTimeout(() => {
         setGuidedTourIndex(nextIndex);
-      }, scrollTargetSelector && nextStep.placement !== 'center' ? 320 : 0);
+        setIsTourTransitioning(false);
+      }, selectorToFind && (nextStep.placement !== 'center' || nextStep.scrollToId) ? 320 : 0);
     }, settleDelay);
-  }, [activateTourContext, activePage, guidedTourSteps, normalMode]);
+  }, [activateTourContext, activePage, currentTourSteps, normalMode]);
 
-  const handleStartHypothesisTour = useCallback(() => {
-    const firstStep = guidedTourSteps[0];
+  const handleStartTour = useCallback((mode: TourMode) => {
+    const steps = getTourStepsByMode(mode);
+    const firstStep = steps[0];
     if (!firstStep) {
       return;
     }
 
-    setGuidedTourRun(false);
+    setIsTourTransitioning(true);
+    setActiveTourMode(null);
     setGuidedTourIndex(0);
     activateTourContext(firstStep);
-    window.setTimeout(() => {
+    window.setTimeout(async () => {
+      // Wait for layout to settle
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      let target: HTMLElement | null = null;
+      if (firstStep.scrollToId) {
+        target = await waitForTourTarget(`#${firstStep.scrollToId}`, 40);
+      }
+
+      if (firstStep.openPath) {
+        window.dispatchEvent(new CustomEvent('toc-open-path', { detail: { ids: firstStep.openPath } }));
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
+
+      if (target) {
+        scrollToTourTarget(target);
+        await new Promise((resolve) => setTimeout(resolve, 320));
+      }
+
       setGuidedTourIndex(0);
-      setGuidedTourRun(true);
+      setActiveTourMode(mode);
+      setIsTourTransitioning(false);
     }, 420);
-  }, [activateTourContext, guidedTourSteps]);
+  }, [activateTourContext]);
+
+  const handleStartHypothesisTour = useCallback(() => handleStartTour('global'), [handleStartTour]);
 
   const tourScrollOffset = typeof window !== 'undefined'
     ? getTourViewportOffset()
@@ -259,12 +257,12 @@ export default function App() {
   return (
     <PageTransition pageKey={activePage === 'normal' ? `normal-${normalMode}` : activePage}>
       <JoyrideComponent
-        steps={guidedTourSteps}
-        run={guidedTourRun}
+        key={activeTourMode || 'inactive'}
+        steps={currentTourSteps}
+        run={activeTourMode !== null}
         stepIndex={guidedTourIndex}
         continuous
         showSkipButton
-        disableOverlayClose
         scrollOffset={tourScrollOffset}
         scrollToFirstStep
         portalElement="body"
@@ -287,19 +285,22 @@ export default function App() {
             borderRadius: '8px',
             border: '1px solid #3f3f46',
             boxShadow: '0 24px 64px rgba(0, 0, 0, 0.42)',
+            ...(isTourTransitioning && { opacity: 0, pointerEvents: 'none' }),
           },
+          ...(isTourTransitioning && { overlay: { opacity: 0, pointerEvents: 'none' } }),
           spotlight: {
             stroke: '#d4a843',
             strokeWidth: 3,
             filter: 'drop-shadow(0 0 12px rgba(212, 168, 67, 0.8)) drop-shadow(0 0 24px rgba(52, 82, 158, 0.45))',
+            ...(isTourTransitioning && { opacity: 0 }),
           },
           buttonNext: { backgroundColor: '#34529e', color: '#fff', borderRadius: '4px', fontWeight: 'bold' },
           buttonBack: { color: '#a1a1aa', fontWeight: 'bold' },
           buttonSkip: { color: '#ef4444', fontWeight: 'bold' },
         }) as any}
         onEvent={(data: any) => {
-          if (data.status === 'finished' || data.status === 'skipped') {
-            setGuidedTourRun(false);
+          if (data.status === 'finished' || data.status === 'skipped' || data.action === 'close') {
+            setActiveTourMode(null);
             setGuidedTourIndex(0);
             return;
           }
@@ -311,8 +312,12 @@ export default function App() {
           const delta = data.action === 'prev' ? -1 : 1;
           const nextIndex = data.index + delta;
 
-          if (nextIndex < 0 || nextIndex >= guidedTourSteps.length) {
-            setGuidedTourRun(false);
+          if (data.index === 6 && data.action === 'next') {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+          }
+
+          if (nextIndex < 0 || nextIndex >= currentTourSteps.length) {
+            setActiveTourMode(null);
             return;
           }
 
@@ -323,7 +328,7 @@ export default function App() {
 
       {activePage === 'hypothesis' ? (
         <PageLayout
-          header={<SiteHeader activePage="hypothesis" onNavigate={handleNavigate} />}
+          header={<SiteHeader activePage="hypothesis" onNavigate={handleNavigate} onStartLocalTour={() => handleStartTour('hypothesis')} />}
           footer={<SiteFooter onNavigate={handleNavigate} />}
         >
           <Suspense fallback={<PageLoadingState />}>
@@ -334,7 +339,7 @@ export default function App() {
 
       {activePage === 'normal' ? (
         <PageLayout
-          header={<SiteHeader activePage={normalMode as SitePage} onNavigate={handleNavigate} />}
+          header={<SiteHeader activePage={normalMode as SitePage} onNavigate={handleNavigate} onStartLocalTour={() => handleStartTour(normalMode as TourMode)} />}
           footer={<SiteFooter onNavigate={handleNavigate} />}
         >
           <Suspense fallback={<PageLoadingState />}>

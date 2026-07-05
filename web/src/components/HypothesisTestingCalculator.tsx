@@ -3587,7 +3587,7 @@ export default function HypothesisTestingCalculator({ onStartGuidedTour }: Hypot
                                                             עבור פרמטר לא ידוע <InlineMath math="\theta" />, נבנה מרווח <InlineMath math="(A, B)" /> כך שבהסתברות מסוימת שתיקבע מראש, הפרמטר האמיתי ייפול בתוך המרווח הזה.
                                                         </p>
 
-                                                        <FormulaBlock className="my-2" formulaName="הגדרת רווח סמך" translation="רווח הסמך הוא טווח ערכים שבו אנו מאמינים שהפרמטר האמיתי של האוכלוסייה נמצא, במידת ביטחון מסוימת.">
+                                                        <FormulaBlock className="my-2 tour-first-ci-formula" formulaName="הגדרת רווח סמך" translation="רווח הסמך הוא טווח ערכים שבו אנו מאמינים שהפרמטר האמיתי של האוכלוסייה נמצא, במידת ביטחון מסוימת.">
                                                             <BlockMath math="P(A < \theta < B) = 1 - \alpha" />
                                                         </FormulaBlock>
 
