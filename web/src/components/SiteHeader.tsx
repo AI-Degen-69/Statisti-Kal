@@ -1,11 +1,12 @@
 import type { ReactElement, ReactNode } from 'react';
-import { Award, BookOpen, Home, ScrollText, Sliders, TrendingUp } from 'lucide-react';
+import { Award, BookOpen, Home, ScrollText, Sliders, TrendingUp, PlayCircle } from 'lucide-react';
 
 export type SitePage = 'landing' | 'hypothesis' | 'forward' | 'inverse' | 'table' | 'formula-sheet';
 
 interface SiteHeaderProps {
   activePage: SitePage;
   onNavigate: (page: SitePage) => void;
+  onStartLocalTour?: () => void;
 }
 
 interface NavItem {
@@ -26,7 +27,7 @@ const hypothesisItem: NavItem = { id: 'hypothesis', label: 'בדיקת השער�
 const tableItem: NavItem = { id: 'table', label: 'טבלאות התפלגות', icon: <BookOpen className="h-4 w-4 shrink-0" />, group: 'reference' };
 const formulaItem: NavItem = { id: 'formula-sheet', label: 'נוסחאות', icon: <ScrollText className="h-4 w-4 shrink-0" />, group: 'reference' };
 
-export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps): ReactElement {
+export default function SiteHeader({ activePage, onNavigate, onStartLocalTour }: SiteHeaderProps): ReactElement {
   return (
     <>
       {/* 1. Logo (Because parent dir="rtl", this is on the far right) */}
@@ -76,7 +77,19 @@ export default function SiteHeader({ activePage, onNavigate }: SiteHeaderProps):
       </nav>
 
       {/* 3. Empty spacer for balanced flex layout (sits on the far left) */}
-      <div className="hidden lg:block lg:flex-1" />
+      <div className="hidden lg:flex lg:flex-1 justify-end items-center px-4">
+        {onStartLocalTour && (
+          <button
+            type="button"
+            onClick={onStartLocalTour}
+            className="tour-local-trigger flex items-center gap-2 rounded border border-[var(--color-primary)]/45 bg-[var(--color-surface)] px-3 py-1.5 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-primary)]/10"
+            aria-label="הפעל סיור מודרך"
+          >
+            <PlayCircle className="h-4 w-4 shrink-0" />
+            סיור מודרך
+          </button>
+        )}
+      </div>
     </>
   );
 }
