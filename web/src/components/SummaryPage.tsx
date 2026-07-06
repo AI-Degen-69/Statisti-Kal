@@ -2,18 +2,159 @@ import React from 'react';
 import { InlineMath, BlockMath } from 'react-katex';
 import { Disclosure } from './ui/CustomComponents';
 import { FormulaBlock } from './ui/FormulaBlock';
-import { BookText } from 'lucide-react';
+import { BookText, Sparkles, Award } from 'lucide-react';
+function GoldenRuleCard({ title, children, example, watermark }: { title: string, children: React.ReactNode, example?: React.ReactNode, watermark?: string }) {
+  return (
+    <div className="bg-gradient-to-br from-[var(--color-surface-raised)] to-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-5 flex flex-col gap-4 shadow-lg relative overflow-hidden group hover:border-[var(--color-primary)]/40 transition-all duration-300">
+      <div className="absolute top-0 right-0 w-1.5 h-full bg-[var(--color-primary)] opacity-70 group-hover:opacity-100 transition-opacity z-10" />
+      
+      {watermark && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden select-none z-0" aria-hidden="true">
+          <div className="text-8xl font-bold opacity-[0.02] transform -rotate-12 scale-150 text-[var(--color-primary)] group-hover:opacity-[0.04] transition-opacity duration-300">
+            <InlineMath math={watermark} />
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-4 relative z-10">
+        <div className="mt-0.5 text-[var(--color-primary)]">
+          <Sparkles className="w-6 h-6 opacity-90 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-extrabold text-[var(--color-text-primary)] mb-1.5">{title}</h3>
+          <div className="text-[var(--color-text-secondary)] leading-relaxed relative z-10">
+            {children}
+          </div>
+        </div>
+      </div>
+
+      {example && (
+        <div className="mt-auto pt-3 border-t border-[var(--color-border)]/40 relative z-10">
+          <div className="bg-black/20 rounded-xl py-1.5 px-3 border border-[var(--color-border)]/30">
+            <div className="text-center text-[var(--color-primary)]">
+              {example}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SummaryPage(): React.ReactElement {
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4 px-4 sm:px-0 py-8">
+    <div className="w-full max-w-[90rem] mx-auto space-y-4 px-4 sm:px-0 py-8">
       <div className="flex items-center gap-3 py-2 mb-6">
         <BookText className="w-8 h-8 text-[var(--color-primary)]" />
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text-primary)]">
           סיכום שיעור סטטיסטיקה
         </h1>
       </div>
-      <div className="w-full max-w-4xl mx-auto space-y-4 px-4 sm:px-0">
+      <div className="w-full max-w-[90rem] mx-auto space-y-6 px-4 sm:px-0 mb-12">
+        <div className="flex items-center gap-2.5 mb-6 border-b border-[var(--color-border)] pb-3">
+          <Award className="w-7 h-7 text-[var(--color-primary)]" />
+          <h2 className="text-2xl font-extrabold text-[var(--color-text-primary)]">משפטי מחץ וכללי ברזל</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <GoldenRuleCard 
+            title="תוחלות פשוטות"
+            example={<BlockMath math="E(X+Y) = E(X) + E(Y)" />}
+            watermark="E(X+Y)"
+          >
+            תוחלת של סכום שווה ל<span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">סכום התוחלות</span> - תמיד, בלי שום תנאים!
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="מכפלות תוחלת"
+            example={<BlockMath math="E(X \cdot Y) = E(X) \cdot E(Y)" />}
+            watermark="E(XY)"
+          >
+            תוחלת של <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">מכפלה</span> שווה למכפלת התוחלות - <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">אך ורק</span> אם המשתנים בלתי תלויים.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="שונות מצטברת"
+            example={<BlockMath math="V(X \pm Y) = V(X) + V(Y) \pm 2Cov(X,Y)" />}
+            watermark="V(X \pm Y)"
+          >
+            שונות היא כמו גיל - אי אפשר לחסר אותה. היא <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-accent-crimson)] decoration-2 underline-offset-4">תמיד מצטברת</span> (גם בהפרש משתנים <InlineMath math="X-Y" />).
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="קבועים"
+            example={<BlockMath math="E(cX) = cE(X), \quad V(cX) = c^2V(X)" />}
+            watermark="c^2"
+          >
+            קבועים יוצאים מהתוחלת כמו שהם, אבל מהשונות הם קופצים <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">בריבוע</span>.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="שונות של קבוע"
+            example={<BlockMath math="V(c) = 0" />}
+            watermark="V(c)=0"
+          >
+            שונות של קבוע היא <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">אפס</span> - כי מה שקבוע, לעולם לא משתנה.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="חוסר הטיה"
+            example={<BlockMath math="E(\hat{\theta}) = \theta" />}
+            watermark="\hat{\theta}"
+          >
+            עומד נחשב <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-accent-cobalt)] decoration-2 underline-offset-4">חסר הטיה</span> אם התוחלת שלו שווה בדיוק לפרמטר אותו הוא מנסה לאמוד.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="תכונת חוסר הזיכרון"
+            example={<BlockMath math="P(X > s+t \mid X > s) = P(X > t)" />}
+            watermark="Exp(\lambda)"
+          >
+            ההתפלגות המעריכית היא היחידה שאין לה <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">זיכרון</span> - העבר לא מנבא שום דבר על העתיד.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="קורלציה לעומת תלות"
+            example={<BlockMath math="Cov(X,Y)=0 \nRightarrow X \perp Y" />}
+            watermark="\rho=0"
+          >
+            חוסר קורלציה (מתאם אפס) אומר שאין קשר <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-accent-cobalt)] decoration-2 underline-offset-4">לינארי</span>, אבל בהחלט יכול להיות קשר מסוג אחר!
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="משפט הגבול המרכזי"
+            example={<BlockMath math="\bar{X} \approx N\left(\mu, \frac{\sigma^2}{n}\right)" />}
+            watermark="CLT"
+          >
+            לא משנה מאיזו צורה האוכלוסייה, אם תאספו מדגם מספיק גדול, הממוצעים ייראו <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">נורמלים לחלוטין</span>.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="חוק המספרים הגדולים"
+            example={<BlockMath math="\bar{X} \xrightarrow{n \to \infty} \mu" />}
+            watermark="n \to \infty"
+          >
+            ככל שנדגום יותר, ממוצע המדגם <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">יתביית וינעל</span> על התוחלת האמיתית של האוכלוסייה.
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="קסם השורש"
+            example={<BlockMath math="SD(\bar{X}) = \frac{\sigma}{\sqrt{n}}" />}
+            watermark="\sqrt{n}"
+          >
+            שגיאת התקן של הממוצע מתכווצת ככל שהמדגם גדל, כי תמיד נחלק ב<span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">שורש גודל המדגם</span> (<InlineMath math="\sqrt{n}" />).
+          </GoldenRuleCard>
+          
+          <GoldenRuleCard 
+            title="טרייד-אוף הטעויות"
+            example={<BlockMath math="\alpha \downarrow \implies \beta \uparrow \implies \text{Power} \downarrow" />}
+            watermark="\alpha, \beta"
+          >
+            הקטנתם את אלפא כדי להוריד טעויות? העוצמה תיפגע. <span className="font-bold text-[var(--color-text-primary)] underline decoration-[var(--color-accent-crimson)] decoration-2 underline-offset-4">אי אפשר לאכול את העוגה ולהשאיר אותה שלמה</span>.
+          </GoldenRuleCard>
+        </div>
+      </div>
+
+      <div className="w-full max-w-[90rem] mx-auto space-y-4 px-4 sm:px-0">
         <Disclosure
           title="1. רמת מובהקות (α) וטעות מסוג ראשון"
           defaultOpen={false}

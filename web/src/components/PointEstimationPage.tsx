@@ -257,24 +257,47 @@ function PointEstimationPage(): ReactElement {
             watermark={<InlineMath math="V(T)" />}
           >
             <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
-              אם גם <InlineMath math="T_1" /> וגם <InlineMath math="T_3" /> חסרי הטיה, משווים שונות:
-              מי שמתפזר פחות סביב <InlineMath math="\theta" /> עדיף.
+              אם שני אומדים (כמו <InlineMath math="T_1" /> ו-<InlineMath math="T_3" /> מהדוגמה הקודמת) נמצאו חסרי הטיה, משווים ביניהם בעזרת השונות: מי שמתפזר פחות סביב היעד (<InlineMath math="\theta" />) הוא יעיל יותר ולכן עדיף.
             </p>
+            
+            <InsightBlock>
+              <strong>הנתון החסר:</strong> נניח שנתון לנו בשאלה שמדובר במדגם מתוך אוכלוסייה בעלת <strong>שונות 100</strong> (כלומר לכל תצפית בודדת <InlineMath math="V(X) = 100" />). כעת נחשב את השונות עבור כל אומד ונראה מי מהם קטן (ויציב) יותר.
+            </InsightBlock>
 
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)] mt-4">
+              <strong>האומד הראשון (<InlineMath math="T_1" />):</strong><br/>
+              נזכור שכאשר קבוע יוצא מהשונות הוא עולה בריבוע, ושונות של הפרש בין משתנים בלתי תלויים היא סכום השונויות.
+            </p>
             <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
-              <BlockMath math="V(T_1)=V(2X_1-X_2)=4V(X_1)+V(X_2)=500" />
+              <BlockMath math="V(T_1) = V(2X_1 - X_2) = 2^2 \cdot V(X_1) + (-1)^2 \cdot V(X_2) = 4V(X_1) + V(X_2)" />
             </ReadingCalcBlock>
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
+              נציב את הנתון <InlineMath math="V(X) = 100" /> ונקבל:
+            </p>
             <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
-              <BlockMath math="V(T_3)=V\left(\frac{X_1+X_2+X_3}{3}\right)=\frac{V(X_1)+V(X_2)+V(X_3)}{9}=\frac{300}{9}=33.33" />
+              <BlockMath math="V(T_1) = 4(100) + 100 = 500" />
             </ReadingCalcBlock>
 
-            <ResultBlock className="py-2">
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)] mt-4">
+              <strong>האומד השלישי (<InlineMath math="T_3" />, ממוצע המדגם):</strong><br/>
+              כאן החלוקה ב-3 (הקבוע <InlineMath math="\frac{1}{3}" />) יוצאת מהשונות בריבוע, כלומר הופכת למכנה 9.
+            </p>
+            <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
+              <BlockMath math="V(T_3) = V\left(\frac{X_1+X_2+X_3}{3}\right) = \frac{V(X_1)+V(X_2)+V(X_3)}{3^2}" />
+            </ReadingCalcBlock>
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
+              שוב נציב 100 עבור כל תצפית במונה:
+            </p>
+            <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
+              <BlockMath math="V(T_3) = \frac{100+100+100}{9} = \frac{300}{9} \approx 33.33" />
+            </ReadingCalcBlock>
+
+            <ResultBlock className="py-2 mt-4">
               <BlockMath math="V(T_3) < V(T_1)\Rightarrow T_3\ \text{עדיף}" />
             </ResultBlock>
 
             <HandwrittenNote>
-              שני אומדים יכולים להיות חסרי הטיה, אבל הממוצע <InlineMath math="\bar{X}" /> יציב יותר מאומד פראי כמו
-              <InlineMath math="2X_1-X_2" />.
+              <strong>המסקנה ברורה:</strong> למרות ששני האומדים חסרי הטיה, ממוצע המדגם (<InlineMath math="\bar{X}" />) תמיד יהיה יציב יותר (שונות 33.33) מאומד פראי שמכפיל תצפיות (שונות 500).
             </HandwrittenNote>
           </Disclosure>
 
@@ -317,13 +340,22 @@ function PointEstimationPage(): ReactElement {
             </SummaryCard>
           </div>
 
-          <ReadingFormulaBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2" formulaName="תוחלת ריבוע הטעות" translation="שונות האומד ועוד ריבוע ההטיה">
+          <InsightBlock>
+            <strong>רגע, מה זה בכלל אומר כשמכניסים אומד לתוך ה-MSE?</strong><br/>
+            תחשבו על אומד כמו חץ שנורה למטרה (הפרמטר האמיתי <InlineMath math="\theta" />). ה-MSE מודד את סך הכל של "הפספוס" שלנו. כשמכניסים אומד <InlineMath math="\hat{\theta}" /> לתוך ה-<InlineMath math="MSE" />, הפעולה שעושים היא לחשב את המרחק הממוצע בין הניחוש שלנו לאמת, כשהוא מועלה בריבוע. ציון ה"פספוס" הסופי מורכב משני סוגים של טעויות שיכולות להיות לקשת שלנו:
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li><strong>שונות (Variance):</strong> האם החצים מפוזרים לכל עבר, או פוגעים קרוב אחד לשני?</li>
+              <li><strong>הטיה (Bias):</strong> האם הכוונת של הקשת עקומה מראש? גם אם החצים פוגעים קרוב אחד לשני, אולי המרכז שלהם סוטה ימינה או שמאלה מהמטרה.</li>
+            </ul>
+          </InsightBlock>
+
+          <ReadingFormulaBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2 mt-4" formulaName="תוחלת ריבוע הטעות" translation="שונות האומד ועוד ריבוע ההטיה">
             <BlockMath math="MSE(\hat{\theta})=E\left[(\hat{\theta}-\theta)^2\right]=V(\hat{\theta})+\left(E(\hat{\theta})-\theta\right)^2" />
           </ReadingFormulaBlock>
 
           <HandwrittenNote className={CONTENT_WIDTH_CLASS}>
-            אומד מוטה לא נפסל אוטומטית. אם ההטיה קטנה אבל החיסכון בשונות גדול,
-            ה-<InlineMath math="MSE" /> הכולל יכול להיות קטן יותר.
+            המסקנה המפתיעה: אומד עם <strong>Bias</strong> (הטיה) לא נפסל אוטומטית. אם ההטיה קטנה אבל הוא מדויק ועקבי מאוד (חוסך הרבה בשונות),
+            ה-<InlineMath math="MSE" /> הכולל שלו יכול להיות קטן יותר, והוא ינצח!
           </HandwrittenNote>
 
           <Disclosure
@@ -334,20 +366,42 @@ function PointEstimationPage(): ReactElement {
             watermark={<InlineMath math="U(0,\theta)" />}
           >
             <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
-              אם <InlineMath math="X\sim U(0,\theta)" />, נבדוק את <InlineMath math="T_1=2X" /> מול
-              <InlineMath math="T_2=1.5X" />.
+              נניח שיש לנו התפלגות אחידה <InlineMath math="X\sim U(0,\theta)" /> (כמו לבחור מספר אקראי בין 0 ל-<InlineMath math="\theta" />). אנחנו רוצים לנחש את <InlineMath math="\theta" />. נשווה בין שני מועמדים: <InlineMath math="T_1=2X" /> ו-<InlineMath math="T_2=1.5X" />.
             </p>
 
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)] mt-4 font-bold text-[var(--color-text-primary)]">
+              בדיקת המועמד הראשון (<InlineMath math="T_1" />):
+            </p>
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
+              התוחלת שלו פוגעת בול במטרה - אין לו שום הטיה (Bias = 0). לכן, הציון הכולל שלו מורכב נטו מהשונות שלו.
+            </p>
             <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
               <BlockMath math="E(T_1)=2E(X)=2\cdot\frac{\theta}{2}=\theta,\qquad MSE(T_1)=V(T_1)=\frac{\theta^2}{3}" />
             </ReadingCalcBlock>
+
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)] mt-4 font-bold text-[var(--color-text-primary)]">
+              בדיקת המועמד השני (<InlineMath math="T_2" />):
+            </p>
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
+              קודם כל, נחשב את ה-Bias שלו. ה-Bias עושה פעולה פשוטה - הוא מחסיר את היעד האמיתי (<InlineMath math="\theta" />) מהתוחלת של האומד, וכך מראה לנו מהי הסטייה הקבועה:
+            </p>
             <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
               <BlockMath math="Bias(T_2)=E(1.5X)-\theta=0.75\theta-\theta=-0.25\theta" />
             </ReadingCalcBlock>
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
+              התוצאה שלילית, מה שאומר שהאומד סובל מ"הטיה כלפי מטה". הוא באופן שיטתי מנחש קצת פחות מהאמת.<br/>
+              כעת, ה-MSE מחבר את השונות יחד עם הסטייה הזו (מועלית בריבוע, כדי שמינוס ופלוס לא יבטלו זה את זה):
+            </p>
             <ReadingCalcBlock contentWidthClassName={CONTENT_WIDTH_CLASS} wrapperClassName="py-2">
               <BlockMath math="MSE(T_2)=V(T_2)+Bias(T_2)^2=\frac{9}{48}\theta^2+\frac{1}{16}\theta^2=\frac{1}{4}\theta^2" />
             </ReadingCalcBlock>
 
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)] mt-4 font-bold text-[var(--color-text-primary)]">
+              השוואת התוצאות הסופיות:
+            </p>
+            <p className="text-base leading-relaxed text-[var(--color-text-secondary)]">
+              ה-<InlineMath math="MSE" /> הוא ציון של טעות, אז הנמוך מנצח. למרות שהאומד השני מוטה, <InlineMath math="1/4" /> קטן יותר מ-<InlineMath math="1/3" />:
+            </p>
             <ResultBlock className="py-2">
               <BlockMath math="\frac{1}{4}\theta^2 < \frac{1}{3}\theta^2\Rightarrow T_2\ \text{עדיף}" />
             </ResultBlock>
