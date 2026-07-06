@@ -1799,7 +1799,7 @@ export default function HypothesisTestingCalculator({ onStartGuidedTour }: Hypot
         : stats;
 
     return (
-        <div className="tour-step-intro space-y-8 bg-[var(--color-background)] min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
+        <div className="tour-step-intro space-y-8 min-h-screen text-[var(--color-text-primary)] p-4 sm:p-6 md:p-8" dir="rtl">
             {/* Default Study Accordion */}
             <AnimatedDetails id="hypothesis-study-example" tocId="hypothesis-study-example" defaultOpen className="group relative bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-lg mb-8 shadow-sm border-r-4 border-r-[var(--color-accent-cobalt)] overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                 <summary className="relative z-10 cursor-pointer select-none p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center gap-4 border-b border-[var(--color-border)]/70 overflow-hidden">

@@ -157,7 +157,7 @@ function BiasVisualCard(): ReactElement {
 
 function PointEstimationPage(): ReactElement {
   return (
-    <div className="min-h-screen bg-[var(--color-background)] p-4 text-[var(--color-text-primary)] sm:p-6 md:p-8" dir="rtl">
+    <div className="min-h-screen p-4 text-[var(--color-text-primary)] sm:p-6 md:p-8" dir="rtl">
       <div className={`${CONTENT_WIDTH_CLASS} space-y-6`}>
         <section className="rounded-[calc(var(--rounded-xl)+6px)] border border-[var(--color-primary)]/25 bg-[linear-gradient(135deg,rgba(212,168,67,0.14),rgba(52,82,158,0.08))] px-5 py-6 shadow-[0_18px_50px_rgba(0,0,0,0.18)] sm:px-7 sm:py-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
