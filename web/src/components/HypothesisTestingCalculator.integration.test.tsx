@@ -117,7 +117,7 @@ describe('HypothesisTestingCalculator unified Step 6 integration', () => {
     expect(html).toContain('JAMA, 1992');
     expect(html).toContain('10.1001/jama.1992.03490120092034');
     expect(html).toContain('טען נתוני ברירת מחדל');
-    expect(html).toContain('הפעל סיור מודרך');
+    expect(html).toContain('סיור בדיקת השערות');
     expect(html).toContain('רמת מובהקות');
     expect(html).toContain('5%');
     expect(html).toContain('התוצאה מובהקת מאוד');

@@ -9,10 +9,6 @@ coverage/
 .worktrees/
 Agent-Skills
 
-# Agent context files
-AGENTS.md
-CONTEXT.md
-STRATEGY.md
 # Temporary AI/Agent workspace files
 /*.cjs
 /*.mjs
@@ -23,9 +19,14 @@ STRATEGY.md
 
 # Private AI and Project Management folders
 .agents/
-docs/
 plans/
 templates/
 scripts/
+
+# Keep the project documentation and verification scripts version-controlled
+!docs/
+!docs/**
+!web/scripts/
+!web/scripts/**
 
 .gbrain-source

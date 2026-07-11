@@ -284,7 +284,9 @@ export function CyberneticBackground() {
       {/* Drifting Math Chips */}
       <div className="absolute inset-0">
         {chips.map(chip => (
-          <MathChip key={chip.id} initialChip={chip} />
+          <React.Fragment key={chip.id}>
+            <MathChip initialChip={chip} />
+          </React.Fragment>
         ))}
       </div>
     </div>
