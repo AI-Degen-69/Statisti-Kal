@@ -9,6 +9,6 @@ describe('PointEstimationPage', () => {
     expect(html).toContain('אמידה נקודתית');
     expect(html).toContain('מושגי יסוד באמידה');
     expect(html).toContain('אומד נראות מקסימלית');
-    expect(html).toContain('רעיון אינטואיטיבי');
+    expect(html).toContain('דוגמת המטבע');
   });
 });

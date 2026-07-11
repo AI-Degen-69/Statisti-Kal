@@ -329,7 +329,7 @@ export function GradientButton({
   className,
   glow = true,
   ...props
-}: ButtonProps & { glow?: boolean }): ReactElement {
+}: ButtonProps & { children?: ReactNode; className?: string; glow?: boolean }): ReactElement {
   return (
     <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="relative inline-flex">
       {glow ? (
@@ -385,8 +385,8 @@ export function ProgressStrip({
 }): ReactElement {
   const barClass = {
     cobalt: 'from-[var(--color-accent-cobalt)] to-[var(--color-accent-cobalt-strong)]',
-    teal: 'from-[var(--color-accent-teal)] to-[#23a89b]',
-    brass: 'from-[var(--color-accent-brass)] to-[#d39c00]',
+    teal: 'from-[var(--color-accent-teal)] to-[var(--color-success)]',
+    brass: 'from-[var(--color-accent-brass)] to-[var(--color-accent-cobalt-strong)]',
   }[tone];
 
   return (

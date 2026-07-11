@@ -423,7 +423,7 @@ export default function LandingPage({ onNavigate, onTryHypothesis, onTryPointEst
                   variant="ghost"
                   onClick={onStartHypothesisTour}
                   className="relative overflow-hidden group transform transition-all duration-300 hover:scale-105 shadow-2xl shadow-[var(--color-accent-brass)]/30 h-20 w-full sm:w-[480px] text-3xl sm:text-4xl font-black whitespace-nowrap border-0"
-                  style={{ backgroundColor: 'var(--color-accent-brass)', color: '#000000' }}
+                  style={{ backgroundColor: 'var(--color-accent-brass)', color: 'var(--color-background)' }}
                   rightIcon={<ExternalLink className="w-10 h-10 transition-transform duration-300 group-hover:-translate-y-1 group-hover:-translate-x-1 relative z-10" />}
                 >
                   <span className="relative z-10">פה מתחילים</span>

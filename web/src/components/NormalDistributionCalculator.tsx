@@ -985,7 +985,9 @@ export default function NormalDistributionCalculator({ initialMode, onNavigate }
                     {isValid && calculation ? (
                       <div className="space-y-4">
                         {calculation.steps.map((st, sIdx) => (
-                          <FormattedStep key={sIdx} text={st} />
+                          <React.Fragment key={sIdx}>
+                            <FormattedStep text={st} />
+                          </React.Fragment>
                         ))}
                       </div>
                     ) : (

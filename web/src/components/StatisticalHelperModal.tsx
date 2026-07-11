@@ -399,13 +399,13 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                 <div className="relative h-[200px] bg-white dark:bg-[var(--color-surface)] rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border)] flex items-center justify-center overflow-hidden">
                   <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`}>
                     {/* Center Axis Grid Line */}
-                    <line x1={meanX} y1="10" x2={meanX} y2={height - 10} stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3,3" />
+                    <line x1={meanX} y1="10" x2={meanX} y2={height - 10} stroke="var(--color-border)" strokeWidth="1" strokeDasharray="3,3" />
                     
                     {/* Population Curve */}
                     <path 
                       d={generateBellCurvePath(popSigma)} 
                       fill="none" 
-                      stroke="#94a3b8" 
+                      stroke="var(--color-text-secondary)"
                       strokeWidth="2.5" 
                       className="transition-all duration-300"
                     />
@@ -414,7 +414,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                     <path 
                       d={generateBellCurvePath(standardError)} 
                       fill="none" 
-                      stroke="#4f46e5" 
+                      stroke="var(--color-accent-cobalt)"
                       strokeWidth="3.5" 
                       className="transition-all duration-150"
                     />

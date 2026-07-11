@@ -281,10 +281,10 @@ export default function App() {
         portalElement="body"
         options={{
           zIndex: 10000,
-          primaryColor: '#d4a843',
-          backgroundColor: '#1e1e24',
-          textColor: '#e0e0e0',
-          arrowColor: '#1e1e24',
+          primaryColor: 'var(--color-accent-brass)',
+          backgroundColor: 'var(--color-surface-raised)',
+          textColor: 'var(--color-text-primary)',
+          arrowColor: 'var(--color-surface-raised)',
           overlayColor: 'rgba(3, 6, 13, 0.42)',
           spotlightPadding: 10,
           spotlightRadius: 18,
@@ -296,20 +296,20 @@ export default function App() {
             fontFamily: 'Assistant, sans-serif',
             textAlign: 'right',
             borderRadius: '8px',
-            border: '1px solid #3f3f46',
+            border: '1px solid var(--color-border)',
             boxShadow: '0 24px 64px rgba(0, 0, 0, 0.42)',
             ...(isTourTransitioning && { opacity: 0, pointerEvents: 'none' }),
           },
           ...(isTourTransitioning && { overlay: { opacity: 0, pointerEvents: 'none' } }),
           spotlight: {
-            stroke: '#d4a843',
+            stroke: 'var(--color-accent-brass)',
             strokeWidth: 3,
             filter: 'drop-shadow(0 0 12px rgba(212, 168, 67, 0.8)) drop-shadow(0 0 24px rgba(52, 82, 158, 0.45))',
             ...(isTourTransitioning && { opacity: 0 }),
           },
-          buttonNext: { backgroundColor: '#34529e', color: '#fff', borderRadius: '4px', fontWeight: 'bold' },
-          buttonBack: { color: '#a1a1aa', fontWeight: 'bold' },
-          buttonSkip: { color: '#ef4444', fontWeight: 'bold' },
+          buttonNext: { backgroundColor: 'var(--color-accent-cobalt)', color: 'var(--color-text-primary)', borderRadius: '4px', fontWeight: 'bold' },
+          buttonBack: { color: 'var(--color-text-secondary)', fontWeight: 'bold' },
+          buttonSkip: { color: 'var(--color-error)', fontWeight: 'bold' },
         }) as any}
         onEvent={(data: any) => {
           if (data.status === 'finished' || data.status === 'skipped' || data.action === 'close') {

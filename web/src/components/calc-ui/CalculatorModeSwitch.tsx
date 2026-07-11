@@ -21,7 +21,7 @@ export function CalculatorModeSwitch({ value, onChange }: CalculatorModeSwitchPr
     >
       <span
         className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all ${!isInverse
-          ? 'bg-[linear-gradient(135deg,#24D1C7,#1C9EDE)] text-[#08131A] shadow-[0_0_0_1px_rgba(36,209,199,0.72)]'
+          ? 'bg-[linear-gradient(135deg,var(--color-accent-teal),var(--color-accent-cobalt))] text-[var(--color-background)] shadow-[0_0_0_1px_var(--color-accent-teal)]'
           : 'bg-transparent text-[var(--color-text-secondary)]'
           }`}
       >
@@ -30,7 +30,7 @@ export function CalculatorModeSwitch({ value, onChange }: CalculatorModeSwitchPr
       </span>
       <span
         className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all ${isInverse
-          ? 'bg-[linear-gradient(135deg,#F6D04D,#E9A91A)] text-[#18140A] shadow-[0_0_0_1px_rgba(246,208,77,0.72)]'
+          ? 'bg-[linear-gradient(135deg,var(--color-accent-brass),var(--color-accent-cobalt-strong))] text-[var(--color-background)] shadow-[0_0_0_1px_var(--color-accent-brass)]'
           : 'bg-transparent text-[var(--color-text-secondary)]'
           }`}
       >
