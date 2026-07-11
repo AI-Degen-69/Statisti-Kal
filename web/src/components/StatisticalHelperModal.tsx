@@ -53,35 +53,37 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-[var(--color-surface)]/80 backdrop-blur-sm p-4 animate-fade-in" dir="rtl">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="relative w-full max-w-4xl rounded-lg border border-[var(--color-border)]"
+        className="relative w-full max-w-4xl rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col max-h-[90vh]"
       >
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-lg bg-[var(--color-accent-cobalt-strong)]/10 text-[var(--color-accent-cobalt)]">
-              <Sparkles className="w-5 h-5 animate-pulse" />
+        <div className="p-4 sm:p-5 border-b border-[var(--color-border)] flex-shrink-0">
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2.5 rounded-lg bg-[var(--color-accent-cobalt-strong)]/10 text-[var(--color-accent-cobalt)]">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-sm sm:text-base text-[var(--color-text-primary)]">
+                  מדריך אינטראקטיבי: סודות שגיאת התקן והשונות
+                </h3>
+                <p className="text-body-xs sm:text-caption text-[var(--color-text-secondary)]">
+                  פענוח ההבדל בין מדגם לאוכלוסייה, ומדוע שגיאת הממוצע מתכווצת עם <InlineMath math="\sqrt{n}" />
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-extrabold text-sm sm:text-base text-[var(--color-text-primary)]">
-                מדריך אינטראקטיבי: סודות שגיאת התקן והשונות
-              </h3>
-              <p className="text-body-xs sm:text-caption text-[var(--color-text-secondary)]">
-                פענוח ההבדל בין מדגם לאוכלוסייה, ומדוע שגיאת הממוצע מתכווצת עם <InlineMath math="\sqrt{n}" />
-              </p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg border border-[var(--color-border)]"
+              aria-label="סגור"
+            >
+              <X />
+            </button>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-lg border border-[var(--color-border)]"
-            aria-label="סגור"
-          >
-            <X />
-          </button>
         </div>
 
         {/* Tabs Bar */}
@@ -130,8 +132,8 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
           {activeTab === 'sigma-vs-s' && (
             <div className="space-y-5 animate-fade-in text-right">
               {/* Intro Banner */}
-              <div className="p-4 rounded-lg bg-[var(--color-primary)]/15">
-                <div className="p-2 rounded-lg bg-[var(--color-warning)]/10">
+              <div className="p-4 rounded-lg bg-[var(--color-primary)]/15 flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-[var(--color-warning)]/10 flex-shrink-0">
                   <Info className="w-4 h-4" />
                 </div>
                 <div className="flex-1 space-y-1">
@@ -229,7 +231,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               {/* Step by Step Expansion Cards */}
               <div className="space-y-3.5">
                 {/* Step 1 */}
-                <div className="p-3.5 bg-[var(--color-surface-raised)]">
+                <div className="p-3.5 bg-[var(--color-surface-raised)] flex items-start gap-3">
                   <div className="flex-shrink-0 w-7 h-7 bg-[var(--color-accent-cobalt-strong)] text-white rounded-full flex items-center justify-center font-bold text-xs mt-0.5">
                     1
                   </div>
@@ -247,7 +249,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                 </div>
 
                 {/* Step 2 */}
-                <div className="p-3.5 bg-[var(--color-surface-raised)]">
+                <div className="p-3.5 bg-[var(--color-surface-raised)] flex items-start gap-3">
                   <div className="flex-shrink-0 w-7 h-7 bg-[var(--color-accent-cobalt-strong)] text-white rounded-full flex items-center justify-center font-bold text-xs mt-0.5">
                     2
                   </div>
@@ -268,7 +270,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                 </div>
 
                 {/* Step 3 */}
-                <div className="p-3.5 bg-[var(--color-surface-raised)]">
+                <div className="p-3.5 bg-[var(--color-surface-raised)] flex items-start gap-3">
                   <div className="flex-shrink-0 w-7 h-7 bg-[var(--color-accent-cobalt-strong)] text-white rounded-full flex items-center justify-center font-bold text-xs mt-0.5">
                     3
                   </div>
@@ -315,14 +317,14 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                       {popSigma}
                     </span>
                   </div>
-                  <input 
+                  <input
                     type="range"
                     min="5"
                     max="30"
                     step="1"
                     value={popSigma}
                     onChange={(e) => setPopSigma(Number(e.target.value))}
-                    className="w-full cursor-pointer h-1.5 bg-[var(--color-surface-raised)]"
+                    className="w-full cursor-pointer h-1.5 bg-[var(--color-surface-raised)] appearance-none"
                   />
                   <span className="block text-body-xs text-[var(--color-text-secondary)]">
                     מייצגת את הפיזור הפנימי המקורי בכל דגימה בנפרד.
@@ -339,14 +341,14 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
                       {sampleSize} דגימות
                     </span>
                   </div>
-                  <input 
+                  <input
                     type="range"
                     min="1"
                     max="100"
                     step="1"
                     value={sampleSize}
                     onChange={(e) => setSampleSize(Number(e.target.value))}
-                    className="w-full cursor-pointer h-1.5 bg-[var(--color-surface-raised)]"
+                    className="w-full cursor-pointer h-1.5 bg-[var(--color-surface-raised)] appearance-none"
                   />
                   <span className="block text-body-xs text-[var(--color-text-secondary)] flex items-center gap-1">
                     <span>שורש מספר הדגימות:</span>
@@ -356,7 +358,7 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
               </div>
 
               {/* Real-time Math Output Box */}
-              <div className="p-3 bg-gradient-to-r from-[var(--color-accent-cobalt)]/5 to-[var(--color-accent-cobalt)]/20">
+              <div className="p-3 bg-gradient-to-r from-[var(--color-accent-cobalt)]/5 to-[var(--color-accent-cobalt)]/20 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <span className="block text-body-xs text-[var(--color-text-secondary)]">סטיית תקן בריבוע (שונות האוכלוסייה):</span>
                   <span className="font-mono text-sm font-extrabold text-[var(--color-text-primary)]">
@@ -431,8 +433,8 @@ export default function StatisticalHelperModal({ isOpen, onClose, initialTab = '
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[var(--color-border)]">
-          <p className="text-[var(--color-text-secondary)]">
+        <div className="p-4 border-t border-[var(--color-border)] flex-shrink-0 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-[var(--color-text-secondary)] text-xs">
             * השתמש במדריך זה ככלי תומך להבנת המבחנים ורווחי הסמך.
           </p>
           <button

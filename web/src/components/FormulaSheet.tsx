@@ -50,7 +50,7 @@ const SectionWatermarks = ({ items }: { items: React.ReactNode[] }) => {
   if (!items || items.length === 0) return null;
   const repeatedItems = [...items, ...items, ...items, ...items];
   return (
-    <div className="absolute inset-0 pointer-events-none select-none opacity-[0.02]">
+    <div className="absolute inset-0 pointer-events-none select-none opacity-[0.02] flex flex-wrap justify-center items-center">
       {repeatedItems.map((item, i) => (
         <div key={i} className="text-5xl sm:text-7xl md:text-[8rem] font-semibold font-mono flex items-center justify-center" style={{ transform: `rotate(${[15, -10, 5, -20, 25, -5, 10, -15][i % 8]}deg)` }}>
           {item}
@@ -1538,10 +1538,10 @@ export default function FormulaSheet({ theme }: FormulaSheetProps) {
         <div className="lg:col-span-9 space-y-8">
           
           {filteredSections.map((section) => (
-            <div 
-              key={section.id} 
+            <div
+              key={section.id}
               ref={sectionRefs[section.id as keyof typeof sectionRefs]}
-              id={section.id}className={`relative overflow-hidden rounded-lg border p-5 md:p-6 transition-all scroll-mt-24 shadow-sm bg-[var(--color-surface)] border-[var(--color-border)]`}
+              id={section.id} className={`relative overflow-hidden rounded-lg border p-5 md:p-6 transition-all scroll-mt-24 shadow-sm bg-[var(--color-surface)] border-[var(--color-border)]`}
             >
               {/* Section Watermarks */}
               <SectionWatermarks items={section.watermarks || []} />
