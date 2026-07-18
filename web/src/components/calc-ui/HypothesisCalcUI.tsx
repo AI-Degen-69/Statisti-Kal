@@ -9,7 +9,7 @@
  * orchestrator focused on math + state. DESIGN.md §3 still applies: none of
  * these may render raw <h1>-<h3> — use <Heading> (see eslint.config.js).
  */
-import React, { useState, useRef, useEffect } from 'react';
+import React, { memo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { InlineMath, BlockMath } from 'react-katex';
@@ -550,7 +550,25 @@ interface DecisionMatrixProps {
 }
 
 
-export function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatrixProps) {
+// Memoized: the matrix renders 14 static KaTeX <InlineMath> labels plus only 2
+// dynamic numbers (alpha, beta/power). The parent passes a fresh `stats` object on
+// every keystroke, which would otherwise re-typeset all 14 static labels each time.
+// The custom comparator skips re-renders when only the `stats` object identity churns
+// but the displayed values (alpha, beta, power) are unchanged.
+function areDecisionMatrixPropsEqual(
+    prev: DecisionMatrixProps,
+    next: DecisionMatrixProps,
+): boolean {
+    return (
+        prev.isValid === next.isValid &&
+        prev.alpha === next.alpha &&
+        prev.calculatePower === next.calculatePower &&
+        prev.stats?.beta === next.stats?.beta &&
+        prev.stats?.power === next.stats?.power
+    );
+}
+
+export const DecisionMatrix = memo(function DecisionMatrix({ isValid, stats, alpha, calculatePower }: DecisionMatrixProps) {
     if (!isValid || !stats) {
         return (
             <div className="py-16 text-center text-[var(--color-text-secondary)] font-bold text-base">
@@ -719,7 +737,7 @@ export function DecisionMatrix({ isValid, stats, alpha, calculatePower }: Decisi
             </tbody>
         </table>
     );
-}
+});
 
 // --- Tooltip helper for Input Labels ---
 interface InputTooltipProps {
