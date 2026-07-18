@@ -1,0 +1,34 @@
+{
+  "name": "Statisti-Kal · מחשבוני סטטיסטיקה בעברית",
+  "short_name": "Statisti-Kal",
+  "description": "מערכת חכמה לסטודנטים בסטטיסטיקה: חישובי הסתברויות, התפלגות נורמלית, בדיקת השערות, אמידה נקודתית ורגרסיה. רץ לחלוטין בדפדפן, ללא שרת.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/",
+  "scope": "/",
+  "display": "minimal-ui",
+  "orientation": "any",
+  "background_color": "#F9F9F6",
+  "theme_color": "#0E0F12",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

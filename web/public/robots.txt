@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://statisti-kal.com/sitemap.xml
