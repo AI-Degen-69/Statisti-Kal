@@ -31,6 +31,7 @@ import {
 } from '../ui';
 import { AnimatedDetails } from '../ui/CustomComponents';
 import { inverseNormalCDF, studentTPPF } from '../../lib/statistics/math';
+import { useScrollPositionedTooltip } from '../../hooks/useScrollPositionedTooltip';
 
 type TailType = 'right' | 'left' | 'two-tailed';
 
@@ -750,10 +751,13 @@ interface InputTooltipProps {
 export const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, className = "", tooltipClassName = "w-52" }) => {
     const [canPortal, setCanPortal] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const [position, setPosition] = useState({ top: 0, left: 0 });
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const triggerRef = useRef<HTMLDivElement | null>(null);
-    const rafRef = useRef<number | null>(null);
+
+    const position = useScrollPositionedTooltip(triggerRef, {
+        visible: isVisible,
+        compute: (rect) => ({ top: rect.top - 8, left: rect.left + rect.width / 2 }),
+    });
 
     useEffect(() => {
         setCanPortal(true);
@@ -762,48 +766,8 @@ export const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, c
     useEffect(() => {
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
     }, []);
-
-    useEffect(() => {
-        if (!isVisible) return;
-
-        // Coalesce scroll/resize into one layout read per frame. Reading
-        // getBoundingClientRect synchronously on every scroll event forces
-        // a layout flush on each event; rAF caps it at one per frame.
-        const scheduleUpdate = () => {
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-            rafRef.current = requestAnimationFrame(updatePosition);
-        };
-
-        const updatePosition = () => {
-            rafRef.current = null;
-            if (!triggerRef.current) return;
-
-            const rect = triggerRef.current.getBoundingClientRect();
-            const nextTop = rect.top - 8;
-            const nextLeft = rect.left + rect.width / 2;
-            setPosition((prev) =>
-                prev.top === nextTop && prev.left === nextLeft
-                    ? prev
-                    : { top: nextTop, left: nextLeft },
-            );
-        };
-
-        updatePosition();
-        // `passive` is a valid runtime option but absent from this project's
-        // strict EventListenerOptions typing, so cast to AddEventListenerOptions.
-        const scrollOpts = { capture: true, passive: true } as AddEventListenerOptions;
-        window.addEventListener('scroll', scheduleUpdate, scrollOpts);
-        window.addEventListener('resize', scheduleUpdate);
-
-        return () => {
-            window.removeEventListener('scroll', scheduleUpdate, scrollOpts);
-            window.removeEventListener('resize', scheduleUpdate);
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, [isVisible]);
 
     const showTooltip = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -864,50 +828,17 @@ export const FloatingFieldError: React.FC<FloatingFieldErrorProps> = ({
     bubbleClassName = "px-2.5 py-1",
 }) => {
     const [canPortal, setCanPortal] = useState(false);
-    const [position, setPosition] = useState({ top: 0, left: 0 });
     const anchorRef = useRef<HTMLSpanElement | null>(null);
+
+    const position = useScrollPositionedTooltip(anchorRef, {
+        visible: !!message,
+        compute: (rect) => ({ top: rect.top + offsetY, left: rect.left }),
+        deps: [offsetY],
+    });
 
     useEffect(() => {
         setCanPortal(true);
     }, []);
-
-    useEffect(() => {
-        if (!message) return;
-
-        // Local rAF handle so this effect doesn't collide with the label
-        // tooltip's rafRef. Coalesce scroll/resize layout reads to one/frame.
-        let rafRef: number | null = null;
-
-        const updatePosition = () => {
-            rafRef = null;
-            if (!anchorRef.current) return;
-
-            const rect = anchorRef.current.getBoundingClientRect();
-            const nextTop = rect.top + offsetY;
-            const nextLeft = rect.left;
-            setPosition((prev) =>
-                prev.top === nextTop && prev.left === nextLeft
-                    ? prev
-                    : { top: nextTop, left: nextLeft },
-            );
-        };
-
-        const scheduleUpdate = () => {
-            if (rafRef !== null) cancelAnimationFrame(rafRef);
-            rafRef = requestAnimationFrame(updatePosition);
-        };
-
-        const scrollOpts = { capture: true, passive: true } as AddEventListenerOptions;
-        updatePosition();
-        window.addEventListener('scroll', scheduleUpdate, scrollOpts);
-        window.addEventListener('resize', scheduleUpdate);
-
-        return () => {
-            window.removeEventListener('scroll', scheduleUpdate, scrollOpts);
-            window.removeEventListener('resize', scheduleUpdate);
-            if (rafRef !== null) cancelAnimationFrame(rafRef);
-        };
-    }, [message, offsetY]);
 
     return (
         <>
