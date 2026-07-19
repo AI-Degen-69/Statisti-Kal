@@ -782,18 +782,24 @@ export const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, c
             if (!triggerRef.current) return;
 
             const rect = triggerRef.current.getBoundingClientRect();
-            setPosition({
-                top: rect.top - 8,
-                left: rect.left + rect.width / 2,
-            });
+            const nextTop = rect.top - 8;
+            const nextLeft = rect.left + rect.width / 2;
+            setPosition((prev) =>
+                prev.top === nextTop && prev.left === nextLeft
+                    ? prev
+                    : { top: nextTop, left: nextLeft },
+            );
         };
 
         updatePosition();
-        window.addEventListener('scroll', scheduleUpdate, true);
+        // `passive` is a valid runtime option but absent from this project's
+        // strict EventListenerOptions typing, so cast to AddEventListenerOptions.
+        const scrollOpts = { capture: true, passive: true } as AddEventListenerOptions;
+        window.addEventListener('scroll', scheduleUpdate, scrollOpts);
         window.addEventListener('resize', scheduleUpdate);
 
         return () => {
-            window.removeEventListener('scroll', scheduleUpdate, true);
+            window.removeEventListener('scroll', scheduleUpdate, scrollOpts);
             window.removeEventListener('resize', scheduleUpdate);
             if (rafRef.current) cancelAnimationFrame(rafRef.current);
         };
