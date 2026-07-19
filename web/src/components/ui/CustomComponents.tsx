@@ -20,6 +20,7 @@
 import React, { forwardRef, useId, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { useScrollPositionedTooltip } from '../../hooks/useScrollPositionedTooltip';
 import { Info, ChevronDown, MessageCircle } from 'lucide-react';
 // ============================================================================
 // 1. InputGroup — Label + input + error + optional tooltip, in one block
@@ -485,31 +486,13 @@ export const InputTooltip: React.FC<InputTooltipProps> = ({
   delay = 100,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const updatePosition = () => {
-      if (!triggerRef.current) return;
-      const rect = triggerRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.top - 8,
-        left: rect.left + rect.width / 2,
-      });
-    };
-
-    updatePosition();
-    window.addEventListener('scroll', updatePosition, true);
-    window.addEventListener('resize', updatePosition);
-
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [isVisible]);
+  const position = useScrollPositionedTooltip(triggerRef, {
+    visible: isVisible,
+    compute: (rect) => ({ top: rect.top - 8, left: rect.left + rect.width / 2 }),
+  });
 
   const showTooltip = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

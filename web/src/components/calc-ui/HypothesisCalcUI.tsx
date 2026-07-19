@@ -31,6 +31,7 @@ import {
 } from '../ui';
 import { AnimatedDetails } from '../ui/CustomComponents';
 import { inverseNormalCDF, studentTPPF } from '../../lib/statistics/math';
+import { useScrollPositionedTooltip } from '../../hooks/useScrollPositionedTooltip';
 
 type TailType = 'right' | 'left' | 'two-tailed';
 
@@ -750,9 +751,13 @@ interface InputTooltipProps {
 export const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, className = "", tooltipClassName = "w-52" }) => {
     const [canPortal, setCanPortal] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
-    const [position, setPosition] = useState({ top: 0, left: 0 });
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const triggerRef = useRef<HTMLDivElement | null>(null);
+
+    const position = useScrollPositionedTooltip(triggerRef, {
+        visible: isVisible,
+        compute: (rect) => ({ top: rect.top - 8, left: rect.left + rect.width / 2 }),
+    });
 
     useEffect(() => {
         setCanPortal(true);
@@ -763,29 +768,6 @@ export const InputTooltip: React.FC<InputTooltipProps> = ({ content, children, c
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, []);
-
-    useEffect(() => {
-        if (!isVisible) return;
-
-        const updatePosition = () => {
-            if (!triggerRef.current) return;
-
-            const rect = triggerRef.current.getBoundingClientRect();
-            setPosition({
-                top: rect.top - 8,
-                left: rect.left + rect.width / 2,
-            });
-        };
-
-        updatePosition();
-        window.addEventListener('scroll', updatePosition, true);
-        window.addEventListener('resize', updatePosition);
-
-        return () => {
-            window.removeEventListener('scroll', updatePosition, true);
-            window.removeEventListener('resize', updatePosition);
-        };
-    }, [isVisible]);
 
     const showTooltip = () => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -846,35 +828,17 @@ export const FloatingFieldError: React.FC<FloatingFieldErrorProps> = ({
     bubbleClassName = "px-2.5 py-1",
 }) => {
     const [canPortal, setCanPortal] = useState(false);
-    const [position, setPosition] = useState({ top: 0, left: 0 });
     const anchorRef = useRef<HTMLSpanElement | null>(null);
+
+    const position = useScrollPositionedTooltip(anchorRef, {
+        visible: !!message,
+        compute: (rect) => ({ top: rect.top + offsetY, left: rect.left }),
+        deps: [offsetY],
+    });
 
     useEffect(() => {
         setCanPortal(true);
     }, []);
-
-    useEffect(() => {
-        if (!message) return;
-
-        const updatePosition = () => {
-            if (!anchorRef.current) return;
-
-            const rect = anchorRef.current.getBoundingClientRect();
-            setPosition({
-                top: rect.top + offsetY,
-                left: rect.left,
-            });
-        };
-
-        updatePosition();
-        window.addEventListener('scroll', updatePosition, true);
-        window.addEventListener('resize', updatePosition);
-
-        return () => {
-            window.removeEventListener('scroll', updatePosition, true);
-            window.removeEventListener('resize', updatePosition);
-        };
-    }, [message, offsetY]);
 
     return (
         <>
