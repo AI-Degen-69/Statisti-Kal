@@ -6,5 +6,9 @@ node_modules
 dist
 **/dist
 .DS_Store
-agents
+.agents
+.worktrees
+.scratch
+.hermes
+.compound-engineering
 .code-review-graph
