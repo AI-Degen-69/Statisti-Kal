@@ -77,7 +77,7 @@ export default function SiteFooter({ onNavigate }: SiteFooterProps): ReactElemen
                   <button
                     type="button"
                     onClick={() => onNavigate(link.page)}
-                    className="group flex items-center gap-1.5 text-body-base font-semibold text-[var(--color-text-secondary)] transition-colors duration-150 hover:text-[var(--color-text-primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-cobalt)] focus-visible:ring-offset-2"
+                    className="group flex items-center gap-1.5 text-body-base font-semibold text-[var(--color-text-secondary)] transition-colors duration-150 hover:text-[var(--color-text-primary)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-cobalt)] focus-visible:ring-offset-2"
                   >
                     <span className="inline-block h-px w-3 bg-[var(--color-border)] transition-all duration-200 group-hover:w-4 group-hover:bg-[var(--color-accent-cobalt)]" />
                     {link.label}
@@ -115,7 +115,7 @@ export default function SiteFooter({ onNavigate }: SiteFooterProps): ReactElemen
               <button
                 type="button"
                 onClick={() => setLegalOpen(true)}
-                className="group inline-flex items-center gap-2 text-body-base font-semibold text-[var(--color-text-secondary)] transition-colors duration-150 hover:text-[var(--color-error)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
+                className="group inline-flex items-center gap-2 text-body-base font-semibold text-[var(--color-text-secondary)] transition-colors duration-150 hover:text-[var(--color-error)] hover:cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-cobalt)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-surface)]"
               >
                 <ShieldAlert className="h-4 w-4 shrink-0" strokeWidth={1.6} aria-hidden="true" />
                 תנאים משפטיים וזכויות יוצרים
@@ -130,7 +130,7 @@ export default function SiteFooter({ onNavigate }: SiteFooterProps): ReactElemen
                 className="
                   group inline-flex items-center gap-2 text-body-base font-semibold
                   text-[var(--color-text-secondary)] transition-colors duration-150
-                  hover:text-[var(--color-accent-brass)]
+                  hover:text-[var(--color-accent-brass)] cursor-pointer
                   focus-visible:outline-none focus-visible:ring-2
                   focus-visible:ring-[var(--color-accent-cobalt)] focus-visible:ring-offset-2
                   focus-visible:ring-offset-[var(--color-surface)]
