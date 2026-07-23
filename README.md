@@ -1,23 +1,34 @@
 <div align="center">
-  <h1>📊 Statisti-Kal</h1>
-  <p><b>Hebrew-First Academic Statistics Instrument</b></p>
+
+![Statisti-Kal — Hebrew-first academic statistics instrument](./assets/readme/hero.svg)
+
+**מחשבון סטטיסטיקה אקדמי בעברית — בדיקת השערות, התפלגות נורמלית, רגרסיה ו"בחן את עצמך" עם ציון אוטומטי**
+
+[🚀 נסו את האפליקציה החיה](https://statisti-kal.vercel.app/)
+
 </div>
 
-<p><b>📚 מחשבון סטטיסטיקה אקדמי בעברית — בדיקת השערות, התפלגות נורמלית, רגרסיה ו"בחן את עצמך" עם ציון אוטומטי</b></p>
-<p>🌐 <a href="https://statisti-kal.vercel.app/">נסו את האפליקציה החיה כאן</a></p>
+## מה זה עושה · What it does
 
-## אודות הפרויקט
-Statisti-Kal היא מערכת אקדמית בעברית (RTL) המיועדת לסטודנטים וללומדי סטטיסטיקה. 
-המערכת מספקת כלים וירטואליים חכמים, עם דגש על פשטות, בהירות אקדמית, והמחשה חזותית של קבלת החלטות בסטטיסטיקה.
+Statisti-Kal is a Hebrew-first (RTL) academic statistics instrument for students. It turns textbook procedures into guided, visual, self-checking practice — no prior statistics software required.
 
-## תכונות מרכזיות
-- **בדיקת השערות:** תהליך מונחה ומפורט (Step-by-Step) כולל ציור פעמון גרפי, הצגת אזורי קבלה ודחייה, וחישוב p-value.
-- **התפלגות נורמלית:** פתרון בעיות הסתברות (רגיל והפוך) על גבי פעמון גאוס אינטראקטיבי.
-- **דפי נוסחאות וטבלאות:** גישה מהירה לכלי העזר הסטטיסטיים המסורתיים בפורמט דיגיטלי.
-- **תמיכה מלאה ב-RTL:** ממשק משתמש קפדני שתוכנן מראש לימין-לשמאל, כולל תצוגת נוסחאות מדויקת באמצעות KaTeX.
+| כלי · Tool | תיאור · Description |
+| --- | --- |
+| **בדיקת השערות** · Hypothesis testing | תהליך מונחה צעד-אחר-צעד עם פעמון גרפי, אזורי קבלה ודחייה, וחישוב p-value. |
+| **התפלגות נורמלית** · Normal distribution | פתרון בעיות הסתברות (רגיל והפוך) על פעמון גאוס אינטראקטיבי. |
+| **דפי נוסחאות וטבלאות** · Formula sheets | גישה מהירה לכלי עזר סטטיסטיים מסורתיים בפורמט דיגיטלי. |
+| **"בחן את עצמך"** · Self-check | תרגול עם ציון אוטומטי ומשוב מיידי. |
+| **RTL + KaTeX** · Hebrew-native | ממשק ימין-לשמאל עם רינדור נוסחאות מדויק. |
 
-## הפעלת הפרויקט (מפתחים)
-קוד האתר מרוכז בתוך תיקיית `web/`. כדי להריץ את סביבת הפיתוח:
+![Normal distribution decision regions](./assets/readme/normal-distribution.svg)
+
+## איך זה עובד · How it works
+
+1. **בוחרים כלי** — בדיקת השערות, התפלגות נורמלית, או דף נוסחאות.
+2. **מזינים נתונים** — המערכת מדריכה צעד אחר צעד, עם המחשה חזותית בכל שלב.
+3. **מקבלים תוצאה** — פעמון, אזורי החלטה, p-value וציון כשנדרש.
+
+## התחלה מהירה · Quick start
 
 ```bash
 cd web
@@ -25,19 +36,13 @@ npm install
 npm run dev
 ```
 
-## טכנולוגיות
-* React 19
-* TypeScript
-* Vite
-* Tailwind CSS v4
-* D3.js & Recharts (להמחשות הגרפיות)
-* Framer Motion (לאנימציות ה-UI)
-* KaTeX (לרינדור מתמטי)
+האפליקציה תרוץ בכתובת `http://localhost:3000`.
 
-## License / רישיון
-This project is licensed under the **Business Source License 1.1 (BUSL-1.1)**,
-which will convert to the **Apache License, Version 2.0** on **2028-07-15**.
-See [`LICENSE.md`](./LICENSE.md) for the full terms, [`TRADEMARK.md`](./TRADEMARK.md)
-for permitted use of the Statisti-Kal name and logo, and
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) for how to take part.
-הפרויקט מופץ תחת רישיון BUSL-1.1, שיומר ל־Apache 2.0 ב־15 ביולי 2028.
+## טכנולוגיות · Tech stack
+
+React 19 · TypeScript · Vite · Tailwind CSS v4 · D3.js & Recharts · Framer Motion · KaTeX
+
+## רישיון · License
+
+Licensed under the **Business Source License 1.1 (BUSL-1.1)**, converting to **Apache License 2.0** on **2028-07-15**.
+See [`LICENSE.md`](./LICENSE.md), [`TRADEMARK.md`](./TRADEMARK.md), and [`CONTRIBUTING.md`](./CONTRIBUTING.md).

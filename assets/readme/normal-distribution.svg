@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Normal distribution decision regions</title>
+  <desc id="desc">A standard normal bell curve shaded into a central fail-to-reject region (blue) and two rejection tails (red), with the mean mu at center and critical values marking the boundaries.</desc>
+
+  <rect width="1200" height="320" rx="24" fill="#0E1117"/>
+  <rect width="1200" height="320" rx="24" fill="none" stroke="#1E293B" stroke-width="1"/>
+
+  <g id="title-block" transform="translate(56 52)">
+    <text x="0" y="0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="14" letter-spacing="2" fill="#64748B">HYPOTHESIS TESTING · NORMAL DISTRIBUTION</text>
+    <text x="0" y="44" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="34" font-weight="800" fill="#F5F7FA">Decision regions on the curve</text>
+  </g>
+
+  <g id="curve" transform="translate(120 70)">
+    <line x1="0" y1="200" x2="960" y2="200" stroke="#334155" stroke-width="1.5"/>
+
+    <!-- reject left tail -->
+    <path d="M0,196.4 137.1,175.6 240,132.5 L240,200 L0,200 Z" fill="#F87171" fill-opacity="0.22"/>
+    <!-- accept middle -->
+    <path d="M240,132.5 308.6,90.8 394.3,41.1 480,20 565.7,41.1 651.4,90.8 720,132.5 L720,200 L240,200 Z" fill="#5B8DEF" fill-opacity="0.16"/>
+    <!-- reject right tail -->
+    <path d="M720,132.5 822.9,175.6 960,196.4 L960,200 L720,200 Z" fill="#F87171" fill-opacity="0.22"/>
+
+    <!-- curve stroke -->
+    <polyline points="0,196.4 137.1,175.6 240,132.5 308.6,90.8 394.3,41.1 480,20 565.7,41.1 651.4,90.8 720,132.5 822.9,175.6 960,196.4" fill="none" stroke="#5B8DEF" stroke-width="2.5" stroke-linejoin="round"/>
+
+    <!-- critical lines -->
+    <line x1="240" y1="20" x2="240" y2="200" stroke="#F87171" stroke-width="1" stroke-dasharray="3 4"/>
+    <line x1="720" y1="20" x2="720" y2="200" stroke="#F87171" stroke-width="1" stroke-dasharray="3 4"/>
+    <!-- mean line -->
+    <line x1="480" y1="14" x2="480" y2="200" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4 4"/>
+
+    <circle cx="480" cy="20" r="4" fill="#F5F7FA"/>
+    <text x="480" y="10" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="15" fill="#F5F7FA">μ</text>
+    <text x="240" y="190" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" fill="#F87171">−z*</text>
+    <text x="720" y="190" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" fill="#F87171">+z*</text>
+
+    <text x="120" y="224" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" fill="#F87171">Reject H₀</text>
+    <text x="480" y="224" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" fill="#5B8DEF">Fail to reject H₀</text>
+    <text x="840" y="224" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" fill="#F87171">Reject H₀</text>
+  </g>
+
+  <text x="600" y="306" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="13" fill="#64748B">Two-tailed test on the standard normal distribution — the visual core of Statisti-Kal's hypothesis checker</text>
+</svg>

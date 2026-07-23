@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">Statisti-Kal</title>
+  <desc id="desc">Hebrew-first academic statistics instrument: hypothesis testing, normal distribution, and regression with step-by-step guidance and auto-graded practice.</desc>
+
+  <defs>
+    <linearGradient id="curveFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5B8DEF" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#5B8DEF" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="360" rx="24" fill="#0E1117"/>
+  <rect width="1200" height="360" rx="24" fill="none" stroke="#1E293B" stroke-width="1"/>
+
+  <!-- Title block -->
+  <g id="title-block" transform="translate(56 56)">
+    <text x="0" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="14" letter-spacing="2" fill="#8B98A9">HEBREW-FIRST · ACADEMIC STATISTICS</text>
+    <text x="0" y="76" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="66" font-weight="800" fill="#F5F7FA">Statisti-Kal</text>
+    <text x="730" y="92" text-anchor="start" direction="rtl" unicode-bidi="isolate" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="24" fill="#CBD5E1">מחשבון סטטיסטיקה אקדמי</text>
+    <text x="0" y="124" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="18" fill="#94A3B8">Hypothesis testing, normal distribution &amp; regression —</text>
+    <text x="0" y="148" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="18" fill="#94A3B8">step-by-step, with auto-graded practice.</text>
+    <text x="0" y="196" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Assistant', sans-serif" font-size="16" fill="#5B8DEF">▶ Live: statisti-kal.vercel.app</text>
+    <text x="0" y="262" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" fill="#94A3B8">React 19 · TypeScript · Vite · Tailwind v4 · KaTeX</text>
+  </g>
+
+  <!-- Project proof: bell curve with rejection region -->
+  <g id="project-proof" transform="translate(780 30)">
+    <line x1="0" y1="250" x2="360" y2="250" stroke="#334155" stroke-width="1.5"/>
+    <path d="M0,243.2 27.8,232.2 55.4,210.4 83.1,174.9 110.8,128.7 138.5,82.9 166.2,54.0 193.8,54.0 221.5,82.9 249.2,128.7 276.9,174.9 304.6,210.4 332.2,232.2 360,243.2 L360,250 L0,250 Z" fill="url(#curveFill)"/>
+    <path d="M276.9,174.9 304.6,210.4 332.2,232.2 360,243.2 L360,250 L276.9,250 Z" fill="#F87171" fill-opacity="0.30"/>
+    <polyline points="0,243.2 27.8,232.2 55.4,210.4 83.1,174.9 110.8,128.7 138.5,82.9 166.2,54.0 193.8,54.0 221.5,82.9 249.2,128.7 276.9,174.9 304.6,210.4 332.2,232.2 360,243.2" fill="none" stroke="#5B8DEF" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="180" y1="40" x2="180" y2="250" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4 4"/>
+    <circle cx="180" cy="54" r="4" fill="#F5F7FA"/>
+    <text x="180" y="34" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="16" fill="#F5F7FA">μ</text>
+    <text x="318" y="206" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" fill="#F87171">p ≈ 0.03</text>
+    <text x="180" y="278" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" fill="#64748B">Normal distribution · rejection region</text>
+  </g>
+</svg>
